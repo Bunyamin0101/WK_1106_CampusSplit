@@ -18,8 +18,8 @@ Die Anwendung berechnet automatisch offene Salden und unterstützt den Export vo
 | Bünyamin Yilmaz      | WI B.Sc. | Projektleiter:in       | GitHub: `Bunyamin0101`     |
 | Romin Josofi         | WI B.Sc. | Software Architect     | GitHub: `rjo98`            |
 | Zuhal Okcu           | WI B.Sc. | Spec/Requirements Lead | GitHub: `okcuzuhal-glitch` |    
-| Julia Andrea Muntean | WI B.Sc. | Implementation Lead    | GitHub: `JuliaMuntean`               |
-| Monica Tsamo Kenfack | WI B.Sc. | QA/Test Lead           | GitHub: `mmkt521`          |
+| Julia Andrea Muntean | WI B.Sc. | Implementation Lead    | GitHub: `JuliaMuntean`     |
+| Monica Tsamo Kenfack | WI B.Sc. | QA/Test Lead           | GitHub: `momosan009`       |
 
 ## Technologien (voraussichtlich)
 
