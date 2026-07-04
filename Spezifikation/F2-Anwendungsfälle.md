@@ -227,7 +227,7 @@ Systeminterne Berechnungen, wie die Saldenberechnung oder Validierung von Eingab
 
 Das folgende Diagramm zeigt die wichtigsten Anwendungsfälle von CampusSplit aus Sicht der Benutzer:innen.
 
-![Use-Case-Diagramm](images/Use-Case-Diagramm.png)
+![Use-Case-Diagramm](../images/Use-Case-Diagramm.png)
 
 ## F2.9 Nicht Bestandteil von F2
 
