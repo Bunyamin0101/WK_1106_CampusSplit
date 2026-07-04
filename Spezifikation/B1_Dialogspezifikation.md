@@ -139,7 +139,7 @@ Die Abmeldung (UC-03) hat keinen eigenen Dialog. Sie ist einfach ein Button „A
 
 ## B1.10 Nicht Bestandteil von B1
 
-Layout, Farben, konkretes UI-Framework, Pixelmaße, REST-Endpunkte hinter den Dialogen – das alles gehört in die Architektur. Was genau im PDF/CSV-Export steht, steht in B3, nicht hier.
+Layout, Farben, konkretes UI-Framework, Pixelmaße, REST-Endpunkte hinter den Dialogen und das alles gehört in die Architektur. Was genau im PDF/CSV-Export steht, steht in B3, nicht hier.
 
 ## B1.11 Querverweise
 
