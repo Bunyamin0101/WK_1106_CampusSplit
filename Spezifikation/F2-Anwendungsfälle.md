@@ -27,7 +27,7 @@ Systeminterne Berechnungen, wie die Saldenberechnung oder Validierung von Eingab
 
 ## F2.2 Zugriff
 
-### UC-01 - Registrieren
+### UC-01 — Registrieren
 
 | Abschnitt               | Inhalt                                                                                                                                                                                                                                                                                |
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -43,7 +43,7 @@ Systeminterne Berechnungen, wie die Saldenberechnung oder Validierung von Eingab
 | **Ausnahmeszenarien**   | E-Mail-Adresse ist bereits vergeben; System zeigt eine Fehlermeldung an.Pflichtfelder fehlen; System markiert die betroffenen Felder.Passwort erfüllt die Mindestanforderungen nicht; System fordert eine Korrektur.                                                                  |
 | **Qualitätsbezug**      | N1 Sicherheit, N1 Benutzerfreundlichkeit, N2 Validierung                                                                                                                                                                                                                              |
 
-### UC-02 - Anmelden
+### UC-02 — Anmelden
 
 | Abschnitt             | Inhalt                                                                                                                                                                                                                                                      |
 | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -58,7 +58,7 @@ Systeminterne Berechnungen, wie die Saldenberechnung oder Validierung von Eingab
 | **Ausnahmeszenarien** | Zugangsdaten sind falsch; System zeigt eine allgemeine Fehlermeldung an. Benutzerkonto existiert nicht; System zeigt eine allgemeine Fehlermeldung an.                                                                                                      |
 | **Qualitätsbezug**    | N1 Sicherheit, N2 Authentifizierung                                                                                                                                                                                                                         |
 
-### UC-03 - Abmelden
+### UC-03 — Abmelden
 
 | Abschnitt          | Inhalt                                                                                                            |
 | ------------------ | ----------------------------------------------------------------------------------------------------------------- |
@@ -74,7 +74,7 @@ Systeminterne Berechnungen, wie die Saldenberechnung oder Validierung von Eingab
 
 ## F2.3 Übersicht
 
-### UC-04 - Dashboard anzeigen
+### UC-04 — Dashboard anzeigen
 
 | Abschnitt               | Inhalt                                                                                                                                                                                                         |
 | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -91,7 +91,7 @@ Systeminterne Berechnungen, wie die Saldenberechnung oder Validierung von Eingab
 
 ## F2.4 Gruppenverwaltung
 
-### UC-05 - Gruppe erstellen
+### UC-05 — Gruppe erstellen
 
 | Abschnitt             | Inhalt                                                                                                                                                                                                                                                                                                              |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -106,7 +106,7 @@ Systeminterne Berechnungen, wie die Saldenberechnung oder Validierung von Eingab
 | **Ausnahmeszenarien** | Gruppenname fehlt; System fordert eine Eingabe. Gruppenname überschreitet maximale Länge; System zeigt Fehlermeldung.                                                                                                                                                                                               |
 | **Qualitätsbezug**    | N1 Benutzerfreundlichkeit, N2 Validierung                                                                                                                                                                                                                                                                           |
 
-### UC-06 - Gruppe anzeigen
+### UC-06 — Gruppe anzeigen
 
 | Abschnitt             | Inhalt                                                                                                                                                                  |
 | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -121,7 +121,7 @@ Systeminterne Berechnungen, wie die Saldenberechnung oder Validierung von Eingab
 | **Ausnahmeszenarien** | Benutzer ist kein Mitglied der Gruppe; Zugriff wird verweigert. Gruppe existiert nicht; System zeigt Fehlermeldung.                                                     |
 | **Qualitätsbezug**    | N1 Sicherheit, N1 Performance                                                                                                                                           |
 
-### UC-07 - Mitglied zur Gruppe hinzufügen
+### UC-07 — Mitglied zur Gruppe hinzufügen
 
 | Abschnitt               | Inhalt                                                                                                                                                                                                                                                                                                                                                 |
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -139,7 +139,7 @@ Systeminterne Berechnungen, wie die Saldenberechnung oder Validierung von Eingab
 
 ## F2.5 Ausgabenverwaltung
 
-### UC-08 - Ausgabe erfassen
+### UC-08 — Ausgabe erfassen
 
 | Abschnitt               | Inhalt                                                                                                                                                                                                                                                                                                                                                                                                            |
 | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -155,7 +155,7 @@ Systeminterne Berechnungen, wie die Saldenberechnung oder Validierung von Eingab
 | **Ausnahmeszenarien**   | Betrag ist ungültig; System fordert Korrektur. Kein Zahler ausgewählt; System fordert Auswahl. Keine beteiligten Personen ausgewählt; System fordert Auswahl. Aufteilungssumme stimmt nicht mit Gesamtbetrag überein; System zeigt Fehlermeldung.                                                                                                                                                                 |
 | **Qualitätsbezug**      | N1 Datenkonsistenz, N2 Validierung, F3 Saldenberechnung                                                                                                                                                                                                                                                                                                                                                           |
 
-### UC-09 - Ausgabe bearbeiten
+### UC-09 — Ausgabe bearbeiten
 
 | Abschnitt               | Inhalt                                                                                                                                                                                                                                                                                                                                   |
 | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -171,7 +171,7 @@ Systeminterne Berechnungen, wie die Saldenberechnung oder Validierung von Eingab
 | **Ausnahmeszenarien**   | Geänderte Daten sind ungültig; System zeigt konkrete Fehlermeldungen. Benutzer ist kein Gruppenmitglied; Zugriff wird verweigert.                                                                                                                                                                                                        |
 | **Qualitätsbezug**      | N1 Datenkonsistenz, N2 Validierung                                                                                                                                                                                                                                                                                                       |
 
-### UC-10 - Ausgabe löschen
+### UC-10 — Ausgabe löschen
 
 | Abschnitt               | Inhalt                                                                                                                                                                                                                                                                  |
 | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -189,7 +189,7 @@ Systeminterne Berechnungen, wie die Saldenberechnung oder Validierung von Eingab
 
 ## F2.6 Saldenverwaltung
 
-### UC-11 - Salden anzeigen
+### UC-11 — Salden anzeigen
 
 | Abschnitt               | Inhalt                                                                                                                                                                                                                                |
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -207,7 +207,7 @@ Systeminterne Berechnungen, wie die Saldenberechnung oder Validierung von Eingab
 
 ## F2.7 Export
 
-### UC-12 - Ausgabenübersicht exportieren
+### UC-12 — Ausgabenübersicht exportieren
 
 | Abschnitt               | Inhalt                                                                                                                                                                                                                                                                             |
 | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
