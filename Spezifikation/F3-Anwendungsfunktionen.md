@@ -17,7 +17,7 @@ Für CampusSplit stehen vor allem die Funktionen im Mittelpunkt, die gemeinsame 
 
 ## F3.2 Funktionsbeschreibungen
 
-### AF-01 - Kostenanteile berechnen
+### AF-01 — Kostenanteile berechnen
 
 | Abschnitt                  | Inhalt                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -55,7 +55,7 @@ Beispiel:
 
 Die Summe bleibt exakt 10,00 €.
 
-### AF-02 - Gruppensalden berechnen
+### AF-02 — Gruppensalden berechnen
 
 | Abschnitt                  | Inhalt                                                                                                                                                                                                                                                                                        |
 | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -87,7 +87,7 @@ Interpretation:
 
 Die Summe der Salden ist 0,00 €.
 
-### AF-03 - Ausgleichsvorschläge berechnen
+### AF-03 — Ausgleichsvorschläge berechnen
 
 | Abschnitt                  | Inhalt                                                                                                                                                                                                                                                                                                                               |
 | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -118,7 +118,7 @@ Daraus entstehen folgende Ausgleichsvorschläge:
 
 CampusSplit führt diese Zahlung nicht selbst aus. Die Zahlung erfolgt außerhalb der Anwendung.
 
-### AF-04 - Exportdaten aufbereiten
+### AF-04 — Exportdaten aufbereiten
 
 | Abschnitt                  | Inhalt                                                                                                                                                                                                                                                                                                                                                                          |
 | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -145,22 +145,8 @@ Ein Export kann enthalten:
 
 Die eigentliche technische Erzeugung der Datei wird nicht in F3 beschrieben. F3 beschreibt nur, welche fachlichen Daten für den Export vorbereitet werden.
 
-## F3.3 Nicht Bestandteil von F3
 
-Folgende Themen werden bewusst nicht als Anwendungsfunktionen beschrieben:
-
-| Thema                                                  | Begründung                                                                                    |
-| ------------------------------------------------------ | --------------------------------------------------------------------------------------------- |
-| Registrierung und Anmeldung                            | Zugriffsfunktionen ohne fachlichen Berechnungsalgorithmus; beschrieben in F2 und N2.          |
-| Reine CRUD-Operationen                                 | Erstellen, Bearbeiten und Löschen von Datensätzen sind Use-Case- oder Implementierungsthemen. |
-| Datenbankspeicherung                                   | Gehört zum Datenmodell und zur Architektur, nicht zu F3.                                      |
-| REST-Endpunkte und Controller                          | Technische Umsetzung, nicht Teil der Spezifikation.                                           |
-| Bildschirmnavigation und Formulare                     | Gehören zur Dialogspezifikation B1.                                                           |
-| PDF-/CSV-Dateierzeugung als technische Implementierung | Gehört zu B3 und zur Architektur.                                                             |
-| Tatsächliche Zahlung offener Beträge                   | Erfolgt außerhalb von CampusSplit.                                                            |
-| Bank- oder Zahlungsanbieterintegration                 | Nicht im Projektumfang enthalten.                                                             |
-
-## F3.4 Querverweise
+## F3.3 Querverweise
 
 | Baustein | Relevanz für F3                                                                                 |
 | -------- | ----------------------------------------------------------------------------------------------- |
