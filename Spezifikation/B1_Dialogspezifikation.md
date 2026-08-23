@@ -1,4 +1,4 @@
-# B1 — Dialogspezifikation
+# B1  Dialogspezifikation
 
 B1 beschreibt die Dialoge, über die man mit CampusSplit arbeitet. Ein Dialog ist eine Bildschirmansicht mit einem klaren Zweck, zum Beispiel „Ausgabe erfassen“ oder „Salden anzeigen“.
 
