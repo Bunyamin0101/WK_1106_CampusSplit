@@ -1,62 +1,169 @@
 # S1 — Nachbarsysteme
 
-P2 zeigt schon im Überblick, mit welchen Systemen CampusSplit spricht. S1 geht auf jede dieser Schnittstellen etwas genauer ein: was fließt hin und her, wann, und was passiert bei Störungen. 
+S1 beschreibt die Systeme außerhalb von CampusSplit, mit denen Daten ausgetauscht werden. Der Browser, die interne Datenbank und erzeugte PDF-/CSV-Dateien werden hier nicht mehr als eigene Nachbarsysteme geführt:
+
+- der Browser ist der Zugangsweg zur Webanwendung,
+- die Datenbank gehört zur internen Persistenz,
+- PDF und CSV sind Ausgaben von CampusSplit und werden in [B3 — Druck- und Exportausgaben](B3_Druckausgaben.md) beschrieben.
+
+Für die Unterstützung von Fremdwährungen benötigt CampusSplit einen externen Wechselkursdienst.
 
 ## S1.1 Übersicht
 
-| ID | Nachbarsystem | Rolle | Richtung | Häufigkeit |
+| ID | Nachbarsystem | Zweck | Richtung | Schnittstelle |
 |---|---|---|---|---|
-| NB-01 | Webbrowser | Benutzeroberfläche | bidirektional | bei jeder Aktion |
-| NB-02 | PostgreSQL | Datenspeicher | bidirektional | bei fast jeder Anfrage |
-| NB-03 | PDF-/CSV-Export | Download-Datei | ausgehend | auf Anforderung (UC-12) |
+| NB-01 | Frankfurter Wechselkursdienst | Wechselkurs für Fremdwährungsausgaben liefern | CampusSplit → Dienst → CampusSplit | HTTPS / REST / JSON |
 
-Externe Dienste wie Zahlungsanbieter, Bank, E-Mail oder Cloud-Login sind bewusst nicht vorgesehen (siehe P1).
+```mermaid
+flowchart LR
+    U[Benutzer] --> CS[CampusSplit]
+    CS -->|Ausgangswährung, Gruppenwährung, Datum| FX[NB-01 Wechselkursdienst]
+    FX -->|Wechselkurs| CS
+    CS -->|Anzeige / Export| U
+```
 
-## S1.2 NB-01 — Webbrowser
+Die Umrechnung wird nur benötigt, wenn die Währung einer Ausgabe von der Gruppenwährung abweicht. Die Eingabe im Dialog ist in [DLG-07 — Ausgabe erfassen](B1_Dialogspezifikation.md#dlg-07--ausgabe-erfassen) beschrieben.
 
-Der Browser ist der einzige Weg, CampusSplit zu nutzen. Er zeigt die Dialoge aus B1 und schickt Eingaben ans System wie Login-Daten, Formulare, Exportanfragen. Umgekehrt bekommt er Gruppen, Ausgaben, Salden und Fehlermeldungen zurück.
+## S1.2 NB-01 — Wechselkursdienst
 
-Bricht die Verbindung ab, kann es nicht weiter genutzt werden. Das zeigt dann der Browser selbst an und nicht CampusSplit. Sobald die Verbindung wiederhergestellt ist, geht alles ohne Datenverlust weiter.
+Für die Wechselkurse wird die öffentliche **Frankfurter API** verwendet. Sie stellt aktuelle und historische Wechselkurse über eine REST-Schnittstelle bereit und benötigt für die öffentliche API keinen API-Key.
 
-Alle Funktionen außer Registrierung und Anmeldung setzen eine angemeldete Sitzung voraus (siehe N2.2).
+Dokumentation: <https://frankfurter.dev/>
 
-## S1.3 NB-02 — PostgreSQL-Datenbank
+CampusSplit nutzt den Dienst nur zum Ermitteln eines Kurses. Die eigentliche Berechnung des Abrechnungsbetrags findet in CampusSplit statt.
 
-Hier liegen alle dauerhaften Daten: Benutzer, Gruppen, Mitgliedschaften, Ausgaben, Kostenanteile. Salden und Ausgleichsvorschläge werden dagegen nicht gespeichert, sondern bei Bedarf aus diesen Daten berechnet (siehe D1.3).
+### Wann wird die Schnittstelle verwendet?
 
-Ist die Datenbank nicht erreichbar, kann CampusSplit nicht zuverlässig arbeiten. Wichtig: Es dürfen dabei nie halbe Datensätze entstehen, und die Fehlermeldung an die Nutzer:innen bleibt verständlich statt technisch (siehe N2.6).
+Die Schnittstelle wird aufgerufen, wenn:
 
-Zugangsdaten zur Datenbank gehören nicht ins Repository (siehe S3.3). Wer welche Gruppendaten sehen darf, regelt N2.3 und zwar unabhängig davon, wie die Datenbankabfrage technisch läuft.
+1. eine Ausgabe in einer anderen Währung als der Gruppenwährung erfasst wird oder
+2. bei einer Bearbeitung die Währung, der Betrag oder das Ausgabedatum so geändert wird, dass eine neue Umrechnung nötig ist.
 
-Da CampusSplit ein Neuprojekt ohne Altsystem ist, muss hier nichts migriert werden (Baustein S2 ist deshalb nicht anwendbar).
+Bei einer Ausgabe in der Gruppenwährung findet kein API-Aufruf statt.
 
-## S1.4 NB-03 — PDF-/CSV-Export
+Beispiel:
 
-Diese Schnittstelle hebt folgendes vor :  CampusSplit erzeugt auf Wunsch eine Datei zum Download. Was genau es beinhaltet wird von B3 geführt. Hier geht es nur um die Schnittstelle selbst.
+```text
+Gruppenwährung: EUR
+Ausgabe: 30,00 USD
+Datum: 12.08.2026
 
-Ausgelöst wird das ausschließlich manuell über UC-12/DLG-11, nie automatisch oder zeitgesteuert.
+CampusSplit benötigt den Kurs USD -> EUR für den 12.08.2026.
+```
 
-Sollte die Erzeugung nicht klappen, gibt's eine verständliche Fehlermeldung und dann entsteht einen neuen Verusch. Dabei entsteht keine halbe Datei und es werden keine Daten verändert. Nur Gruppenmitglieder dürfen Exporte ihrer eigenen Gruppe erzeugen (N2.8).
+### Anfrage
 
-Nach dem Download gehört die Datei der Nutzer:innen. CampusSplit speichert sie nicht dauerhaft und verfolgt nicht aktiv weiter, was damit passiert.
+Für ein Währungspaar kann die API beispielsweise so angesprochen werden:
 
-## S1.5 Nicht Bestandteil von S1
+```http
+GET https://api.frankfurter.dev/v2/rate/USD/EUR?date=2026-08-12
+```
 
-Konkrete Protokolle, Datenbankschema, Verbindungspools, PDF-/CSV-Bibliotheken, Anbindung externer Dienste, Datenmigration.
+Dabei werden nur die für den Wechselkurs notwendigen Daten übertragen:
 
-## S1.6 Querverweise
+| Wert | Beispiel | Bedeutung |
+|---|---|---|
+| Ausgangswährung | `USD` | Währung der Ausgabe |
+| Zielwährung | `EUR` | Gruppenwährung |
+| Datum | `2026-08-12` | Datum der Ausgabe |
+
+Personenbezogene Daten, Gruppenname, Beschreibung der Ausgabe oder Mitgliederdaten werden nicht an den Wechselkursdienst übertragen.
+
+### Antwort
+
+Eine erfolgreiche Antwort enthält unter anderem Ausgangswährung, Zielwährung, Datum und Kurs.
+
+Beispiel:
+
+```json
+{
+  "date": "2026-08-12",
+  "base": "USD",
+  "quote": "EUR",
+  "rate": 0.86
+}
+```
+
+CampusSplit berechnet daraus den Abrechnungsbetrag:
+
+```text
+30,00 USD × 0,86 = 25,80 EUR
+```
+
+Der Originalbetrag bleibt als Fremdwährungsbetrag erkennbar. Salden und Ausgleichsvorschläge werden in der Gruppenwährung dargestellt. Die Darstellung im Export ist in [B3](B3_Druckausgaben.md) beschrieben.
+
+## S1.3 Regeln für die Schnittstelle
+
+| ID | Regel |
+|---|---|
+| FX-01 | Ein API-Aufruf ist nur nötig, wenn Originalwährung und Gruppenwährung verschieden sind. |
+| FX-02 | Für die Umrechnung wird nach Möglichkeit der Kurs zum Datum der Ausgabe verwendet. |
+| FX-03 | CampusSplit führt die eigentliche Multiplikation und Rundung selbst durch. |
+| FX-04 | An den Wechselkursdienst werden keine personenbezogenen Daten oder Ausgabendetails übertragen. |
+| FX-05 | Ohne erfolgreich ermittelten Kurs darf kein erfundener oder stillschweigend angenommener Wechselkurs verwendet werden. |
+| FX-06 | Ein Fehler beim Wechselkursdienst darf keine unvollständig gespeicherte Fremdwährungsausgabe erzeugen. |
+| FX-07 | Originalbetrag, Originalwährung und der verwendete Kurs müssen für die spätere Nachvollziehbarkeit erhalten bleiben. |
+| FX-08 | Salden und Ausgleichsvorschläge werden in der Gruppenwährung berechnet und angezeigt. |
+
+Die allgemeinen Regeln für Validierung und Fehlerbehandlung stehen in [N2.4 — Validierung](N2_Querschnittskonzepte_%28ZO%29.md#n24-validierung) und [N2.6 — Fehlerbehandlung](N2_Querschnittskonzepte_%28ZO%29.md#n26-fehlerbehandlung).
+
+## S1.4 Fehlerfälle
+
+| Fehlerfall | Verhalten |
+|---|---|
+| Wechselkursdienst nicht erreichbar | Benutzer erhält eine verständliche Fehlermeldung. Die Fremdwährungsausgabe wird nicht mit einem erfundenen Kurs gespeichert. |
+| Zeitüberschreitung | Vorgang wird abgebrochen und kann erneut gestartet werden. |
+| Währung wird vom Dienst nicht unterstützt | Benutzer erhält einen Hinweis, dass für diese Währung kein Kurs ermittelt werden konnte. |
+| Ungültige Antwort | Antwort wird nicht für die Berechnung verwendet. |
+| Für das gewählte Datum ist kein Kurs vorhanden | CampusSplit meldet, dass für das Datum kein verwendbarer Kurs ermittelt werden konnte. |
+
+Ein Fehler bei der externen Schnittstelle darf bestehende Gruppen-, Ausgaben- oder Saldendaten nicht verändern.
+
+## S1.5 Abgrenzung
+
+Folgende Dinge sind **keine externen Nachbarsysteme** in dieser Spezifikation:
+
+### Webbrowser
+
+Der Browser ist der Zugangsweg zur Webanwendung und stellt die Dialoge aus [B1](B1_Dialogspezifikation.md) dar. Er wird deshalb nicht als eigenes Nachbarsystem geführt.
+
+### Datenbank
+
+Die Datenbank ist Teil der internen Persistenz von CampusSplit. Welches konkrete Datenbankprodukt verwendet wird und wie die Verbindung technisch umgesetzt ist, wird später in der Architektur festgelegt. Das fachliche Datenmodell steht in [D1](D1_Datenmodell_%28ZO%29.md).
+
+### PDF- und CSV-Export
+
+PDF und CSV sind erzeugte Dateien und kein eigenständiges System. Inhalt und Aufbau stehen in [B3](B3_Druckausgaben.md).
+
+## S1.6 Nicht Bestandteil von S1
+
+Nicht festgelegt werden:
+
+- konkrete HTTP-Bibliothek im Backend,
+- Cache-Strategie für Wechselkurse,
+- interne Klassen oder Services für die API-Anbindung,
+- Datenbankschema,
+- konkrete Persistenztechnik,
+- technische PDF-/CSV-Bibliotheken.
+
+Diese Punkte gehören in die spätere Architektur beziehungsweise Implementierung.
+
+## S1.7 Querverweise
 
 | Baustein | Relevanz |
 |---|---|
-| P2 | Liefert den Überblick, den S1 vertieft. |
-| D1 | Beschreibt die über NB-02 gespeicherten und über NB-03 exportierten Daten. |
-| B1 | Dialoge sind die über NB-01 dargestellte Oberfläche. |
-| B3 | Beschreibt den Inhalt der über NB-03 erzeugten Datei. |
-| S3 | Beschreibt, was für die Erreichbarkeit dieser Schnittstellen beim Start nötig ist. |
-| N2 | Regelt Authentifizierung, Zugriff und Fehlerverhalten an allen drei Schnittstellen. |
+| [P1/P2 — Projektgrundlagen](Projektgrundlagen%20%28P1%26P2%29%20%28JM%29.md) | Systemgrenze und Projektumfang |
+| [F2 — Anwendungsfälle](F2-anwendungsf%C3%A4lle.md) | Erfassen und Bearbeiten von Ausgaben |
+| [F3 — Anwendungsfunktionen](F3-anwendungsfunktionen.md) | Fachliche Verarbeitung von Ausgaben und Salden |
+| [D1 — Datenmodell](D1_Datenmodell_%28ZO%29.md) | Fachliche Datenobjekte |
+| [D2 — Datentypenverzeichnis](D2_Datentypenverzeichnis_%28ZO%29.md) | Geldbeträge und Währungscodes |
+| [B1 — Dialogspezifikation](B1_Dialogspezifikation.md) | Eingabe und Anzeige von Fremdwährungen |
+| [B3 — Druck- und Exportausgaben](B3_Druckausgaben.md) | Export von Original- und Abrechnungsbeträgen |
+| [N1 — Nichtfunktionale Anforderungen](N1_Nichtfunktionale%20Anforderungen_%28ZO%29.md) | Qualitätsanforderungen und Zuverlässigkeit |
+| [N2 — Querschnittskonzepte](N2_Querschnittskonzepte_%28ZO%29.md) | Validierung, Geldbeträge und Fehlerbehandlung |
 
 ## Eingesetzte KI-Werkzeuge
 
-Claude (Anthropic): Für die Verbindung und Expandierung unterschiedliche Ideen und Bausteine sowie die saubere Formulierung
+Claude (Anthropic) und ChatGPT (OpenAI) wurden unterstützend bei Formulierungen und der Prüfung der Querverweise verwendet.
 
-Entwurf geprüft von Momosan009.
+Die fachlichen Inhalte wurden anschließend mit den vorhandenen Spezifikationsbausteinen abgeglichen.
