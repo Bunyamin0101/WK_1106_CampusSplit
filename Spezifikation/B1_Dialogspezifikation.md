@@ -1,4 +1,4 @@
-# B1  Dialogspezifikation
+# B1 Dialogspezifikation
 
 B1 beschreibt die Dialoge, über die man mit CampusSplit arbeitet. Ein Dialog ist eine Bildschirmansicht mit einem klaren Zweck, zum Beispiel „Ausgabe erfassen“ oder „Salden anzeigen“.
 
@@ -39,7 +39,7 @@ flowchart LR
 
 ## B1.2 Zugriff
 
-### DLG-01 — Registrierung
+### DLG-01 Registrierung
 
 Ein Gast legt ein Konto an.
 
@@ -55,7 +55,7 @@ Mögliche Fehler: Pflichtfeld leer, E-Mail-Format ungültig, E-Mail schon vergeb
 
 Nach erfolgreicher Registrierung geht es entsprechend [UC-01](F2-anwendungsf%C3%A4lle.md#uc-01--registrieren) weiter.
 
-### DLG-02 — Anmeldung
+### DLG-02 Anmeldung
 
 | Feld | Pflicht | Prüfung |
 |---|---|---|
@@ -70,7 +70,7 @@ Erfolgreich → DLG-03 Dashboard.
 
 ## B1.3 Übersicht
 
-### DLG-03 — Dashboard
+### DLG-03 Dashboard
 
 Startseite nach dem Login. Zeigt alle Gruppen mit Kurzsaldo („bekommt zurück“ / „schuldet“ / „ausgeglichen“). Gibt es noch keine Gruppe, erscheint ein Hinweis zum Erstellen einer neuen Gruppe.
 
@@ -82,18 +82,19 @@ Aktionen:
 
 ## B1.4 Gruppenverwaltung
 
-### DLG-04 — Gruppe erstellen
+### DLG-04 Gruppe erstellen
 
 | Feld | Pflicht | Prüfung |
 |---|---|---|
 | Gruppenname | Ja | darf nicht leer sein |
 | Beschreibung | Nein | optional |
+| Gruppenwährung | Ja | Währung, in der Salden und Ausgleichsvorschläge berechnet werden |
 
 Aktionen: „Gruppe erstellen“ → [UC-05](F2-anwendungsf%C3%A4lle.md#uc-05--gruppe-erstellen), „Abbrechen“ → zurück ohne Speichern.
 
 Nach dem Speichern öffnet sich direkt die neue Gruppe (DLG-05). Wer die Gruppe erstellt, wird automatisch Administrator. Die Rechte stehen in [N2.3 — Autorisierung und Gruppenrechte](N2_Querschnittskonzepte_%28ZO%29.md#n23-autorisierung-und-gruppenrechte).
 
-### DLG-05 — Gruppendetail
+### DLG-05 Gruppendetail
 
 Die zentrale Seite einer Gruppe: Name, Mitgliederliste mit Rollenkennzeichnung, Ausgabenliste sowie Zugriff auf Salden und Export.
 
@@ -107,7 +108,7 @@ Aktionen:
 
 Wer kein Mitglied der Gruppe ist, hat keinen Zugriff. Siehe [N2.3](N2_Querschnittskonzepte_%28ZO%29.md#n23-autorisierung-und-gruppenrechte).
 
-### DLG-06 — Mitglied hinzufügen
+### DLG-06 Mitglied hinzufügen
 
 Ein Administrator gibt die E-Mail-Adresse der Person ein, die zur Gruppe hinzugefügt werden soll.
 
@@ -121,12 +122,13 @@ Wer kein Admin ist, kommt nicht an diesen Dialog. Siehe [AUT-04 in N2.3](N2_Quer
 
 ## B1.5 Ausgabenverwaltung
 
-### DLG-07 — Ausgabe erfassen
+### DLG-07 Ausgabe erfassen
 
 | Feld | Pflicht | Prüfung / Verhalten |
 |---|---|---|
 | Beschreibung | Ja | darf nicht leer sein |
 | Betrag | Ja | gültiger Geldbetrag nach [D2.3 — MoneyAmountDT](D2_Datentypenverzeichnis_%28ZO%29.md#d23-moneyamountdt) |
+| Währung | Ja | standardmäßig die Gruppenwährung |
 | Datum | Ja | gültiges Datum |
 | Kategorie | Nein | optional |
 | Zahler | Ja | muss zulässiges Gruppenmitglied sein |
@@ -136,14 +138,18 @@ Wer kein Admin ist, kommt nicht an diesen Dialog. Siehe [AUT-04 in N2.3](N2_Quer
 
 Bei `CUSTOM_AMOUNT` gibt es pro ausgewählter Person ein eigenes Betragsfeld. Zusätzlich wird angezeigt, wie viel vom Gesamtbetrag noch verteilt werden muss.
 
-#### Einfaches Mockup
+Wird eine andere Währung als die Gruppenwährung gewählt, zeigt CampusSplit nach erfolgreicher Umrechnung zusätzlich den verwendeten Wechselkurs und den Abrechnungsbetrag in Gruppenwährung an. Der Wechselkurs wird über das in [S1 — Nachbarsysteme](S1_Nachbarsysteme.md) beschriebene externe System ermittelt.
+
+Beispiel: `30,00 USD` → Wechselkurs `1 USD = 0,86 EUR` → Abrechnungsbetrag `25,80 EUR`.
+
+####  Mockup
 
 ```text
 +--------------------------------------------------+
 | Ausgabe erfassen                                 |
 +--------------------------------------------------+
 | Beschreibung *  [____________________________]   |
-| Betrag *        [__________] EUR                 |
+| Betrag *        [__________] [EUR v]             |
 | Datum *         [__/__/____]                     |
 | Kategorie       [ auswählen                 v ]  |
 |                                                  |
@@ -161,17 +167,17 @@ Bei „Eigene Beträge“ werden zusätzliche Betragsfelder für die ausgewählt
 
 Aktionen: „Ausgabe speichern“ → [UC-08](F2-anwendungsf%C3%A4lle.md#uc-08--ausgabe-erfassen), „Abbrechen“ → DLG-05.
 
-Mögliche Fehler: Betrag ungültig, kein Zahler gewählt, Zahler nicht zulässig, keine Beteiligten ausgewählt oder Summe der Anteile passt nicht zum Gesamtbetrag. Die allgemeinen Prüfungen stehen in [N2.4 — Validierung](N2_Querschnittskonzepte_%28ZO%29.md#n24-validierung), die Regeln zu Geldbeträgen in [N2.5 — Geldbetragsverarbeitung](N2_Querschnittskonzepte_%28ZO%29.md#n25-geldbetragsverarbeitung).
+Mögliche Fehler: Betrag ungültig, kein Zahler gewählt, Zahler nicht zulässig, keine Beteiligten ausgewählt, Summe der Anteile passt nicht zum Gesamtbetrag oder für eine Fremdwährung konnte kein Wechselkurs ermittelt werden. Die allgemeinen Prüfungen stehen in [N2.4 — Validierung](N2_Querschnittskonzepte_%28ZO%29.md#n24-validierung), die Regeln zu Geldbeträgen in [N2.5 — Geldbetragsverarbeitung](N2_Querschnittskonzepte_%28ZO%29.md#n25-geldbetragsverarbeitung).
 
 Nach dem Speichern zurück zu DLG-05. Ausgaben- und Saldenanzeige werden aktualisiert.
 
-### DLG-08 — Ausgabe bearbeiten
+### DLG-08 Ausgabe bearbeiten
 
 Wie [DLG-07](#dlg-07--ausgabe-erfassen), aber vorausgefüllt mit den bestehenden Werten.
 
 Aktionen: „Änderungen speichern“ → [UC-09](F2-anwendungsf%C3%A4lle.md#uc-09--ausgabe-bearbeiten), „Löschen“ → DLG-09 / [UC-10](F2-anwendungsf%C3%A4lle.md#uc-10--ausgabe-l%C3%B6schen), „Abbrechen“ → DLG-05.
 
-### DLG-09 — Ausgabe löschen (Bestätigung)
+### DLG-09 Ausgabe löschen (Bestätigung)
 
 Zeigt, was gelöscht wird: Beschreibung, Betrag und Datum. Zusätzlich wird darauf hingewiesen, dass die zugehörigen Kostenanteile mitgelöscht werden.
 
@@ -179,15 +185,15 @@ Aktionen: „Endgültig löschen“ → [UC-10](F2-anwendungsf%C3%A4lle.md#uc-10
 
 ## B1.6 Saldenverwaltung
 
-### DLG-10 — Salden anzeigen
+### DLG-10 Salden anzeigen
 
-Zeigt pro Mitglied den Saldo mit klarer Beschriftung: „bekommt X € zurück“, „schuldet X €“ oder „ausgeglichen“. Dazu kommen Ausgleichsvorschläge, also wer wem wie viel zahlen sollte.
+Zeigt pro Mitglied den Saldo in der Gruppenwährung mit klarer Beschriftung: „bekommt X € zurück“, „schuldet X €“ oder „ausgeglichen“. Dazu kommen Ausgleichsvorschläge, also wer wem wie viel zahlen sollte.
 
 Die Berechnung der Salden und Ausgleichsvorschläge ist in [F3 — Anwendungsfunktionen](F3-anwendungsfunktionen.md), insbesondere [AF-02](F3-anwendungsfunktionen.md#af-02--gruppensalden-berechnen) und [AF-03](F3-anwendungsfunktionen.md#af-03--ausgleichsvorschl%C3%A4ge-berechnen), beschrieben.
 
 Die eigentliche Zahlung findet außerhalb von CampusSplit statt.
 
-#### Einfaches Mockup
+####  Mockup
 
 ```text
 +--------------------------------------------------+
@@ -211,7 +217,7 @@ Aktionen: „Zur Gruppe“ → DLG-05 / [UC-06](F2-anwendungsf%C3%A4lle.md#uc-06
 
 ## B1.7 Export
 
-### DLG-11 — Export
+### DLG-11 Export
 
 | Feld | Pflicht | Verhalten |
 |---|---|---|
@@ -259,11 +265,7 @@ Die Abmeldung ([UC-03](F2-anwendungsf%C3%A4lle.md#uc-03--abmelden)) hat keinen e
 
 ## B1.10 Nicht Bestandteil von B1
 
-<<<<<<< Updated upstream
-Layout, Farben, konkretes UI-Framework, Pixelmaße, REST-Endpunkte hinter den Dialogen und das alles gehört in die Architektur. Was genau im PDF/CSV-Export steht, steht in B3, nicht hier.
-=======
 Layout, Farben, konkretes UI-Framework, Pixelmaße und technische REST-Endpunkte werden hier nicht festgelegt. Die fachlichen Exportinhalte stehen in [B3](B3_Druckausgaben.md).
->>>>>>> Stashed changes
 
 ## B1.11 Querverweise
 
@@ -274,6 +276,7 @@ Layout, Farben, konkretes UI-Framework, Pixelmaße und technische REST-Endpunkte
 | [D1 — Datenmodell](D1_Datenmodell_%28ZO%29.md) | Datenobjekte, die in den Dialogen verwendet werden |
 | [D2 — Datentypenverzeichnis](D2_Datentypenverzeichnis_%28ZO%29.md) | Datentypen wie MoneyAmountDT, SplitMethodDT und ExportFormatDT |
 | [B3 — Druck- und Exportausgaben](B3_Druckausgaben.md) | Inhalt des Exports aus DLG-11 |
+| [S1 — Nachbarsysteme](S1_Nachbarsysteme.md) | Externer Wechselkursdienst für Fremdwährungsausgaben |
 | [N1 — Nichtfunktionale Anforderungen](N1_Nichtfunktionale%20Anforderungen_%28ZO%29.md) | Anforderungen an Bedienbarkeit und Darstellung |
 | [N2 — Querschnittskonzepte](N2_Querschnittskonzepte_%28ZO%29.md) | Zugriff, Validierung, Geldbeträge und Fehlerbehandlung |
 
