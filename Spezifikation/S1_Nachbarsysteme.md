@@ -1,6 +1,6 @@
-# S1 — Nachbarsysteme
+# S1 Nachbarsysteme
 
-S1 beschreibt die Systeme außerhalb von CampusSplit, mit denen Daten ausgetauscht werden. Der Browser, die interne Datenbank und erzeugte PDF-/CSV-Dateien werden hier nicht mehr als eigene Nachbarsysteme geführt:
+S1 beschreibt die Systeme außerhalb von CampusSplit, mit denen Daten ausgetauscht werden.
 
 - der Browser ist der Zugangsweg zur Webanwendung,
 - die Datenbank gehört zur internen Persistenz,
@@ -24,7 +24,7 @@ flowchart LR
 
 Die Umrechnung wird nur benötigt, wenn die Währung einer Ausgabe von der Gruppenwährung abweicht. Die Eingabe im Dialog ist in [DLG-07 — Ausgabe erfassen](B1_Dialogspezifikation.md#dlg-07--ausgabe-erfassen) beschrieben.
 
-## S1.2 NB-01 — Wechselkursdienst
+## S1.2 NB-01 Wechselkursdienst
 
 Für die Wechselkurse wird die öffentliche **Frankfurter API** verwendet. Sie stellt aktuelle und historische Wechselkurse über eine REST-Schnittstelle bereit und benötigt für die öffentliche API keinen API-Key.
 
