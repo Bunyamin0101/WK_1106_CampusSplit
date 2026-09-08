@@ -10,7 +10,7 @@ Im Mittelpunkt von CampusSplit stehen Benutzer:innen, Gruppen, Gruppenmitgliedsc
 
 CampusSplit verwaltet gemeinsame Ausgaben innerhalb von Gruppen.
 
-Ein Benutzer kann Mitglied mehrerer Gruppen sein. Eine Gruppe kann mehrere Mitglieder enthalten. Innerhalb einer Gruppe können Ausgaben erfasst werden. Jede Ausgabe besitzt einen Zahler und wird über Kostenanteile auf beteiligte Gruppenmitglieder verteilt.
+Ein Benutzer kann Mitglied mehrerer Gruppen sein. Eine Gruppe kann mehrere Mitglieder enthalten und besitzt eine feste Gruppenwährung. Innerhalb einer Gruppe können Ausgaben erfasst werden, auch in einer anderen Währung als der Gruppenwährung — in diesem Fall wird über den externen Wechselkursdienst (siehe [S1](S1_Nachbarsysteme.md)) ein Abrechnungsbetrag in Gruppenwährung ermittelt. Jede Ausgabe besitzt einen Zahler und wird über Kostenanteile auf beteiligte Gruppenmitglieder verteilt.
 
 Salden und Ausgleichsvorschläge werden nicht dauerhaft als eigene Entitäten gespeichert. Sie werden aus Ausgaben und Kostenanteilen berechnet.
 
@@ -38,6 +38,7 @@ erDiagram
         Identifier id
         Text name
         Text description
+        CurrencyCodeDT currency
         Identifier ownerId
         Timestamp createdAt
         Timestamp updatedAt
@@ -58,7 +59,9 @@ erDiagram
         Identifier createdByUserId
         Identifier categoryId
         Text description
-        MoneyAmountDT amount
+        MoneyAmountDT originalAmount
+        MoneyAmountDT settlementAmount
+        ExchangeRateDT exchangeRate
         Date expenseDate
         Timestamp createdAt
         Timestamp updatedAt
@@ -123,6 +126,7 @@ Beispiele:
 | id          | [Identifier](D2_Datentypenverzeichnis.md#d22-identifier)    | Eindeutige Kennung der Gruppe.                         |
 | name        | Text          | Name der Gruppe.                                       |
 | description | Text \[0..1\] | Optionale Beschreibung der Gruppe.                     |
+| currency    | [CurrencyCodeDT](D2_Datentypenverzeichnis.md#d24-currencycodedt) | Gruppenwährung, in der Salden und Ausgleichsvorschläge berechnet werden. |
 | ownerId     | [Identifier](D2_Datentypenverzeichnis.md#d22-identifier)    | Verweis auf den [User](#user), der die Gruppe erstellt hat. |
 | createdAt   | Timestamp     | Zeitpunkt der Erstellung der Gruppe.                   |
 | updatedAt   | Timestamp     | Zeitpunkt der letzten Änderung der Gruppe.             |
@@ -137,6 +141,7 @@ Beispiele:
 ### Invarianten
 
 - Eine Gruppe muss einen Namen besitzen.
+- Eine Gruppe muss genau eine Gruppenwährung besitzen, die bei der Erstellung festgelegt wird.
 - Der Ersteller einer Gruppe muss Mitglied dieser Gruppe sein.
 - Der Ersteller einer Gruppe erhält initial die Rolle ADMIN.
 - Jede Gruppe muss mindestens ein Mitglied besitzen.
@@ -173,7 +178,7 @@ Diese Entität löst die n:m-Beziehung zwischen [User](#user) und [Group](#group
 
 ### Expense
 
-Expense repräsentiert eine gemeinsame Ausgabe innerhalb einer Gruppe.
+Expense repräsentiert eine gemeinsame Ausgabe innerhalb einer Gruppe. Eine Ausgabe kann in ihrer eigenen Originalwährung erfasst werden, die von der Gruppenwährung abweichen darf.
 
 Beispiele:
 
@@ -192,7 +197,9 @@ Beispiele:
 | createdByUserId | [Identifier](D2_Datentypenverzeichnis.md#d22-identifier)          | [User](#user), der die Ausgabe in CampusSplit erfasst hat. |
 | categoryId      | [Identifier](D2_Datentypenverzeichnis.md#d22-identifier) \[0..1\] | Optionale [Category](#category) der Ausgabe.                      |
 | description     | Text                | Beschreibung der Ausgabe.                             |
-| amount          | [MoneyAmountDT](D2_Datentypenverzeichnis.md#d23-moneyamountdt)       | Gesamtbetrag der Ausgabe inklusive Währung (EUR in der ersten Version).                             |
+| originalAmount  | [MoneyAmountDT](D2_Datentypenverzeichnis.md#d23-moneyamountdt)       | Ursprünglicher Betrag und Währung, wie erfasst.                             |
+| settlementAmount | [MoneyAmountDT](D2_Datentypenverzeichnis.md#d23-moneyamountdt)      | Abrechnungsbetrag in der Gruppenwährung. Entspricht originalAmount, wenn Original- und Gruppenwährung übereinstimmen. |
+| exchangeRate    | [ExchangeRateDT](D2_Datentypenverzeichnis.md#d24a-exchangeratedt) \[0..1\] | Verwendeter Wechselkurs. Nur vorhanden, wenn Original- und Gruppenwährung voneinander abweichen. |
 | expenseDate     | Date                | Datum der Ausgabe.                                    |
 | createdAt       | Timestamp           | Zeitpunkt der Erfassung.                              |
 | updatedAt       | Timestamp           | Zeitpunkt der letzten Änderung.                       |
@@ -207,17 +214,18 @@ Beispiele:
 
 ### Invarianten
 
-- Der Betrag einer Ausgabe muss größer als 0.00 sein.
-- Die Währung einer Ausgabe ist in der ersten Version EUR.
+- Der originalAmount-Betrag einer Ausgabe muss größer als 0.00 sein.
+- Stimmen Original- und Gruppenwährung überein, entspricht settlementAmount exakt originalAmount und exchangeRate ist nicht gesetzt.
+- Weichen Original- und Gruppenwährung voneinander ab, muss ein exchangeRate vorhanden sein, und settlementAmount ergibt sich aus originalAmount multipliziert mit dem Kurs.
 - Der Zahler muss Mitglied der zugehörigen Gruppe sein.
 - Der erfassende Benutzer muss Mitglied der zugehörigen Gruppe sein.
 - Eine Ausgabe muss mindestens einen Kostenanteil besitzen.
-- Die Summe aller Kostenanteile muss exakt dem Gesamtbetrag der Ausgabe entsprechen.
+- Die Summe aller Kostenanteile muss exakt dem settlementAmount der Ausgabe entsprechen (nicht dem originalAmount).
 - Eine Ausgabe darf nur von einem Mitglied der zugehörigen Gruppe eingesehen, erstellt, bearbeitet oder gelöscht werden.
 
 ### ExpenseShare
 
-ExpenseShare repräsentiert den Kostenanteil eines Gruppenmitglieds an einer bestimmten Ausgabe.
+ExpenseShare repräsentiert den Kostenanteil eines Gruppenmitglieds an einer bestimmten Ausgabe. Der Kostenanteil wird immer in der Gruppenwährung angegeben, also auf Basis des settlementAmount der zugehörigen Ausgabe.
 
 Eine Ausgabe kann auf alle oder nur auf ausgewählte Mitglieder einer Gruppe aufgeteilt werden.
 
@@ -226,7 +234,7 @@ Eine Ausgabe kann auf alle oder nur auf ausgewählte Mitglieder einer Gruppe auf
 | id          | [Identifier](D2_Datentypenverzeichnis.md#d22-identifier)    | Eindeutige Kennung des Kostenanteils.             |
 | expenseId   | [Identifier](D2_Datentypenverzeichnis.md#d22-identifier)    | Verweis auf die zugehörige [Expense](#expense).               |
 | userId      | [Identifier](D2_Datentypenverzeichnis.md#d22-identifier)    | [User](#user), dem dieser Kostenanteil zugeordnet ist. |
-| shareAmount | [MoneyAmountDT](D2_Datentypenverzeichnis.md#d23-moneyamountdt) | Anteil des Benutzers an der Ausgabe.              |
+| shareAmount | [MoneyAmountDT](D2_Datentypenverzeichnis.md#d23-moneyamountdt) | Anteil des Benutzers an der Ausgabe, in Gruppenwährung. |
 
 ### Beziehungen
 
@@ -240,7 +248,8 @@ Eine Ausgabe kann auf alle oder nur auf ausgewählte Mitglieder einer Gruppe auf
 - Der Benutzer des Kostenanteils muss Mitglied der Gruppe sein, zu der die Ausgabe gehört.
 - Ein Kostenanteil darf nicht negativ sein.
 - Pro Ausgabe darf ein Benutzer höchstens einen Kostenanteil besitzen.
-- Die Summe aller Kostenanteile einer Ausgabe muss exakt dem Gesamtbetrag der Ausgabe entsprechen.
+- shareAmount ist immer in der Gruppenwährung angegeben.
+- Die Summe aller Kostenanteile einer Ausgabe muss exakt dem settlementAmount der Ausgabe entsprechen.
 - Ein Kostenanteil beschreibt keine tatsächliche Zahlung, sondern nur den fachlichen Anteil an einer Ausgabe.
 
 ### Category
@@ -281,7 +290,7 @@ Einige Informationen werden in CampusSplit nicht dauerhaft als eigene Entitäten
 
 ### Balance
 
-Balance beschreibt den aktuellen Saldo eines Gruppenmitglieds innerhalb einer Gruppe.
+Balance beschreibt den aktuellen Saldo eines Gruppenmitglieds innerhalb einer Gruppe, angegeben in der Gruppenwährung.
 
 Ein Saldo zeigt, ob ein Mitglied Geld zurückbekommt oder Geld schuldet.
 
@@ -291,13 +300,13 @@ Ein Saldo zeigt, ob ein Mitglied Geld zurückbekommt oder Geld schuldet.
 | Negativer Saldo | Das Mitglied schuldet Geld.       |
 | Saldo 0.00      | Das Mitglied ist ausgeglichen.    |
 
-Der Saldo wird aus Expense und ExpenseShare berechnet.
+Der Saldo wird aus Expense (settlementAmount) und ExpenseShare berechnet.
 
-Saldo = Summe gezahlter Beträge - Summe eigener Kostenanteile
+Saldo = Summe gezahlter Abrechnungsbeträge - Summe eigener Kostenanteile
 
 ### Beispiel
 
-| Mitglied | Gezahlt | Eigener Kostenanteil | Saldo   |
+| Mitglied | Gezahlt (Gruppenwährung) | Eigener Kostenanteil | Saldo   |
 | -------- | ------- | -------------------- | ------- |
 | Person A | 30.00   | 10.00                | +20.00  |
 | Person B | 0.00    | 10.00                | \-10.00 |
@@ -309,7 +318,7 @@ Die Berechnung wird in [F3](F3-anwendungsfunktionen.md) als Anwendungsfunktion A
 
 ### SettlementProposal
 
-SettlementProposal beschreibt einen Ausgleichsvorschlag zwischen zwei Gruppenmitgliedern.
+SettlementProposal beschreibt einen Ausgleichsvorschlag zwischen zwei Gruppenmitgliedern, angegeben in der Gruppenwährung.
 
 Ein Ausgleichsvorschlag ist keine echte Zahlung. Er zeigt nur, welche Zahlung sinnvoll wäre, um offene Salden auszugleichen.
 
@@ -317,7 +326,7 @@ Ein Ausgleichsvorschlag ist keine echte Zahlung. Er zeigt nur, welche Zahlung si
 | ----------- | --------------------------------- |
 | Schuldner   | Benutzer mit negativem Saldo.     |
 | Gläubiger   | Benutzer mit positivem Saldo.     |
-| Betrag      | Vorgeschlagener Ausgleichsbetrag. |
+| Betrag      | Vorgeschlagener Ausgleichsbetrag, in Gruppenwährung. |
 
 ### Beispiel
 
@@ -347,11 +356,11 @@ Ein Export kann folgende Informationen enthalten:
 - Exportdatum
 - Zeitraum
 - Mitgliederliste
-- Ausgabenliste
+- Ausgabenliste mit Originalbetrag/-währung und Abrechnungsbetrag
 - Zahler je Ausgabe
-- Kostenanteile
-- Saldenübersicht
-- Ausgleichsvorschläge
+- Kostenanteile in Gruppenwährung
+- Saldenübersicht in Gruppenwährung
+- Ausgleichsvorschläge in Gruppenwährung
 
 Exportdateien werden in der ersten Version nicht dauerhaft als eigene fachliche Entität gespeichert.
 
@@ -381,12 +390,14 @@ Die folgenden Invarianten gelten über mehrere Entitäten hinweg.
 | INV-02 | Ein Benutzer darf eine Ausgabe nur sehen, wenn er Mitglied der zugehörigen Gruppe ist.           |
 | INV-03 | Der Zahler einer Ausgabe muss Mitglied der zugehörigen Gruppe sein.                              |
 | INV-04 | Jeder Kostenanteil muss einem Mitglied der zugehörigen Gruppe gehören.                           |
-| INV-05 | Die Summe aller Kostenanteile einer Ausgabe muss exakt dem Gesamtbetrag der Ausgabe entsprechen. |
+| INV-05 | Die Summe aller Kostenanteile einer Ausgabe muss exakt dem settlementAmount der Ausgabe entsprechen. |
 | INV-06 | Die Summe aller Salden innerhalb einer Gruppe muss 0.00 ergeben.                                 |
 | INV-07 | Jede Gruppe muss mindestens einen Administrator besitzen.                                        |
 | INV-08 | Jede E-Mail-Adresse darf nur einem Benutzerkonto zugeordnet sein.                                |
 | INV-09 | Passwörter werden niemals im Klartext gespeichert.                                               |
 | INV-10 | Tatsächliche Zahlungen werden nicht in CampusSplit verarbeitet.                                  |
+| INV-11 | Weicht die Originalwährung einer Ausgabe von der Gruppenwährung ab, muss ein exchangeRate vorhanden sein. |
+| INV-12 | Salden und Ausgleichsvorschläge werden ausschließlich in der Gruppenwährung berechnet und dargestellt. |
 
 ## D1.6 Nicht Bestandteil von D1
 
@@ -404,7 +415,7 @@ Folgende Themen sind bewusst nicht Bestandteil des D1-Datenmodells:
 | Zahlungsanbieter            | PayPal, Kreditkarten oder ähnliche Dienste sind nicht vorgesehen.                              |
 | Persistente Exportdateien   | Exporte werden erzeugt und heruntergeladen, aber nicht dauerhaft als Fachobjekte gespeichert.  |
 | Historie externer Zahlungen | Zahlungen erfolgen außerhalb von CampusSplit und werden nicht nachverfolgt.                    |
-| Mehrwährungsdaten           | Die erste Version verwendet ausschließlich Euro.                                               |
+| Cache-Strategie für Wechselkurse | Technische Umsetzung, siehe S1.                                                            |
 
 ## D1.7 Querverweise
 
@@ -415,10 +426,10 @@ Folgende Themen sind bewusst nicht Bestandteil des D1-Datenmodells:
 | [F1](F1-geschaeftsprozesse.md)       | Aktivitäten A5 bis A10 erzeugen oder nutzen Ausgaben, Kostenanteile, Salden und Exporte.                                          |
 | [F2](F2-anwendungsfälle.md)       | Use Cases UC-05 bis UC-12 lesen oder schreiben zentrale Entitäten dieses Datenmodells.                                            |
 | [F3](F3-anwendungsfunktionen.md)       | Kostenanteile, Salden, Ausgleichsvorschläge und Exportdaten werden aus D1-Entitäten berechnet.                                    |
-| [D2](D2_Datentypenverzeichnis.md)       | Definiert fachliche Datentypen wie Identifier, MoneyAmountDT, CurrencyCodeDT, MembershipRoleDT, SplitMethodDT und ExportFormatDT. |
+| [D2](D2_Datentypenverzeichnis.md)       | Definiert fachliche Datentypen wie Identifier, MoneyAmountDT, CurrencyCodeDT, ExchangeRateDT, MembershipRoleDT, SplitMethodDT und ExportFormatDT. |
 | [B1](B1_Dialogspezifikation.md)       | Dialoge verwenden die hier beschriebenen Datenobjekte in Anzeigen, Formularen und Übersichten.                                    |
 | [B3](B3_Druckausgaben.md)       | Druck- und Exportausgaben nutzen Ausgaben, Kostenanteile, Salden und Ausgleichsvorschläge.                                        |
-| [S1](S1_Nachbarsysteme.md)       | Schnittstellen greifen auf die hier beschriebenen Daten zu.                                                                       |
+| [S1](S1_Nachbarsysteme.md)       | Externer Wechselkursdienst liefert die Werte für exchangeRate bei Fremdwährungsausgaben.                                          |
 | [N1](N1_Nichtfunktionale%20Anforderungen.md)       | Sicherheits-, Konsistenz- und Performanceanforderungen wirken auf Speicherung und Berechnung.                                     |
 | [N2](N2_Querschnittskonzepte.md)       | Authentifizierung, Autorisierung, Validierung und Fehlerbehandlung greifen auf diese Entitäten zu.                                |
 | [E2](E2_Glossar.md)       | Das Glossar definiert Begriffe wie Benutzer, Gruppe, Ausgabe, Kostenanteil, Saldo, Schuldner und Gläubiger.                       |
