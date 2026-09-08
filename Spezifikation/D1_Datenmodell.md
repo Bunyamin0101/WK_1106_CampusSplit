@@ -77,7 +77,6 @@ erDiagram
         Text name
     }
 ```
-## D1.2 CampusSplit-Daten
 
 ## D1.2 CampusSplit-Daten
 
