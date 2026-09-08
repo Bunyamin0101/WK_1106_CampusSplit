@@ -13,7 +13,7 @@ Der Sinn von N2 ist, diese Konzepte einmal festzulegen, statt sie in jedem Kapit
 | [N2.2](#n22-authentifizierung-und-sitzung)   | Authentifizierung und Sitzung   | Einheitlicher Zugriffsschutz für angemeldete Benutzer:innen            |
 | [N2.3](#n23-autorisierung-und-gruppenrechte) | Autorisierung und Gruppenrechte | Zugriff auf Gruppen und Aktionen abhängig von Mitgliedschaft und Rolle |
 | [N2.4](#n24-validierung)                     | Validierung                     | Einheitliche Prüfung von Eingaben vor Speicherung                      |
-| [N2.5](#n25-geldbetragsverarbeitung)         | Geldbetragsverarbeitung         | Centgenaue und konsistente Verarbeitung von Geldbeträgen               |
+| [N2.5](#n25-geldbetragsverarbeitung)         | Geldbetragsverarbeitung         | Centgenaue und konsistente Verarbeitung von Geldbeträgen, inklusive Fremdwährungsumrechnung |
 | [N2.6](#n26-fehlerbehandlung)                | Fehlerbehandlung                | Einheitliches Verhalten bei fachlichen und technischen Fehlern         |
 | [N2.7](#n27-logging)                         | Logging                         | Nachvollziehbare Protokollierung ohne sensible Daten                   |
 | [N2.8](#n28-exportsicherheit)                | Exportsicherheit                | Sichere und konsistente Erzeugung von PDF- und CSV-Exporten            |
@@ -164,7 +164,8 @@ Wichtig ist Validierung deshalb überall dort, wo Nutzer:innen etwas eintragen: 
 - E-Mail-Adressen müssen ein gültiges Format haben.
 - Wer etwas in einer Gruppe tut, muss auch Mitglied dieser Gruppe sein.
 - Auch Zahler und Beteiligte einer [Expense](D1_Datenmodell.md#expense) müssen Mitglieder der Gruppe sein.
-- Die einzelnen [ExpenseShare](D1_Datenmodell.md#expenseshare)s müssen in Summe exakt den Gesamtbetrag der Ausgabe ergeben.
+- Die einzelnen [ExpenseShare](D1_Datenmodell.md#expenseshare)s müssen in Summe exakt dem Abrechnungsbetrag (settlementAmount) der Ausgabe entsprechen.
+- Bei einer Fremdwährungsausgabe muss vor dem Speichern ein gültiger Wechselkurs ermittelt worden sein.
 - Fehlermeldungen werden verständlich direkt im betroffenen Dialog angezeigt.
 - Ist eine Eingabe ungültig, wird nichts gespeichert.
 
@@ -176,9 +177,9 @@ Statt pauschal "Pflichtfelder dürfen nicht leer sein" auf alle Formulare anzuwe
 | --------------------- | ------------------------------------------------------------ | ----------------------------------- |
 | Registrierung        | Name, E-Mail, Passwort                                       | –                                    |
 | Anmeldung            | E-Mail, Passwort                                              | –                                    |
-| Gruppenerstellung    | Gruppenname                                                   | Beschreibung                        |
+| Gruppenerstellung    | Gruppenname, Gruppenwährung                                   | Beschreibung                        |
 | Mitgliederverwaltung | E-Mail-Adresse des neuen Mitglieds                            | –                                    |
-| Ausgabenerfassung    | Betrag, Zahler, mindestens eine beteiligte Person, Aufteilung | Beschreibung, Datum, Kategorie      |
+| Ausgabenerfassung    | Betrag, Währung, Zahler, mindestens eine beteiligte Person, Aufteilung | Beschreibung, Datum, Kategorie |
 | Export               | Exportformat                                                  | Zeitraum                            |
 
 ### Regeln
@@ -193,8 +194,9 @@ Statt pauschal "Pflichtfelder dürfen nicht leer sein" auf alle Formulare anzuwe
 | VAL-06 | Der Zahler einer Ausgabe muss Mitglied der Gruppe sein.                |
 | VAL-07 | Jede beteiligte Person einer Ausgabe muss Mitglied der Gruppe sein.    |
 | VAL-08 | Mindestens eine beteiligte Person muss ausgewählt sein.                |
-| VAL-09 | Die Summe aller Kostenanteile muss exakt dem Gesamtbetrag entsprechen. |
+| VAL-09 | Die Summe aller Kostenanteile muss exakt dem Abrechnungsbetrag entsprechen. |
 | VAL-10 | Ein Exportformat muss PDF oder CSV sein.                               |
+| VAL-11 | Bei einer Ausgabe in Fremdwährung muss ein gültiger Wechselkurs vorliegen, bevor gespeichert wird. |
 
 ### Fehlerdarstellung
 
@@ -205,10 +207,11 @@ Beispiele:
 | Situation                          | Beispielmeldung                                            |
 | ------------------------------------ | -------------------------------------------------------------|
 | Gruppenname fehlt                  | „Bitte geben Sie einen Gruppennamen ein."                  |
-| Betrag ist ungültig                | „Der Betrag muss größer als 0,00 € sein."                  |
+| Betrag ist ungültig                | „Der Betrag muss größer als 0,00 sein."                    |
 | Keine beteiligte Person ausgewählt | „Bitte wählen Sie mindestens ein Gruppenmitglied aus."     |
-| Aufteilungssumme ist falsch        | „Die Summe der Anteile muss dem Gesamtbetrag entsprechen." |
+| Aufteilungssumme ist falsch        | „Die Summe der Anteile muss dem Abrechnungsbetrag entsprechen." |
 | Benutzer ist kein Gruppenmitglied  | „Sie haben keinen Zugriff auf diese Gruppe."               |
+| Wechselkurs konnte nicht ermittelt werden | „Für diese Währung konnte aktuell kein Kurs ermittelt werden." |
 
 ### Querverweise
 
@@ -219,25 +222,27 @@ Beispiele:
 | [D1](D1_Datenmodell.md#d15-datenmodell-invarianten)       | Datenmodell-Invarianten definieren fachlich erlaubte Zustände.                |
 | [D2](D2_Datentypenverzeichnis.md)       | Datentypen bestimmen gültige Wertebereiche.                                   |
 | [B1](B1_Dialogspezifikation.md)       | Dialoge zeigen Validierungsfehler an.                                         |
+| [S1](S1_Nachbarsysteme.md)       | Liefert den für die Validierung nötigen Wechselkurs bei Fremdwährungsausgaben. |
 | [N1](N1_Nichtfunktionale%20Anforderungen.md)       | Datenkonsistenz und Benutzerfreundlichkeit fordern verständliche Validierung. |
 
 ## N2.5 Geldbetragsverarbeitung
 
 ### Anliegen
 
-Da es bei CampusSplit im Kern um Geld geht, muss hier besonders sauber gerechnet werden. Schon kleine Rundungsfehler summieren sich über mehrere Ausgaben hinweg und führen am Ende zu Salden, die nicht mehr stimmen. Deshalb legen wir für den gesamten Umgang mit Geldbeträgen eine einheitliche Regel fest, statt das jeder Funktion einzeln zu überlassen.
+Da es bei CampusSplit im Kern um Geld geht, muss hier besonders sauber gerechnet werden. Schon kleine Rundungsfehler summieren sich über mehrere Ausgaben hinweg und führen am Ende zu Salden, die nicht mehr stimmen. Zusätzlich unterstützt CampusSplit Ausgaben in einer anderen Währung als der Gruppenwährung, was eine zuverlässige Umrechnung erfordert. Deshalb legen wir für den gesamten Umgang mit Geldbeträgen eine einheitliche Regel fest, statt das jeder Funktion einzeln zu überlassen.
 
-> **Hinweis:** Die konkrete Berechnungslogik für Kostenaufteilung, Saldenberechnung und Ausgleichsvorschläge ist sehr umfangreich und wird ausführlich in [F3-anwendungsfunktionen.md](F3-anwendungsfunktionen.md) beschrieben. Hier in N2.5 stehen nur die querschnittlichen Grundregeln, die für die Geldverarbeitung überall im System gelten.
+> **Hinweis:** Die konkrete Berechnungslogik für Kostenaufteilung, Saldenberechnung und Ausgleichsvorschläge ist sehr umfangreich und wird ausführlich in [F3-anwendungsfunktionen.md](F3-anwendungsfunktionen.md) beschrieben. Die technischen Details der Wechselkursermittlung stehen in [S1 — Nachbarsysteme](S1_Nachbarsysteme.md). Hier in N2.5 stehen nur die querschnittlichen Grundregeln, die für die Geldverarbeitung überall im System gelten.
 
 ### Strategie
 
 - Geldbeträge werden centgenau verarbeitet ([MoneyAmountDT](D2_Datentypenverzeichnis.md#d23-moneyamountdt)).
-- Die erste Version verwendet ausschließlich Euro ([CurrencyCodeDT](D2_Datentypenverzeichnis.md#d24-currencycodedt)).
+- Jede Gruppe hat eine feste Gruppenwährung ([CurrencyCodeDT](D2_Datentypenverzeichnis.md#d24-currencycodedt)), in der Salden und Ausgleichsvorschläge immer angegeben werden.
+- Eine Ausgabe kann in einer anderen Währung erfasst werden als die Gruppenwährung; in diesem Fall wird über den externen Wechselkursdienst ein [ExchangeRateDT](D2_Datentypenverzeichnis.md#d24a-exchangeratedt) ermittelt und der Betrag in die Gruppenwährung umgerechnet.
 - Beträge werden immer mit zwei Nachkommastellen dargestellt.
 - Ausgaben und Kostenanteile können nicht negativ sein.
 - Ein Saldo dagegen kann positiv, negativ oder genau null sein.
 - Berechnungen laufen deterministisch ab, also bei gleicher Eingabe immer mit demselben Ergebnis.
-- Die Kostenanteile einer Ausgabe müssen in Summe dem Gesamtbetrag entsprechen.
+- Die Kostenanteile einer Ausgabe müssen in Summe dem Abrechnungsbetrag in Gruppenwährung entsprechen.
 - Die Summe aller Salden innerhalb einer Gruppe muss 0.00 ergeben.
 
 ### Fachliche Bedeutung von Salden
@@ -262,6 +267,16 @@ Beispiel: 10.00 € werden auf drei Personen verteilt.
 
 Wichtig ist dabei, dass die Rundung nachvollziehbar und deterministisch bleibt: Bei identischer Eingabe kommt jedes Mal dieselbe Verteilung heraus. Die genaue Rechenlogik dazu steht in F3.
 
+### Fremdwährungsumrechnung
+
+Bei einer Ausgabe in Fremdwährung gilt:
+
+- Die Umrechnung erfolgt nur, wenn Originalwährung und Gruppenwährung voneinander abweichen.
+- Der Wechselkurs wird beim externen Wechselkursdienst ermittelt, nicht selbst angenommen oder erfunden.
+- Der Abrechnungsbetrag in Gruppenwährung ergibt sich aus Originalbetrag multipliziert mit dem ermittelten Kurs, anschließend centgenau gerundet.
+- Originalbetrag, Originalwährung und der verwendete Kurs bleiben dauerhaft nachvollziehbar mit der Ausgabe verknüpft.
+- Kann kein Kurs ermittelt werden, wird die Ausgabe nicht gespeichert.
+
 ### Regeln
 
 | ID       | Regel                                                                |
@@ -270,9 +285,10 @@ Wichtig ist dabei, dass die Rundung nachvollziehbar und deterministisch bleibt: 
 | MONEY-02 | Ausgaben müssen größer als 0.00 sein.                                |
 | MONEY-03 | Kostenanteile dürfen nicht negativ sein.                             |
 | MONEY-04 | Salden dürfen negativ, positiv oder null sein.                       |
-| MONEY-05 | Die Summe der Kostenanteile entspricht exakt dem Gesamtbetrag.       |
-| MONEY-06 | Die Summe aller Gruppensalden ergibt exakt 0.00.                     |
-| MONEY-07 | Alle Beträge werden in der ersten Version in Euro dargestellt.       |
+| MONEY-05 | Die Summe der Kostenanteile entspricht exakt dem Abrechnungsbetrag.  |
+| MONEY-06 | Die Summe aller Gruppensalden ergibt exakt 0.00 in Gruppenwährung.   |
+| MONEY-07 | Jede Gruppe hat eine feste Gruppenwährung, in der Salden dargestellt werden. |
+| MONEY-08 | Weicht die Originalwährung einer Ausgabe von der Gruppenwährung ab, wird ein Wechselkurs über den externen Dienst ermittelt und die Umrechnung nachvollziehbar gespeichert. |
 
 ### Querverweise
 
@@ -280,9 +296,10 @@ Wichtig ist dabei, dass die Rundung nachvollziehbar und deterministisch bleibt: 
 | -------- | ----------------------------------------------------------------------------------|
 | [F3](F3-anwendungsfunktionen.md)       | [F3-anwendungsfunktionen.md](F3-anwendungsfunktionen.md) beschreibt AF-01, AF-02 und AF-03 mit der vollständigen Berechnungslogik. |
 | [D1](D1_Datenmodell.md#expense)       | [Expense](D1_Datenmodell.md#expense), [ExpenseShare](D1_Datenmodell.md#expenseshare), Balance und SettlementProposal verwenden Geldbeträge. |
-| [D2](D2_Datentypenverzeichnis.md#d23-moneyamountdt)       | [MoneyAmountDT](D2_Datentypenverzeichnis.md#d23-moneyamountdt) und [CurrencyCodeDT](D2_Datentypenverzeichnis.md#d24-currencycodedt) definieren Wertebereiche und Regeln. |
-| [B1](B1_Dialogspezifikation.md)       | Dialoge erfassen und zeigen Geldbeträge.                                         |
-| [B3](B3_Druckausgaben.md)       | Exportdateien enthalten Geldbeträge und Salden.                                  |
+| [D2](D2_Datentypenverzeichnis.md#d23-moneyamountdt)       | [MoneyAmountDT](D2_Datentypenverzeichnis.md#d23-moneyamountdt), [CurrencyCodeDT](D2_Datentypenverzeichnis.md#d24-currencycodedt) und [ExchangeRateDT](D2_Datentypenverzeichnis.md#d24a-exchangeratedt) definieren Wertebereiche und Regeln. |
+| [S1](S1_Nachbarsysteme.md)       | Externer Wechselkursdienst zur Ermittlung des Umrechnungskurses. |
+| [B1](B1_Dialogspezifikation.md)       | Dialoge erfassen und zeigen Geldbeträge, inklusive Fremdwährung.                 |
+| [B3](B3_Druckausgaben.md)       | Exportdateien enthalten Geldbeträge, Wechselkurse und Salden.                    |
 | [N1](N1_Nichtfunktionale%20Anforderungen.md)       | Genauigkeits- und Datenkonsistenzanforderungen beziehen sich auf Geldberechnung. |
 
 ## N2.6 Fehlerbehandlung
@@ -307,6 +324,7 @@ Fehler lassen sich nie ganz vermeiden. Die Anwendung muss trotzdem einheitlich r
 | Autorisierungsfehler  | Kein Gruppenmitglied               | Zugriff verweigert                    |
 | Nicht gefunden        | Gruppe existiert nicht             | Meldung mit Rückkehrmöglichkeit       |
 | Persistenz-/Exportfehler | Speichern oder Export schlägt fehl | Keine Teilspeicherung, erneut möglich |
+| Wechselkursfehler     | Wechselkursdienst nicht erreichbar | Keine Speicherung mit erfundenem Kurs, erneut möglich (siehe FX-06 in S1) |
 | Sitzungsfehler        | Sitzung abgelaufen                 | Weiterleitung zur Anmeldung           |
 
 ### Regeln
@@ -318,7 +336,7 @@ Fehler lassen sich nie ganz vermeiden. Die Anwendung muss trotzdem einheitlich r
 | ERR-03 | Bei fehlender Berechtigung wird die Aktion abgelehnt.                            |
 | ERR-04 | Bei fehlerhafter Ausgabeerfassung entsteht keine Teilspeicherung.                |
 | ERR-05 | Nach einem Fehler bleibt ein stabiler Systemzustand erhalten.                    |
-| ERR-06 | Wiederholbare Aktionen wie Export oder Speichern können erneut ausgelöst werden. |
+| ERR-06 | Wiederholbare Aktionen wie Export, Speichern oder Wechselkursermittlung können erneut ausgelöst werden. |
 
 ### Querverweise
 
@@ -326,7 +344,7 @@ Fehler lassen sich nie ganz vermeiden. Die Anwendung muss trotzdem einheitlich r
 | -------- | --------------------------------------------------------------------------|
 | [F2](F2-anwendungsfälle.md)       | Exception-Szenarien beschreiben Fehler in Use Cases.                      |
 | [B1](B1_Dialogspezifikation.md)       | Dialoge zeigen Fehlerzustände und Validierungsfehler.                     |
-| [S1](S1_Nachbarsysteme.md)       | Schnittstellenfehler werden an Use Cases zurückgegeben.                   |
+| [S1](S1_Nachbarsysteme.md)       | Fehlerfälle des Wechselkursdienstes und ihr Verhalten.                    |
 | [S3](S3_Inbetriebnahme.md)       | Funktionstests prüfen zentrale Fehlerfälle nach Inbetriebnahme.           |
 | [N1](N1_Nichtfunktionale%20Anforderungen.md)       | Zuverlässigkeit und verständliche Fehlerbehandlung werden dort gefordert. |
 
@@ -357,6 +375,7 @@ Dabei geht es uns nur um Fehlersuche und Betrieb - Logging ist ausdrücklich kei
 | Fehler beim Speichern einer Ausgabe | Fehlersuche                            |
 | Fehler bei Exporterzeugung          | Fehlersuche                            |
 | Fehler beim Datenbankzugriff        | Betrieb und Diagnose                   |
+| Fehler beim Wechselkursdienst       | Fehlersuche                            |
 | Anwendung gestartet                 | Betriebsinformation                    |
 
 ### Regeln
@@ -390,7 +409,8 @@ CampusSplit kann [Group](D1_Datenmodell.md#group)ndaten, [Expense](D1_Datenmodel
 - Exporte dürfen nur von Mitgliedern der jeweiligen Gruppe erzeugt werden.
 - Ein Export bezieht sich immer auf genau eine Gruppe.
 - Die Exportdaten werden jedes Mal aus dem aktuellen Datenbestand berechnet.
-- Die exportierten Salden müssen mit der Berechnung aus F3 übereinstimmen.
+- Die exportierten Salden müssen mit der Berechnung aus F3 übereinstimmen und werden in Gruppenwährung dargestellt.
+- Bei Fremdwährungsausgaben werden zusätzlich Originalbetrag, Originalwährung und verwendeter Wechselkurs exportiert.
 - Passwörter, Passwort-Hashes und Sessioninformationen tauchen in keiner Exportdatei auf.
 - Technische IDs werden nur exportiert, wenn sie fachlich tatsächlich gebraucht werden.
 - Exporte verändern keine gespeicherten Daten.
@@ -410,10 +430,11 @@ CampusSplit kann [Group](D1_Datenmodell.md#group)ndaten, [Expense](D1_Datenmodel
 | EXP-SEC-01 | Nur Gruppenmitglieder dürfen Exporte ihrer Gruppe erzeugen.               |
 | EXP-SEC-02 | Exporte enthalten keine Passwörter oder Passwort-Hashes.                  |
 | EXP-SEC-03 | Exporte enthalten keine Session- oder Tokeninformationen.                 |
-| EXP-SEC-04 | Exportierte Beträge werden in Euro mit zwei Nachkommastellen dargestellt. |
+| EXP-SEC-04 | Salden und Kostenanteile werden in Gruppenwährung mit zwei Nachkommastellen dargestellt. |
 | EXP-SEC-05 | Exportierte Salden stimmen mit der aktuellen Berechnung überein.          |
 | EXP-SEC-06 | Exporte führen keine Zahlungen aus.                                       |
 | EXP-SEC-07 | Exporte verändern keine gespeicherten Daten.                              |
+| EXP-SEC-08 | Bei Fremdwährungsausgaben werden Originalbetrag, Originalwährung und Wechselkurs im Export ausgegeben. |
 
 ### Querverweise
 
@@ -422,7 +443,7 @@ CampusSplit kann [Group](D1_Datenmodell.md#group)ndaten, [Expense](D1_Datenmodel
 | [F2](F2-anwendungsfälle.md)       | UC-12 löst den Export aus.                                                 |
 | [F3](F3-anwendungsfunktionen.md)       | AF-04 bereitet Exportdaten fachlich auf.                                   |
 | [D1](D1_Datenmodell.md#group)       | Exportdaten stammen aus [Group](D1_Datenmodell.md#group)n, [Membership](D1_Datenmodell.md#membership)s, [Expense](D1_Datenmodell.md#expense)n und [ExpenseShare](D1_Datenmodell.md#expenseshare)s. |
-| [D2](D2_Datentypenverzeichnis.md#d27-exportformatdt)       | [ExportFormatDT](D2_Datentypenverzeichnis.md#d27-exportformatdt), [MoneyAmountDT](D2_Datentypenverzeichnis.md#d23-moneyamountdt) und [CurrencyCodeDT](D2_Datentypenverzeichnis.md#d24-currencycodedt) bestimmen Exportwerte. |
+| [D2](D2_Datentypenverzeichnis.md#d27-exportformatdt)       | [ExportFormatDT](D2_Datentypenverzeichnis.md#d27-exportformatdt), [MoneyAmountDT](D2_Datentypenverzeichnis.md#d23-moneyamountdt) und [ExchangeRateDT](D2_Datentypenverzeichnis.md#d24a-exchangeratedt) bestimmen Exportwerte. |
 | [B1](B1_Dialogspezifikation.md)       | DLG-11 beschreibt den Exportdialog.                                        |
 | [B3](B3_Druckausgaben.md)       | Beschreibt Inhalt und Struktur der PDF- und CSV-Ausgaben.                  |
 | [N1](N1_Nichtfunktionale%20Anforderungen.md)       | Sicherheits- und Konsistenzanforderungen gelten auch für Exporte.          |
@@ -436,7 +457,6 @@ Ein paar Querschnittskonzepte, die man sich grundsätzlich vorstellen könnte, h
 | Mehrmandantenfähigkeit      | nicht vorgesehen | CampusSplit unterscheidet nur zwischen Benutzern und Gruppen - Organisationen oder Mandanten gibt es in diesem Modell nicht. |
 | Zahlungsabwicklung          | nicht vorgesehen | CampusSplit berechnet zwar Salden, führt aber selbst keine Zahlungen aus.                                                    |
 | Bankintegration             | nicht vorgesehen | Es werden keinerlei Bankdaten verarbeitet.                                                                                   |
-| Mehrwährungslogik           | nicht vorgesehen | Die erste Version verwendet ausschließlich Euro.                                                                             |
 | Vollständige Audit-Historie | nicht vorgesehen | Änderungen an Daten werden nicht als eigene fachliche Historie mitgeschrieben.                                               |
 | Echtzeit-Kommunikation      | nicht vorgesehen | Weder Live-Chat noch Echtzeit-Synchronisation gehören zum Projektumfang.                                                     |
 | E-Mail-Benachrichtigungen   | nicht vorgesehen | Ein externer E-Mail-Dienst ist nicht vorgesehen.                                                                             |
@@ -453,10 +473,10 @@ Wir nennen diese Punkte hier bewusst, damit klar wird: Das Fehlen dieser Funktio
 | [F2](F2-anwendungsfälle.md)       | Use Cases bilden die sichtbare Oberfläche der Querschnittskonzepte.                                               |
 | [F3](F3-anwendungsfunktionen.md)       | Anwendungsfunktionen setzen Geldbetragsverarbeitung, Validierung und Exportregeln fachlich um.                    |
 | [D1](D1_Datenmodell.md#d15-datenmodell-invarianten)       | Datenmodell-Invarianten bilden die Grundlage für Validierung und Autorisierung. |
-| [D2](D2_Datentypenverzeichnis.md)       | Datentypen wie [MoneyAmountDT](D2_Datentypenverzeichnis.md#d23-moneyamountdt), [MembershipRoleDT](D2_Datentypenverzeichnis.md#d25-membershiproledt), SplitMethodDT und ExportFormatDT stützen die Querschnittsregeln. |
+| [D2](D2_Datentypenverzeichnis.md)       | Datentypen wie [MoneyAmountDT](D2_Datentypenverzeichnis.md#d23-moneyamountdt), ExchangeRateDT, [MembershipRoleDT](D2_Datentypenverzeichnis.md#d25-membershiproledt), SplitMethodDT und ExportFormatDT stützen die Querschnittsregeln. |
 | [B1](B1_Dialogspezifikation.md)       | Dialoge zeigen Validierungsfehler, Fehlerzustände und berechtigungsabhängige Aktionen.                            |
 | [B3](B3_Druckausgaben.md)       | Exporte folgen den Regeln der Exportsicherheit.                                                                   |
-| [S1](S1_Nachbarsysteme.md)       | Schnittstellen müssen Authentifizierung, Autorisierung, Validierung und Fehlerbehandlung berücksichtigen.         |
+| [S1](S1_Nachbarsysteme.md)       | Externer Wechselkursdienst; Validierung, Geldverarbeitung und Fehlerbehandlung berücksichtigen dessen Verhalten.  |
 | [S3](S3_Inbetriebnahme.md)       | Inbetriebnahme und Releases müssen Konfiguration, Datenbeständigkeit und Logging berücksichtigen.                 |
 | [N1](N1_Nichtfunktionale%20Anforderungen.md)       | Nichtfunktionale Anforderungen definieren messbare Qualitätskriterien für die hier beschriebenen Konzepte.        |
 | [E2](E2_Glossar.md)       | Glossar definiert zentrale Begriffe wie Authentifizierung, Autorisierung, Saldo, Export und Gruppenadministrator. |
