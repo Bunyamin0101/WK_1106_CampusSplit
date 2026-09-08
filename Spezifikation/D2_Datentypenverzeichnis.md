@@ -11,6 +11,7 @@ Im Mittelpunkt stehen dagegen Wertebereiche, Gleichheits- und Ordnungsregeln sow
 | Identifier       | Eindeutiger technischer Schlüssel | Identifikation von Entitäten                          |
 | MoneyAmountDT    | Zusammengesetzter Geldbetrag (Betrag + Währung) | Ausgaben, Kostenanteile, Salden, Ausgleichsvorschläge |
 | CurrencyCodeDT   | Währungscode                      | Bestandteil von MoneyAmountDT                     |
+| ExchangeRateDT   | Zusammengesetzter Wechselkurswert | Umrechnung von Fremdwährungsausgaben in die Gruppenwährung (siehe [S1](S1_Nachbarsysteme.md)) |
 | MembershipRoleDT | Aufzählung                        | Rolle eines Benutzers innerhalb einer Gruppe          |
 | SplitMethodDT    | Aufzählung                        | Art der Kostenaufteilung                              |
 | ExportFormatDT   | Aufzählung                        | Format einer Ausgabenübersicht                        |
@@ -44,7 +45,7 @@ Zwei Identifier sind genau dann gleich, wenn ihre Werte exakt übereinstimmen. E
 
 # D2.3 MoneyAmountDT
 
-MoneyAmountDT bildet einen Geldbetrag ab und wird für den Gesamtbetrag einer [Expense](D1_Datenmodell.md#expense), für [ExpenseShare](D1_Datenmodell.md#expenseshare)s, für den berechneten Saldo eines Gruppenmitglieds, für Ausgleichsvorschläge zwischen Schuldner und Gläubiger sowie für exportierte Beträge verwendet.
+MoneyAmountDT bildet einen Geldbetrag ab und wird für den Originalbetrag und den Abrechnungsbetrag einer [Expense](D1_Datenmodell.md#expense), für [ExpenseShare](D1_Datenmodell.md#expenseshare)s, für den berechneten Saldo eines Gruppenmitglieds sowie für Ausgleichsvorschläge zwischen Schuldner und Gläubiger verwendet.
 
 ### Struktur
 
@@ -65,14 +66,14 @@ Der value-Bestandteil eines MoneyAmountDT besitzt immer genau zwei Nachkommastel
 | ---------------- | --------------------------------- |
 | 0.00 EUR             | Kein Betrag                       |
 | 10.00 EUR            | Zehn Euro                         |
-| 3.33 EUR             | Drei Euro und dreiunddreißig Cent |
+| 30.00 USD            | Dreißig US-Dollar (Originalbetrag einer Fremdwährungsausgabe) |
 | \-5.00 EUR           | Negativer Saldo von fünf Euro     |
 
 ### Regeln
 
 Beträge werden centgenau verarbeitet. Eine Ausgabe muss größer als 0.00 sein, während Kostenanteile zwar nicht negativ sein dürfen, aber durchaus 0.00 betragen können. Salden hingegen dürfen positiv, negativ oder null sein: Ein positiver Saldo bedeutet, dass ein Mitglied Geld zurückbekommt, ein negativer, dass es Geld schuldet.
 
-Zwei rechnerische Bedingungen sind dabei zentral: Die Summe aller Kostenanteile einer Ausgabe muss exakt dem Gesamtbetrag entsprechen, und die Summe aller Salden innerhalb einer Gruppe muss stets 0.00 ergeben.
+Zwei rechnerische Bedingungen sind dabei zentral: Die Summe aller Kostenanteile einer Ausgabe muss exakt dem **Abrechnungsbetrag in Gruppenwährung** entsprechen, und die Summe aller Salden innerhalb einer Gruppe muss stets 0.00 ergeben.
 
 ### Rundung
 
@@ -88,17 +89,17 @@ Die Rundung muss deterministisch erfolgen, das heißt: Bei identischer Eingabe l
 
 ### Gleichheit
 
-Zwei Geldbeträge gelten als gleich, wenn ihr value denselben centgenauen Wert besitzt UND ihre currency identisch ist. Beträge in unterschiedlichen Währungen sind grundsätzlich nicht vergleichbar.
+Zwei Geldbeträge gelten als gleich, wenn ihr value denselben centgenauen Wert besitzt UND ihre currency identisch ist. Beträge in unterschiedlichen Währungen sind ohne Umrechnung nicht direkt vergleichbar.
 
 | **Betrag A** | **Betrag B** | **Ergebnis** |
 | ------------ | ------------ | ------------ |
 | 10.00 EUR    | 10.00 EUR    | gleich       |
 | 10.00 EUR    | 10.01 EUR    | nicht gleich |
-| 10.00 EUR    | 10.00 USD    | nicht vergleichbar |
+| 10.00 EUR    | 10.00 USD    | nicht direkt vergleichbar (siehe [ExchangeRateDT](#d24a-exchangeratedt)) |
 
 ### Ordnung
 
-Geldbeträge derselben Währung sind numerisch sortierbar, zum Beispiel: -5.00 EUR < 0.00 EUR < 10.00 EUR. Beträge unterschiedlicher Währungen besitzen keine fachliche Ordnung zueinander.
+Geldbeträge derselben Währung sind numerisch sortierbar, zum Beispiel: -5.00 EUR < 0.00 EUR < 10.00 EUR. Beträge unterschiedlicher Währungen besitzen ohne Umrechnung keine fachliche Ordnung zueinander.
 
 ### Verarbeitungshinweis
 
@@ -106,23 +107,50 @@ Geldbeträge dürfen nicht über ungenaue Gleitkommazahlen verarbeitet werden. E
 
 # D2.4 CurrencyCodeDT
 
-CurrencyCodeDT beschreibt die Währung eines Geldbetrags und ist Bestandteil von [MoneyAmountDT](#d23-moneyamountdt). Für die erste Version von CampusSplit ist ausschließlich Euro vorgesehen.
+CurrencyCodeDT beschreibt die Währung eines Geldbetrags und ist Bestandteil von [MoneyAmountDT](#d23-moneyamountdt).
 
-| **Wert** | **Bedeutung** |
+### Wertebereich
+
+Ein CurrencyCodeDT ist ein gültiger Währungscode, wie er vom externen Wechselkursdienst aus [S1 — Nachbarsysteme](S1_Nachbarsysteme.md) unterstützt wird (z. B. EUR, USD). CampusSplit legt selbst keine feste, abschließende Liste unterstützter Währungen fest, sondern richtet sich nach dem, was der Wechselkursdienst liefern kann.
+
+Jede Gruppe besitzt eine feste **Gruppenwährung** (siehe [Group.currency](D1_Datenmodell.md#group)). Eine Ausgabe kann in einer anderen Währung erfasst werden als die Gruppenwährung; in diesem Fall wird über den Wechselkursdienst ein Wechselkurs ermittelt und der Betrag in die Gruppenwährung umgerechnet (siehe [ExchangeRateDT](#d24a-exchangeratedt) und S1).
+
+| **Beispielwert** | **Bedeutung** |
 | -------- | ------------- |
 | EUR      | Euro          |
+| USD      | US-Dollar     |
 
 ### Regeln
 
-Jede Ausgabe wird in Euro erfasst, und alle zugehörigen Kostenanteile übernehmen automatisch dieselbe Währung. Auch Salden und Ausgleichsvorschläge werden ausschließlich in Euro angegeben; eine Umrechnung zwischen unterschiedlichen Währungen ist nicht vorgesehen.
+Eine Ausgabe kann in ihrer Originalwährung von der Gruppenwährung abweichen. Salden und Ausgleichsvorschläge werden immer ausschließlich in der Gruppenwährung angegeben; sie enthalten keine unterschiedlichen Währungen gemischt.
 
 ### Gleichheit und Ordnung
 
 Zwei Währungscodes sind gleich, wenn ihr Code identisch ist. Eine fachliche Sortierung von Währungscodes ist nicht vorgesehen.
 
-### Erweiterbarkeit
+# D2.4a ExchangeRateDT
 
-Die Unterstützung weiterer Währungen ist nicht Bestandteil der ersten Version. Eine spätere Mehrwährungsunterstützung müsste zusätzlich in Spezifikation, Datenmodell, Berechnungslogik, Oberfläche und Architektur berücksichtigt werden.
+ExchangeRateDT bildet einen Wechselkurs ab, der zur Umrechnung einer Fremdwährungsausgabe in die Gruppenwährung verwendet wird. Er kommt bei [Expense](D1_Datenmodell.md#expense).exchangeRate zum Einsatz, sofern die Ausgabe in einer anderen Währung als der Gruppenwährung erfasst wurde.
+
+### Struktur
+
+| Bestandteil | Typ | Beschreibung |
+| ----------- | --- | ------------ |
+| fromCurrency | [CurrencyCodeDT](#d24-currencycodedt) | Ausgangswährung (Originalwährung der Ausgabe) |
+| toCurrency | [CurrencyCodeDT](#d24-currencycodedt) | Zielwährung (Gruppenwährung) |
+| rate | Dezimalwert | Umrechnungsfaktor von fromCurrency nach toCurrency |
+| date | Date | Datum, für das der Kurs ermittelt wurde (i. d. R. das Ausgabedatum) |
+
+### Regeln
+
+- Ein ExchangeRateDT wird nur benötigt, wenn Originalwährung und Gruppenwährung voneinander abweichen (siehe FX-01 in S1.3).
+- Der Kurs wird beim externen Wechselkursdienst ermittelt und nicht selbst erfunden oder angenommen (siehe FX-05 in S1.3).
+- CampusSplit führt die Multiplikation von Originalbetrag und Kurs sowie die anschließende Rundung selbst durch (siehe FX-03 in S1.3).
+- Originalbetrag, Originalwährung und der verwendete Kurs bleiben für die Nachvollziehbarkeit dauerhaft mit der Ausgabe verknüpft (siehe FX-07 in S1.3).
+
+### Gleichheit und Ordnung
+
+Zwei ExchangeRateDT-Werte sind gleich, wenn fromCurrency, toCurrency, rate und date identisch sind. Eine fachliche Ordnung ist nicht vorgesehen.
 
 # D2.5 MembershipRoleDT
 
@@ -156,7 +184,7 @@ Zwei Rollen sind gleich, wenn ihr Rollenwert identisch ist. Eine natürliche Ord
 
 # D2.6 SplitMethodDT
 
-SplitMethodDT beschreibt, auf welche Weise eine Ausgabe auf die beteiligten Gruppenmitglieder verteilt wird, und kommt bei der Erfassung und Bearbeitung von [Expense](D1_Datenmodell.md#expense)n zum Einsatz.
+SplitMethodDT beschreibt, auf welche Weise eine Ausgabe auf die beteiligten Gruppenmitglieder verteilt wird, und kommt bei der Erfassung und Bearbeitung von [Expense](D1_Datenmodell.md#expense)n zum Einsatz. Die Aufteilung erfolgt immer in der Gruppenwährung, also nach einer eventuellen Umrechnung über [ExchangeRateDT](#d24a-exchangeratedt).
 
 | **Wert**      | **Bedeutung**                                                              |
 | ------------- | -------------------------------------------------------------------------- |
@@ -221,7 +249,7 @@ ExportFormatDT legt das gewünschte Format einer Ausgabenübersicht fest und wir
 
 ### Regeln
 
-Ein Export bezieht sich stets auf genau eine Gruppe und darf keine Passwörter oder sonstigen sicherheitsrelevanten Informationen enthalten. Exportierte Beträge werden in Euro mit zwei Nachkommastellen dargestellt, und exportierte Salden müssen mit der aktuellen Saldenberechnung übereinstimmen. Zudem dürfen Exporte ausschließlich für Gruppen erzeugt werden, in denen der Benutzer Mitglied ist.
+Ein Export bezieht sich stets auf genau eine Gruppe und darf keine Passwörter oder sonstigen sicherheitsrelevanten Informationen enthalten. Salden werden in der Gruppenwährung dargestellt, Originalausgaben zeigen zusätzlich Originalbetrag, Originalwährung und den verwendeten Wechselkurs, sofern eine Umrechnung stattgefunden hat. Zudem dürfen Exporte ausschließlich für Gruppen erzeugt werden, in denen der Benutzer Mitglied ist.
 
 ### Inhalt eines Exports
 
@@ -231,11 +259,11 @@ Ein Export bezieht sich stets auf genau eine Gruppe und darf keine Passwörter o
 | Exportdatum | Zeitpunkt der Erzeugung des Exports |
 | Zeitraum | Betrachteter Zeitraum der Ausgaben |
 | Mitgliederliste | Liste der Gruppenmitglieder |
-| Ausgabenliste | Liste aller enthaltenen Ausgaben |
+| Ausgabenliste | Liste aller enthaltenen Ausgaben mit Originalbetrag/-währung und Abrechnungsbetrag |
 | Zahler je Ausgabe | Wer welche Ausgabe bezahlt hat |
-| Kostenanteile | Aufteilung je Ausgabe |
-| Saldenübersicht | Aktueller Saldo je Mitglied |
-| Ausgleichsvorschläge | Vorgeschlagene Ausgleichszahlungen |
+| Kostenanteile | Aufteilung je Ausgabe in Gruppenwährung |
+| Saldenübersicht | Aktueller Saldo je Mitglied in Gruppenwährung |
+| Ausgleichsvorschläge | Vorgeschlagene Ausgleichszahlungen in Gruppenwährung |
 
 ### Gleichheit und Ordnung
 
@@ -265,7 +293,7 @@ Bewusst ausgeklammert bleiben folgende Themen:
 | UI-Formularfelder                      | Werden in der Dialogspezifikation B1 beschrieben |
 | Passwortregeln im Detail               | Gehören zu Sicherheit und Querschnittskonzepten  |
 | Physische Speicherung von Geldbeträgen | Architektur- und Implementierungsentscheidung    |
-| Mehrwährungsumrechnung                 | Nicht Bestandteil der ersten Version             |
+| Cache-Strategie für Wechselkurse       | Technische Umsetzung, siehe S1                   |
 | Zahlungsstatus echter Zahlungen        | CampusSplit verarbeitet keine Zahlungen          |
 
 # D2.10 Querverweise
@@ -276,10 +304,11 @@ Bewusst ausgeklammert bleiben folgende Themen:
 | [P2](P2_Architekturueberblick.md)           | Beschreibt CampusSplit, Browser, Datenbank und Exportdateien als relevante Systeme                                        |
 | [F1](F1-geschaeftsprozesse.md)           | Beschreibt den Geschäftsprozess der gemeinsamen Ausgabenverwaltung                                                        |
 | [F2](F2-anwendungsfälle.md)           | Nutzt die Datentypen bei Registrierung, Gruppenerstellung, Ausgabenerfassung, Saldenanzeige und Export                    |
-| [F3](F3-anwendungsfunktionen.md)           | Verwendet MoneyAmountDT, CurrencyCodeDT und SplitMethodDT für Kostenaufteilung und Saldenberechnung                       |
+| [F3](F3-anwendungsfunktionen.md)           | Verwendet MoneyAmountDT, CurrencyCodeDT, ExchangeRateDT und SplitMethodDT für Kostenaufteilung und Saldenberechnung        |
 | [D1](D1_Datenmodell.md)           | Verwendet die hier beschriebenen Datentypen in Entitäten wie User, Group, Expense und ExpenseShare                        |
 | [B1](B1_Dialogspezifikation.md)           | Dialoge verwenden diese Datentypen in Eingabefeldern, Auswahllisten und Anzeigen                                          |
-| [B3](B3_Druckausgaben.md)           | Druck- und Exportausgaben verwenden ExportFormatDT und MoneyAmountDT                                                      |
+| [B3](B3_Druckausgaben.md)           | Druck- und Exportausgaben verwenden ExportFormatDT, MoneyAmountDT und ExchangeRateDT                                      |
+| [S1](S1_Nachbarsysteme.md)           | Externer Wechselkursdienst liefert die Werte für ExchangeRateDT                                                            |
 | [N1](N1_Nichtfunktionale%20Anforderungen.md)           | Anforderungen an Sicherheit, Datenkonsistenz, Performance und Benutzbarkeit beeinflussen den Umgang mit diesen Datentypen |
 | [N2](N2_Querschnittskonzepte.md)           | Validierung, Autorisierung und Fehlerbehandlung nutzen insbesondere MembershipRoleDT, MoneyAmountDT und SplitMethodDT     |
 | [E2](E2_Glossar.md)           | Das Glossar definiert Begriffe wie Geldbetrag, Währung, Rolle, Aufteilung, Saldo, Schuldner und Gläubiger                 |
