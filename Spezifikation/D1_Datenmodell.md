@@ -85,7 +85,7 @@ User repräsentiert eine registrierte Person, die CampusSplit nutzt.
 
 | Attribut     | Typ        | Beschreibung                                                         |
 | ------------ | ---------- | ---------------------------------------------------------------------|
-| id           | [Identifier](D2_-_Datentypenverzeichnis.md#d22-identifier) | Eindeutige Kennung des Benutzers.                                    |
+| id           | [Identifier](D2_Datentypenverzeichnis.md#d22-identifier) | Eindeutige Kennung des Benutzers.                                    |
 | name         | Text       | Anzeigename des Benutzers.                                           |
 | email        | Email      | E-Mail-Adresse zur Anmeldung und Identifikation.                     |
 | passwordHash | Text       | Gehashter Passwortwert. Das Klartextpasswort wird nicht gespeichert. |
@@ -120,10 +120,10 @@ Beispiele:
 
 | Attribut    | Typ           | Beschreibung                                           |
 | ----------- | ------------- | --------------------------------------------------------|
-| id          | [Identifier](D2_-_Datentypenverzeichnis.md#d22-identifier)    | Eindeutige Kennung der Gruppe.                         |
+| id          | [Identifier](D2_Datentypenverzeichnis.md#d22-identifier)    | Eindeutige Kennung der Gruppe.                         |
 | name        | Text          | Name der Gruppe.                                       |
 | description | Text \[0..1\] | Optionale Beschreibung der Gruppe.                     |
-| ownerId     | [Identifier](D2_-_Datentypenverzeichnis.md#d22-identifier)    | Verweis auf den [User](#user), der die Gruppe erstellt hat. |
+| ownerId     | [Identifier](D2_Datentypenverzeichnis.md#d22-identifier)    | Verweis auf den [User](#user), der die Gruppe erstellt hat. |
 | createdAt   | Timestamp     | Zeitpunkt der Erstellung der Gruppe.                   |
 | updatedAt   | Timestamp     | Zeitpunkt der letzten Änderung der Gruppe.             |
 
@@ -151,10 +151,10 @@ Diese Entität löst die n:m-Beziehung zwischen [User](#user) und [Group](#group
 
 | Attribut | Typ              | Beschreibung                              |
 | -------- | ---------------- | -------------------------------------------|
-| id       | [Identifier](D2_-_Datentypenverzeichnis.md#d22-identifier)       | Eindeutige Kennung der Mitgliedschaft.    |
-| userId   | [Identifier](D2_-_Datentypenverzeichnis.md#d22-identifier)       | Verweis auf den [User](#user).                 |
-| groupId  | [Identifier](D2_-_Datentypenverzeichnis.md#d22-identifier)       | Verweis auf die [Group](#group).                   |
-| role     | [MembershipRoleDT](D2_-_Datentypenverzeichnis.md#d25-membershiproledt) | Rolle des Benutzers innerhalb der Gruppe. |
+| id       | [Identifier](D2_Datentypenverzeichnis.md#d22-identifier)       | Eindeutige Kennung der Mitgliedschaft.    |
+| userId   | [Identifier](D2_Datentypenverzeichnis.md#d22-identifier)       | Verweis auf den [User](#user).                 |
+| groupId  | [Identifier](D2_Datentypenverzeichnis.md#d22-identifier)       | Verweis auf die [Group](#group).                   |
+| role     | [MembershipRoleDT](D2_Datentypenverzeichnis.md#d25-membershiproledt) | Rolle des Benutzers innerhalb der Gruppe. |
 | joinedAt | Timestamp        | Zeitpunkt des Beitritts zur Gruppe.       |
 
 ### Beziehungen
@@ -186,13 +186,13 @@ Beispiele:
 
 | Attribut        | Typ                 | Beschreibung                                          |
 | ---------------- | ------------------- | -------------------------------------------------------|
-| id              | [Identifier](D2_-_Datentypenverzeichnis.md#d22-identifier)          | Eindeutige Kennung der Ausgabe.                       |
-| groupId         | [Identifier](D2_-_Datentypenverzeichnis.md#d22-identifier)          | [Group](#group), zu der die Ausgabe gehört.                    |
-| paidByUserId    | [Identifier](D2_-_Datentypenverzeichnis.md#d22-identifier)          | [User](#user), der die Ausgabe bezahlt hat.                |
-| createdByUserId | [Identifier](D2_-_Datentypenverzeichnis.md#d22-identifier)          | [User](#user), der die Ausgabe in CampusSplit erfasst hat. |
-| categoryId      | [Identifier](D2_-_Datentypenverzeichnis.md#d22-identifier) \[0..1\] | Optionale [Category](#category) der Ausgabe.                      |
+| id              | [Identifier](D2_Datentypenverzeichnis.md#d22-identifier)          | Eindeutige Kennung der Ausgabe.                       |
+| groupId         | [Identifier](D2_Datentypenverzeichnis.md#d22-identifier)          | [Group](#group), zu der die Ausgabe gehört.                    |
+| paidByUserId    | [Identifier](D2_Datentypenverzeichnis.md#d22-identifier)          | [User](#user), der die Ausgabe bezahlt hat.                |
+| createdByUserId | [Identifier](D2_Datentypenverzeichnis.md#d22-identifier)          | [User](#user), der die Ausgabe in CampusSplit erfasst hat. |
+| categoryId      | [Identifier](D2_Datentypenverzeichnis.md#d22-identifier) \[0..1\] | Optionale [Category](#category) der Ausgabe.                      |
 | description     | Text                | Beschreibung der Ausgabe.                             |
-| amount          | [MoneyAmountDT](D2_-_Datentypenverzeichnis.md#d23-moneyamountdt)       | Gesamtbetrag der Ausgabe inklusive Währung (EUR in der ersten Version).                             |
+| amount          | [MoneyAmountDT](D2_Datentypenverzeichnis.md#d23-moneyamountdt)       | Gesamtbetrag der Ausgabe inklusive Währung (EUR in der ersten Version).                             |
 | expenseDate     | Date                | Datum der Ausgabe.                                    |
 | createdAt       | Timestamp           | Zeitpunkt der Erfassung.                              |
 | updatedAt       | Timestamp           | Zeitpunkt der letzten Änderung.                       |
@@ -223,10 +223,10 @@ Eine Ausgabe kann auf alle oder nur auf ausgewählte Mitglieder einer Gruppe auf
 
 | Attribut    | Typ           | Beschreibung                                      |
 | ------------ | ------------- | ---------------------------------------------------|
-| id          | [Identifier](D2_-_Datentypenverzeichnis.md#d22-identifier)    | Eindeutige Kennung des Kostenanteils.             |
-| expenseId   | [Identifier](D2_-_Datentypenverzeichnis.md#d22-identifier)    | Verweis auf die zugehörige [Expense](#expense).               |
-| userId      | [Identifier](D2_-_Datentypenverzeichnis.md#d22-identifier)    | [User](#user), dem dieser Kostenanteil zugeordnet ist. |
-| shareAmount | [MoneyAmountDT](D2_-_Datentypenverzeichnis.md#d23-moneyamountdt) | Anteil des Benutzers an der Ausgabe.              |
+| id          | [Identifier](D2_Datentypenverzeichnis.md#d22-identifier)    | Eindeutige Kennung des Kostenanteils.             |
+| expenseId   | [Identifier](D2_Datentypenverzeichnis.md#d22-identifier)    | Verweis auf die zugehörige [Expense](#expense).               |
+| userId      | [Identifier](D2_Datentypenverzeichnis.md#d22-identifier)    | [User](#user), dem dieser Kostenanteil zugeordnet ist. |
+| shareAmount | [MoneyAmountDT](D2_Datentypenverzeichnis.md#d23-moneyamountdt) | Anteil des Benutzers an der Ausgabe.              |
 
 ### Beziehungen
 
@@ -258,7 +258,7 @@ Beispiele:
 
 | Attribut | Typ        | Beschreibung                      |
 | -------- | ---------- | ------------------------------------|
-| id       | [Identifier](D2_-_Datentypenverzeichnis.md#d22-identifier) | Eindeutige Kennung der Kategorie. |
+| id       | [Identifier](D2_Datentypenverzeichnis.md#d22-identifier) | Eindeutige Kennung der Kategorie. |
 | name     | Text       | Name der Kategorie.               |
 
 ### Beziehungen
@@ -275,7 +275,7 @@ Beispiele:
 
 ## D1.3 Abgeleitete Informationen
 
-> Hinweis: Dieser Abschnitt wandert laut Rückmeldung des Dozenten inhaltlich nach F3. Er bleibt hier vorerst stehen, bis die Übernahme in F3 abgeschlossen ist, damit nichts verloren geht.
+> Hinweis: Dieser Abschnitt wandert laut Rückmeldung des Dozenten inhaltlich nach [F3](F3-anwendungsfunktionen.md). Er bleibt hier vorerst stehen, bis die Übernahme in F3 abgeschlossen ist, damit nichts verloren geht.
 
 Einige Informationen werden in CampusSplit nicht dauerhaft als eigene Entitäten gespeichert. Sie werden aus bestehenden Daten berechnet.
 
@@ -305,7 +305,7 @@ Saldo = Summe gezahlter Beträge - Summe eigener Kostenanteile
 
 Die Summe aller Salden einer Gruppe muss 0.00 ergeben.
 
-Die Berechnung wird in F3 als Anwendungsfunktion AF-02 Gruppensalden berechnen beschrieben.
+Die Berechnung wird in [F3](F3-anwendungsfunktionen.md) als Anwendungsfunktion AF-02 Gruppensalden berechnen beschrieben.
 
 ### SettlementProposal
 
@@ -328,7 +328,7 @@ Ein Ausgleichsvorschlag ist keine echte Zahlung. Er zeigt nur, welche Zahlung si
 
 Ausgleichsvorschläge werden aus berechneten Salden abgeleitet und nicht dauerhaft gespeichert.
 
-Die Berechnung wird in F3 als Anwendungsfunktion AF-03 Ausgleichsvorschläge berechnen beschrieben.
+Die Berechnung wird in [F3](F3-anwendungsfunktionen.md) als Anwendungsfunktion AF-03 Ausgleichsvorschläge berechnen beschrieben.
 
 ### ExportDocument
 
@@ -355,7 +355,7 @@ Ein Export kann folgende Informationen enthalten:
 
 Exportdateien werden in der ersten Version nicht dauerhaft als eigene fachliche Entität gespeichert.
 
-Die fachliche Aufbereitung der Exportdaten wird in F3 als Anwendungsfunktion AF-04 Exportdaten aufbereiten beschrieben.
+Die fachliche Aufbereitung der Exportdaten wird in [F3](F3-anwendungsfunktionen.md) als Anwendungsfunktion AF-04 Exportdaten aufbereiten beschrieben.
 
 ## D1.4 Kardinalitäten
 
@@ -410,15 +410,15 @@ Folgende Themen sind bewusst nicht Bestandteil des D1-Datenmodells:
 
 | Baustein | Relevanz für D1                                                                                                                   |
 | -------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| P1       | Definiert Ziele, Zielgruppen, Projektumfang, Nichtziele und Rahmenbedingungen.                                                    |
-| P2       | Beschreibt Webbrowser, CampusSplit, Datenbank und Exportdateien als relevante Systeme.                                            |
-| F1       | Aktivitäten A5 bis A10 erzeugen oder nutzen Ausgaben, Kostenanteile, Salden und Exporte.                                          |
-| F2       | Use Cases UC-05 bis UC-12 lesen oder schreiben zentrale Entitäten dieses Datenmodells.                                            |
-| F3       | Kostenanteile, Salden, Ausgleichsvorschläge und Exportdaten werden aus D1-Entitäten berechnet.                                    |
-| D2       | Definiert fachliche Datentypen wie Identifier, MoneyAmountDT, CurrencyCodeDT, MembershipRoleDT, SplitMethodDT und ExportFormatDT. |
-| B1       | Dialoge verwenden die hier beschriebenen Datenobjekte in Anzeigen, Formularen und Übersichten.                                    |
-| B3       | Druck- und Exportausgaben nutzen Ausgaben, Kostenanteile, Salden und Ausgleichsvorschläge.                                        |
-| S1       | Schnittstellen greifen auf die hier beschriebenen Daten zu.                                                                       |
-| N1       | Sicherheits-, Konsistenz- und Performanceanforderungen wirken auf Speicherung und Berechnung.                                     |
-| N2       | Authentifizierung, Autorisierung, Validierung und Fehlerbehandlung greifen auf diese Entitäten zu.                                |
-| E2       | Das Glossar definiert Begriffe wie Benutzer, Gruppe, Ausgabe, Kostenanteil, Saldo, Schuldner und Gläubiger.                       |
+| [P1](P1_Ziele_und_Rahmenbedingungen.md)       | Definiert Ziele, Zielgruppen, Projektumfang, Nichtziele und Rahmenbedingungen.                                                    |
+| [P2](P2_Architekturueberblick.md)       | Beschreibt Webbrowser, CampusSplit, Datenbank und Exportdateien als relevante Systeme.                                            |
+| [F1](F1-geschaeftsprozesse.md)       | Aktivitäten A5 bis A10 erzeugen oder nutzen Ausgaben, Kostenanteile, Salden und Exporte.                                          |
+| [F2](F2-anwendungsfälle.md)       | Use Cases UC-05 bis UC-12 lesen oder schreiben zentrale Entitäten dieses Datenmodells.                                            |
+| [F3](F3-anwendungsfunktionen.md)       | Kostenanteile, Salden, Ausgleichsvorschläge und Exportdaten werden aus D1-Entitäten berechnet.                                    |
+| [D2](D2_Datentypenverzeichnis.md)       | Definiert fachliche Datentypen wie Identifier, MoneyAmountDT, CurrencyCodeDT, MembershipRoleDT, SplitMethodDT und ExportFormatDT. |
+| [B1](B1_Dialogspezifikation.md)       | Dialoge verwenden die hier beschriebenen Datenobjekte in Anzeigen, Formularen und Übersichten.                                    |
+| [B3](B3_Druckausgaben.md)       | Druck- und Exportausgaben nutzen Ausgaben, Kostenanteile, Salden und Ausgleichsvorschläge.                                        |
+| [S1](S1_Nachbarsysteme.md)       | Schnittstellen greifen auf die hier beschriebenen Daten zu.                                                                       |
+| [N1](N1_Nichtfunktionale%20Anforderungen.md)       | Sicherheits-, Konsistenz- und Performanceanforderungen wirken auf Speicherung und Berechnung.                                     |
+| [N2](N2_Querschnittskonzepte.md)       | Authentifizierung, Autorisierung, Validierung und Fehlerbehandlung greifen auf diese Entitäten zu.                                |
+| [E2](E2_Glossar.md)       | Das Glossar definiert Begriffe wie Benutzer, Gruppe, Ausgabe, Kostenanteil, Saldo, Schuldner und Gläubiger.                       |
