@@ -72,13 +72,15 @@ Text name
 
 ## D1.2 CampusSplit-Daten
 
+## D1.2 CampusSplit-Daten
+
 ### User
 
 User repräsentiert eine registrierte Person, die CampusSplit nutzt.
 
 | Attribut     | Typ        | Beschreibung                                                         |
-| ------------ | ---------- | -------------------------------------------------------------------- |
-| id           | Identifier | Eindeutige Kennung des Benutzers.                                    |
+| ------------ | ---------- | ---------------------------------------------------------------------|
+| id           | [Identifier](D2_-_Datentypenverzeichnis.md#identifier) | Eindeutige Kennung des Benutzers.                                    |
 | name         | Text       | Anzeigename des Benutzers.                                           |
 | email        | Email      | E-Mail-Adresse zur Anmeldung und Identifikation.                     |
 | passwordHash | Text       | Gehashter Passwortwert. Das Klartextpasswort wird nicht gespeichert. |
@@ -87,11 +89,11 @@ User repräsentiert eine registrierte Person, die CampusSplit nutzt.
 
 ### Beziehungen
 
-- Ein User kann Mitglied in mehreren Gruppen sein.
-- Ein User kann Gruppen erstellen.
-- Ein User kann Ausgaben bezahlen.
-- Ein User kann Ausgaben erfassen.
-- Ein User kann Kostenanteile an Ausgaben besitzen.
+- Ein [User](#user) kann Mitglied in mehreren [Group](#group)n sein.
+- Ein [User](#user) kann [Group](#group)n erstellen.
+- Ein [User](#user) kann [Expense](#expense)n bezahlen.
+- Ein [User](#user) kann [Expense](#expense)n erfassen.
+- Ein [User](#user) kann [ExpenseShare](#expenseshare)s an Ausgaben besitzen.
 
 ### Invarianten
 
@@ -112,20 +114,20 @@ Beispiele:
 - gemeinsame Haushalts- oder Freizeitgruppe
 
 | Attribut    | Typ           | Beschreibung                                           |
-| ----------- | ------------- | ------------------------------------------------------ |
-| id          | Identifier    | Eindeutige Kennung der Gruppe.                         |
+| ----------- | ------------- | --------------------------------------------------------|
+| id          | [Identifier](D2_-_Datentypenverzeichnis.md#identifier)    | Eindeutige Kennung der Gruppe.                         |
 | name        | Text          | Name der Gruppe.                                       |
 | description | Text \[0..1\] | Optionale Beschreibung der Gruppe.                     |
-| ownerId     | Identifier    | Verweis auf den Benutzer, der die Gruppe erstellt hat. |
+| ownerId     | [Identifier](D2_-_Datentypenverzeichnis.md#identifier)    | Verweis auf den [User](#user), der die Gruppe erstellt hat. |
 | createdAt   | Timestamp     | Zeitpunkt der Erstellung der Gruppe.                   |
 | updatedAt   | Timestamp     | Zeitpunkt der letzten Änderung der Gruppe.             |
 
 ### Beziehungen
 
-- Eine Group besitzt mehrere Membership-Einträge.
-- Eine Group kann mehrere Expense-Einträge enthalten.
-- Eine Group besitzt genau einen Ersteller.
-- Eine Group kann mehrere Kategorien für Ausgaben verwenden.
+- Eine [Group](#group) besitzt mehrere [Membership](#membership)-Einträge.
+- Eine [Group](#group) kann mehrere [Expense](#expense)-Einträge enthalten.
+- Eine [Group](#group) besitzt genau einen Ersteller ([User](#user)).
+- Eine [Group](#group) kann mehrere [Category](#category)n für Ausgaben verwenden.
 
 ### Invarianten
 
@@ -140,22 +142,22 @@ Beispiele:
 
 Membership repräsentiert die Mitgliedschaft eines Benutzers in einer Gruppe.
 
-Diese Entität löst die n:m-Beziehung zwischen User und Group auf.
+Diese Entität löst die n:m-Beziehung zwischen [User](#user) und [Group](#group) auf.
 
 | Attribut | Typ              | Beschreibung                              |
-| -------- | ---------------- | ----------------------------------------- |
-| id       | Identifier       | Eindeutige Kennung der Mitgliedschaft.    |
-| userId   | Identifier       | Verweis auf den Benutzer.                 |
-| groupId  | Identifier       | Verweis auf die Gruppe.                   |
-| role     | MembershipRoleDT | Rolle des Benutzers innerhalb der Gruppe. |
+| -------- | ---------------- | -------------------------------------------|
+| id       | [Identifier](D2_-_Datentypenverzeichnis.md#identifier)       | Eindeutige Kennung der Mitgliedschaft.    |
+| userId   | [Identifier](D2_-_Datentypenverzeichnis.md#identifier)       | Verweis auf den [User](#user).                 |
+| groupId  | [Identifier](D2_-_Datentypenverzeichnis.md#identifier)       | Verweis auf die [Group](#group).                   |
+| role     | [MembershipRoleDT](D2_-_Datentypenverzeichnis.md#membershiproledt) | Rolle des Benutzers innerhalb der Gruppe. |
 | joinedAt | Timestamp        | Zeitpunkt des Beitritts zur Gruppe.       |
 
 ### Beziehungen
 
-- Eine Membership gehört genau zu einem User.
-- Eine Membership gehört genau zu einer Group.
-- Eine Group besitzt eine oder mehrere Mitgliedschaften.
-- Ein User besitzt null, eine oder mehrere Mitgliedschaften.
+- Eine [Membership](#membership) gehört genau zu einem [User](#user).
+- Eine [Membership](#membership) gehört genau zu einer [Group](#group).
+- Eine [Group](#group) besitzt eine oder mehrere Mitgliedschaften.
+- Ein [User](#user) besitzt null, eine oder mehrere Mitgliedschaften.
 
 ### Invarianten
 
@@ -178,26 +180,26 @@ Beispiele:
 - Freizeitaktivität
 
 | Attribut        | Typ                 | Beschreibung                                          |
-| --------------- | ------------------- | ----------------------------------------------------- |
-| id              | Identifier          | Eindeutige Kennung der Ausgabe.                       |
-| groupId         | Identifier          | Gruppe, zu der die Ausgabe gehört.                    |
-| paidByUserId    | Identifier          | Benutzer, der die Ausgabe bezahlt hat.                |
-| createdByUserId | Identifier          | Benutzer, der die Ausgabe in CampusSplit erfasst hat. |
-| categoryId      | Identifier \[0..1\] | Optionale Kategorie der Ausgabe.                      |
+| ---------------- | ------------------- | -------------------------------------------------------|
+| id              | [Identifier](D2_-_Datentypenverzeichnis.md#identifier)          | Eindeutige Kennung der Ausgabe.                       |
+| groupId         | [Identifier](D2_-_Datentypenverzeichnis.md#identifier)          | [Group](#group), zu der die Ausgabe gehört.                    |
+| paidByUserId    | [Identifier](D2_-_Datentypenverzeichnis.md#identifier)          | [User](#user), der die Ausgabe bezahlt hat.                |
+| createdByUserId | [Identifier](D2_-_Datentypenverzeichnis.md#identifier)          | [User](#user), der die Ausgabe in CampusSplit erfasst hat. |
+| categoryId      | [Identifier](D2_-_Datentypenverzeichnis.md#identifier) \[0..1\] | Optionale [Category](#category) der Ausgabe.                      |
 | description     | Text                | Beschreibung der Ausgabe.                             |
-| amount          | MoneyAmountDT       | Gesamtbetrag der Ausgabe.                             |
-| currency        | CurrencyCodeDT      | Währung der Ausgabe, in der ersten Version EUR.       |
+| amount          | [MoneyAmountDT](D2_-_Datentypenverzeichnis.md#moneyamountdt)       | Gesamtbetrag der Ausgabe.                             |
+| currency        | [CurrencyCodeDT](D2_-_Datentypenverzeichnis.md#currencycodedt)      | Währung der Ausgabe, in der ersten Version EUR.       |
 | expenseDate     | Date                | Datum der Ausgabe.                                    |
 | createdAt       | Timestamp           | Zeitpunkt der Erfassung.                              |
 | updatedAt       | Timestamp           | Zeitpunkt der letzten Änderung.                       |
 
 ### Beziehungen
 
-- Eine Expense gehört genau zu einer Group.
-- Eine Expense hat genau einen Zahler.
-- Eine Expense hat genau einen erfassenden Benutzer.
-- Eine Expense besitzt mindestens einen ExpenseShare.
-- Eine Expense kann optional einer Category zugeordnet sein.
+- Eine [Expense](#expense) gehört genau zu einer [Group](#group).
+- Eine [Expense](#expense) hat genau einen Zahler ([User](#user)).
+- Eine [Expense](#expense) hat genau einen erfassenden Benutzer ([User](#user)).
+- Eine [Expense](#expense) besitzt mindestens einen [ExpenseShare](#expenseshare).
+- Eine [Expense](#expense) kann optional einer [Category](#category) zugeordnet sein.
 
 ### Invarianten
 
@@ -216,18 +218,18 @@ ExpenseShare repräsentiert den Kostenanteil eines Gruppenmitglieds an einer bes
 Eine Ausgabe kann auf alle oder nur auf ausgewählte Mitglieder einer Gruppe aufgeteilt werden.
 
 | Attribut    | Typ           | Beschreibung                                      |
-| ----------- | ------------- | ------------------------------------------------- |
-| id          | Identifier    | Eindeutige Kennung des Kostenanteils.             |
-| expenseId   | Identifier    | Verweis auf die zugehörige Ausgabe.               |
-| userId      | Identifier    | Benutzer, dem dieser Kostenanteil zugeordnet ist. |
-| shareAmount | MoneyAmountDT | Anteil des Benutzers an der Ausgabe.              |
+| ------------ | ------------- | ---------------------------------------------------|
+| id          | [Identifier](D2_-_Datentypenverzeichnis.md#identifier)    | Eindeutige Kennung des Kostenanteils.             |
+| expenseId   | [Identifier](D2_-_Datentypenverzeichnis.md#identifier)    | Verweis auf die zugehörige [Expense](#expense).               |
+| userId      | [Identifier](D2_-_Datentypenverzeichnis.md#identifier)    | [User](#user), dem dieser Kostenanteil zugeordnet ist. |
+| shareAmount | [MoneyAmountDT](D2_-_Datentypenverzeichnis.md#moneyamountdt) | Anteil des Benutzers an der Ausgabe.              |
 
 ### Beziehungen
 
-- Ein ExpenseShare gehört genau zu einer Expense.
-- Ein ExpenseShare gehört genau zu einem User.
-- Eine Expense besitzt einen oder mehrere Kostenanteile.
-- Ein User kann an mehreren Ausgaben beteiligt sein.
+- Ein [ExpenseShare](#expenseshare) gehört genau zu einer [Expense](#expense).
+- Ein [ExpenseShare](#expenseshare) gehört genau zu einem [User](#user).
+- Eine [Expense](#expense) besitzt einen oder mehrere Kostenanteile.
+- Ein [User](#user) kann an mehreren Ausgaben beteiligt sein.
 
 ### Invarianten
 
@@ -251,14 +253,14 @@ Beispiele:
 - Sonstiges
 
 | Attribut | Typ        | Beschreibung                      |
-| -------- | ---------- | --------------------------------- |
-| id       | Identifier | Eindeutige Kennung der Kategorie. |
+| -------- | ---------- | ------------------------------------|
+| id       | [Identifier](D2_-_Datentypenverzeichnis.md#identifier) | Eindeutige Kennung der Kategorie. |
 | name     | Text       | Name der Kategorie.               |
 
 ### Beziehungen
 
-- Eine Category kann mehreren Ausgaben zugeordnet sein.
-- Eine Expense kann maximal einer Kategorie zugeordnet sein.
+- Eine [Category](#category) kann mehreren [Expense](#expense)n zugeordnet sein.
+- Eine [Expense](#expense) kann maximal einer [Category](#category) zugeordnet sein.
 
 ### Invarianten
 
