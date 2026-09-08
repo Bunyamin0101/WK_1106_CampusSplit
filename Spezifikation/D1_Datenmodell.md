@@ -14,62 +14,69 @@ Ein Benutzer kann Mitglied mehrerer Gruppen sein. Eine Gruppe kann mehrere Mitgl
 
 Salden und Ausgleichsvorschläge werden nicht dauerhaft als eigene Entitäten gespeichert. Sie werden aus Ausgaben und Kostenanteilen berechnet.
 
-erDiagram  
-USER ||--o{ MEMBERSHIP : has  
-GROUP ||--o{ MEMBERSHIP : contains  
-GROUP ||--o{ EXPENSE : has  
-USER ||--o{ EXPENSE : pays  
-USER ||--o{ EXPENSE : creates  
-EXPENSE ||--o{ EXPENSE_SHARE : consists_of  
-USER ||--o{ EXPENSE_SHARE : owes  
-CATEGORY ||--o{ EXPENSE : classifies  
-<br/>USER {  
-Identifier id  
-Text name  
-Email email  
-Text passwordHash  
-Timestamp createdAt  
-Timestamp updatedAt  
-}  
-<br/>GROUP {  
-Identifier id  
-Text name  
-Text description  
-Identifier ownerId  
-Timestamp createdAt  
-Timestamp updatedAt  
-}  
-<br/>MEMBERSHIP {  
-Identifier id  
-Identifier userId  
-Identifier groupId  
-MembershipRoleDT role  
-Timestamp joinedAt  
-}  
-<br/>EXPENSE {  
-Identifier id  
-Identifier groupId  
-Identifier paidByUserId  
-Identifier createdByUserId  
-Identifier categoryId  
-Text description  
-MoneyAmountDT amount  
-CurrencyCodeDT currency  
-Date expenseDate  
-Timestamp createdAt  
-Timestamp updatedAt  
-}  
-<br/>EXPENSE_SHARE {  
-Identifier id  
-Identifier expenseId  
-Identifier userId  
-MoneyAmountDT shareAmount  
-}  
-<br/>CATEGORY {  
-Identifier id  
-Text name  
-}
+```mermaid
+erDiagram
+    USER ||--o{ MEMBERSHIP : has
+    GROUP ||--o{ MEMBERSHIP : contains
+    GROUP ||--o{ EXPENSE : has
+    USER ||--o{ EXPENSE : pays
+    USER ||--o{ EXPENSE : creates
+    EXPENSE ||--o{ EXPENSE_SHARE : consists_of
+    USER ||--o{ EXPENSE_SHARE : owes
+    CATEGORY ||--o{ EXPENSE : classifies
 
+    USER {
+        Identifier id
+        Text name
+        Email email
+        Text passwordHash
+        Timestamp createdAt
+        Timestamp updatedAt
+    }
+
+    GROUP {
+        Identifier id
+        Text name
+        Text description
+        Identifier ownerId
+        Timestamp createdAt
+        Timestamp updatedAt
+    }
+
+    MEMBERSHIP {
+        Identifier id
+        Identifier userId
+        Identifier groupId
+        MembershipRoleDT role
+        Timestamp joinedAt
+    }
+
+    EXPENSE {
+        Identifier id
+        Identifier groupId
+        Identifier paidByUserId
+        Identifier createdByUserId
+        Identifier categoryId
+        Text description
+        MoneyAmountDT amount
+        CurrencyCodeDT currency
+        Date expenseDate
+        Timestamp createdAt
+        Timestamp updatedAt
+    }
+
+    EXPENSE_SHARE {
+        Identifier id
+        Identifier expenseId
+        Identifier userId
+        MoneyAmountDT shareAmount
+    }
+
+    CATEGORY {
+        Identifier id
+        Text name
+    }
+```
 ## D1.2 CampusSplit-Daten
 
 ## D1.2 CampusSplit-Daten
