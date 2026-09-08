@@ -1,17 +1,16 @@
 # P1 — Ziele und Rahmenbedingungen
 
-Grundlagenbaustein der CampusSplit-Spezifikation nach Siedersleben. Dieser Baustein beschreibt, warum das System gebaut wird, für wen es gedacht ist und welche Rahmenbedingungen den Lösungsraum begrenzen.
+Grundlagenbaustein der CampusSplit-Spezifikation nach Siedersleben. Dieser Baustein beschreibt, warum das System entwickelt wird, für wen es gedacht ist und welche Rahmenbedingungen den Lösungsraum eingrenzen.
 
 ---
 
 ## P1.1 Mission
 
-CampusSplit ist eine Webanwendung zur Verwaltung gemeinsamer Ausgaben in Gruppen. Nutzer können Gruppen anlegen, Ausgaben erfassen, Kosten auf Gruppenmitglieder aufteilen und offene Beträge einsehen.
+CampusSplit ist eine Webanwendung zur Verwaltung gemeinsamer Ausgaben in Gruppen. Nutzer können Gruppen für Wohngemeinschaften, Reisen oder studentische Projekte erstellen, Ausgaben erfassen und Kosten auf Gruppenmitglieder aufteilen.
 
-Das System soll den Aufwand reduzieren, der sonst durch Chatnachrichten, Tabellen oder manuelle Rechnungen entsteht. CampusSplit zeigt transparent, wer bezahlt hat, wer beteiligt ist und wer wem noch Geld schuldet.
+Das System soll den Aufwand verringern, der sonst oft durch Chatnachrichten, Tabellen oder manuelle Berechnungen entsteht. Nutzer sollen schnell sehen können, welche Ausgaben es gibt und wer wem noch Geld schuldet.
 
-Eine echte Zahlung findet nicht in CampusSplit statt. Die Anwendung dokumentiert Ausgaben, berechnet Salden und erstellt bei Bedarf eine Ausgabenübersicht als Export. Die fachlichen Abläufe stehen in [F1 — Geschäftsprozesse](F1-geschaeftsprozesse.md), die konkreten Anwendungsfälle in [F2 — Anwendungsfälle](F2-anwendungsf%23U00e4lle.md).
-
+CampusSplit ersetzt keine echte Zahlungsabwicklung. Die Anwendung dokumentiert gemeinsame Kosten, berechnet offene Beträge und ermöglicht den Export von Ausgabenübersichten. Die fachlichen Abläufe werden in [F1 — Geschäftsprozesse](F1-geschaeftsprozesse.md) und [F2 — Anwendungsfälle](F2-anwendungsf%23U00e4lle.md) genauer beschrieben.
 
 ---
 
@@ -21,15 +20,15 @@ Eine echte Zahlung findet nicht in CampusSplit statt. Die Anwendung dokumentiert
 |---|---|
 | Z-01 | Nutzer können sich registrieren und anmelden. |
 | Z-02 | Nutzer können Gruppen erstellen und verwalten. |
-| Z-03 | Gruppenmitglieder können hinzugefügt werden. |
-| Z-04 | Ausgaben können erfasst und einer Gruppe zugeordnet werden. |
-| Z-05 | Kosten können auf beteiligte Mitglieder aufgeteilt werden. |
+| Z-03 | Mitglieder können einer Gruppe hinzugefügt werden. |
+| Z-04 | Ausgaben können erfasst und gespeichert werden. |
+| Z-05 | Kosten können auf Gruppenmitglieder aufgeteilt werden. |
 | Z-06 | Offene Beträge werden automatisch berechnet. |
 | Z-07 | Kreditoren und Debitoren werden verständlich angezeigt. |
-| Z-08 | Ausgabenübersichten können als PDF oder CSV exportiert werden. |
+| Z-08 | Ausgabenübersichten können exportiert werden. |
 | Z-09 | Die Anwendung soll einfach bedienbar sein. |
 
-Die Berechnung der offenen Beträge wird in [F3 — Anwendungsfunktionen](F3-anwendungsfunktionen.md) beschrieben. Die Dialoge zu den Zielen stehen in [B1 — Dialogspezifikation](B1_Dialogspezifikation.md).
+Ein Kreditor ist ein Gruppenmitglied, das Geld zurückbekommt. Ein Debitor ist ein Gruppenmitglied, das noch Geld schuldet. Die Berechnung dieser Beträge wird in [F3 — Anwendungsfunktionen](F3-anwendungsfunktionen.md) beschrieben.
 
 ---
 
@@ -37,84 +36,76 @@ Die Berechnung der offenen Beträge wird in [F3 — Anwendungsfunktionen](F3-anw
 
 | Rolle | Beschreibung | Interesse |
 |---|---|---|
-| Nutzer | Verwendet CampusSplit im Alltag. | Ausgaben verwalten. |
-| Gruppenmitglied | Ist Mitglied einer Gruppe. | Eigene Salden sehen. |
-| Gruppenadministrator | Verwaltet eine Gruppe. | Mitglieder hinzufügen. |
-| Entwicklungsteam | Projektgruppe aus fünf Studierenden. | System umsetzen und dokumentieren. |
-| Prüfer / Betreuer | Bewertet das Projekt. | Spezifikation nachvollziehen. |
+| Gast | Person ohne Anmeldung. | Konto erstellen oder anmelden. |
+| Nutzer | Angemeldete Person. | Gruppen und Ausgaben verwalten. |
+| Gruppenmitglied | Mitglied einer Gruppe. | Ausgaben und offene Beträge ansehen. |
+| Gruppenersteller | Erstellt eine Gruppe. | Gruppe starten und Mitglieder hinzufügen. |
+| Entwicklungsteam | Projektgruppe aus fünf Studierenden. | Anwendung planen, umsetzen und dokumentieren. |
+| Dozent / Prüfer | Bewertet das Projekt. | Nachvollziehbare Spezifikation prüfen. |
 
-Die Rollen innerhalb einer Gruppe werden nur so weit unterschieden, wie es für die erste Version nötig ist. Weitere Regeln zu Zugriff und Gruppenrechten stehen in [N2 — Querschnittskonzepte](N2_Querschnittskonzepte.md).
+Weitere Regeln zu Rollen und Zugriff werden in [N2 — Querschnittskonzepte](N2_Querschnittskonzepte.md) beschrieben.
 
 ---
 
 ## P1.4 Projektumfang
 
-Zum Umfang der ersten Version gehören die Kernfunktionen, die für gemeinsame Ausgaben notwendig sind.
+Der Projektumfang beschreibt, was in der ersten Version umgesetzt wird und was bewusst nicht dazugehört.
 
-| Bereich | Inhalt |
+| Bereich | Gehört zum Projektumfang |
 |---|---|
-| Benutzer | Registrierung, Anmeldung und Sitzung |
-| Gruppen | Gruppen erstellen, anzeigen und verwalten |
-| Mitglieder | Mitglieder zu Gruppen hinzufügen |
+| Zugriff | Registrierung, Anmeldung und gespeicherte Sitzung |
+| Gruppen | Gruppen erstellen, anzeigen und Mitglieder verwalten |
 | Ausgaben | Ausgaben erfassen, bearbeiten und löschen |
-| Aufteilung | Kosten gleichmäßig oder manuell aufteilen |
-| Salden | Kreditoren, Debitoren und offene Beträge berechnen |
-| Export | Ausgabenübersicht als PDF oder CSV erzeugen |
+| Aufteilung | Kosten auf beteiligte Gruppenmitglieder aufteilen |
+| Salden | Offene Beträge berechnen und anzeigen |
+| Export | Ausgabenübersicht als PDF oder CSV bereitstellen |
 
-```mermaid
-flowchart TD
-    A[CampusSplit]
-    A --> B[Benutzerverwaltung]
-    A --> C[Gruppenverwaltung]
-    A --> D[Ausgabenverwaltung]
-    A --> E[Saldenberechnung]
-    A --> F[Export]
-```
-
-Die Exportinhalte werden in [B3 — Druck- und Exportausgaben](B3_Druckausgaben.md) festgelegt. Das fachliche Datenmodell steht in [D1 — Datenmodell](D1_Datenmodell.md).
+Die Dialoge der Anwendung werden in [B1 — Dialogspezifikation](B1_Dialogspezifikation.md) beschrieben. Die Exportausgaben werden in [B3 — Druck- und Exportausgaben](B3_Druckausgaben.md) festgelegt.
 
 ---
 
 ## P1.5 Nichtziele
 
-Einige mögliche Funktionen werden bewusst nicht umgesetzt, damit der Projektumfang realistisch bleibt.
+Einige Funktionen werden in der ersten Version bewusst nicht umgesetzt. Dadurch bleibt der Umfang für ein Semester realistisch.
 
 | ID | Nichtziel | Begründung |
 |---|---|---|
-| NZ-01 | Direkte Zahlungsabwicklung | Zahlungen finden außerhalb der Anwendung statt. |
-| NZ-02 | Bankanbindung | Bankdaten sind für die Kernfunktion nicht nötig. |
-| NZ-03 | Native mobile App | Eine Webanwendung reicht aus. |
+| NZ-01 | Direkte Zahlungsabwicklung | Zahlungen erfolgen außerhalb der Anwendung. |
+| NZ-02 | Bankanbindung | Für die Grundfunktion nicht notwendig. |
+| NZ-03 | Mobile App | Eine Webanwendung reicht aus. |
 | NZ-04 | Chatfunktion | Kommunikation ist nicht der Schwerpunkt. |
-| NZ-05 | Automatische Belegerkennung | OCR oder KI würde den Umfang erhöhen. |
-| NZ-06 | Datenmigration | CampusSplit wird neu entwickelt. |
+| NZ-05 | Mehrere Währungen | Die erste Version nutzt nur Euro. |
+| NZ-06 | OCR-Erkennung von Belegen | Würde den Umfang zu stark erhöhen. |
+| NZ-07 | Datenmigration | CampusSplit wird neu entwickelt. |
+| NZ-08 | KI-Funktionen | KI ist kein Bestandteil der ersten Version. |
 
-Schnittstellen, externe Systeme und Datenflüsse werden nicht in P1 beschrieben. Sie gehören zu [P2 — Architekturüberblick](P2_Architekturueberblick.md) und [S1 — Nachbarsysteme](S1_Nachbarsysteme.md).
+Die Systemgrenze und die Nachbarsysteme werden in [P2 — Architekturüberblick](P2_Architekturueberblick.md) und [S1 — Nachbarsysteme](S1_Nachbarsysteme.md) beschrieben.
 
 ---
 
 ## P1.6 Rahmenbedingungen
 
-CampusSplit wird im Rahmen eines Hochschulprojekts im vierten Semester entwickelt. Das Projektteam besteht aus fünf Studierenden.
+CampusSplit wird im Rahmen eines Hochschulprojekts im vierten Semester des Studiengangs Wirtschaftsinformatik entwickelt. Das Projektteam besteht aus fünf Personen.
 
-Die Anwendung wird als Webanwendung geplant und mit Java in Visual Studio Code umgesetzt. Für die Nutzung wird ein aktueller Webbrowser benötigt. Daten wie Benutzer, Gruppen, Mitglieder und Ausgaben müssen dauerhaft gespeichert werden.
+Die Anwendung soll mit Java umgesetzt werden. Als Entwicklungsumgebung wird Visual Studio Code verwendet. Da CampusSplit eine Webanwendung ist, soll das System über einen Browser nutzbar sein.
+
+Für die Anwendung müssen Daten dauerhaft gespeichert werden. Dazu gehören zum Beispiel Benutzerkonten, Gruppen, Mitglieder, Ausgaben und Berechnungsgrundlagen für offene Beträge. Das fachliche Datenmodell wird in [D1 — Datenmodell](D1_Datenmodell.md) und [D2 — Datentypenverzeichnis](D2_Datentypenverzeichnis.md) beschrieben.
 
 | ID | Rahmenbedingung |
 |---|---|
-| RB-01 | Umsetzung im Rahmen eines Hochschulprojekts. |
-| RB-02 | Entwicklung durch fünf Studierende. |
-| RB-03 | Umsetzung als Webanwendung. |
-| RB-04 | Entwicklung mit Java und Visual Studio Code. |
-| RB-05 | Nutzung über einen aktuellen Webbrowser. |
-| RB-06 | Dauerhafte Speicherung der Anwendungsdaten. |
-| RB-07 | Umfang muss für ein Semester realistisch bleiben. |
-
-Technische Details wie konkrete API-Endpunkte, Datenbankprodukt oder Deployment werden nicht in P1 festgelegt. Sie werden in [P2 — Architekturüberblick](P2_Architekturueberblick.md), [S1 — Nachbarsysteme](S1_Nachbarsysteme.md) und [S3 — Inbetriebnahme](S3_Inbetriebnahme.md) genauer beschrieben.
+| RB-01 | Umsetzung durch fünf Studierende. |
+| RB-02 | Umsetzung als Webanwendung. |
+| RB-03 | Entwicklung mit Java und Visual Studio Code. |
+| RB-04 | Dauerhafte Speicherung von Daten. |
+| RB-05 | Registrierung und Anmeldung sind erforderlich. |
+| RB-06 | Der Umfang muss für ein Semester realistisch bleiben. |
+| RB-07 | Die Anwendung soll einfach zu bedienen sein. |
 
 ---
 
 ## P1.7 Erfolgskriterien
 
-Das Projekt gilt als erfolgreich, wenn die wichtigsten Funktionen nutzbar sind und die Berechnung der offenen Beträge nachvollziehbar funktioniert.
+Das Projekt gilt als erfolgreich, wenn die wichtigsten Funktionen umgesetzt wurden und nachvollziehbar funktionieren.
 
 | ID | Erfolgskriterium |
 |---|---|
@@ -123,28 +114,26 @@ Das Projekt gilt als erfolgreich, wenn die wichtigsten Funktionen nutzbar sind u
 | EK-03 | Gruppen können erstellt und angezeigt werden. |
 | EK-04 | Mitglieder können Gruppen zugeordnet werden. |
 | EK-05 | Ausgaben können erfasst und gespeichert werden. |
-| EK-06 | Salden werden korrekt berechnet. |
-| EK-07 | Kreditoren und Debitoren werden verständlich angezeigt. |
+| EK-06 | Offene Beträge werden korrekt berechnet. |
+| EK-07 | Kreditoren und Debitoren werden verständlich dargestellt. |
 | EK-08 | Eine Ausgabenübersicht kann exportiert werden. |
 | EK-09 | Die Anwendung ist im Browser nutzbar. |
 
-Nichtfunktionale Anforderungen wie Bedienbarkeit, Sicherheit und Zuverlässigkeit stehen in [N1 — Nichtfunktionale Anforderungen](N1_Nichtfunktionale%20Anforderungen.md).
+Nichtfunktionale Anforderungen wie Bedienbarkeit, Sicherheit und Datenkonsistenz werden in [N1 — Nichtfunktionale Anforderungen](N1_Nichtfunktionale%20Anforderungen.md) beschrieben.
 
 ---
 
 ## P1.8 Annahmen
 
-Für die erste Version gelten folgende Annahmen:
+Für die erste Version von CampusSplit gelten folgende Annahmen:
 
 | ID | Annahme |
 |---|---|
 | A-01 | Nutzer besitzen ein Gerät mit aktuellem Webbrowser. |
-| A-02 | Gruppen haben eine überschaubare Anzahl an Personen. |
-| A-03 | Ausgaben werden manuell eingetragen. |
-| A-04 | Tatsächliche Zahlungen finden außerhalb der Anwendung statt. |
-| A-05 | Salden werden aus Ausgaben und Kostenanteilen berechnet. |
-
-Die Begriffe Ausgabe, Kostenanteil, Saldo, Kreditor und Debitor werden im [E2 — Glossar](E2_Glossar.md) erklärt.
+| A-02 | Gruppen bestehen aus einer überschaubaren Anzahl an Personen. |
+| A-03 | Es wird zunächst nur mit Euro gerechnet. |
+| A-04 | Ausgaben werden manuell eingetragen. |
+| A-05 | Zahlungen finden außerhalb der Anwendung statt. |
 
 ---
 
@@ -152,10 +141,10 @@ Die Begriffe Ausgabe, Kostenanteil, Saldo, Kreditor und Debitor werden im [E2 �
 
 | ID | Risiko | Gegenmaßnahme |
 |---|---|---|
-| R-01 | Salden werden falsch berechnet. | Berechnung früh mit Beispielen testen. |
-| R-02 | Der Projektumfang wird zu groß. | Fokus auf Kernfunktionen legen. |
-| R-03 | Datenmodell passt nicht zu Funktionen. | D1 und F3 früh abgleichen. |
-| R-04 | Schnittstellen passen nicht zusammen. | P2 und S1 früh abstimmen. |
+| R-01 | Offene Beträge werden falsch berechnet. | Berechnung früh mit Beispielen testen. |
+| R-02 | Der Projektumfang wird zu groß. | Zuerst auf Kernfunktionen konzentrieren. |
+| R-03 | Daten werden unpassend gespeichert. | Datenmodell früh planen. |
+| R-04 | Oberfläche und Logik passen nicht zusammen. | Schnittstellen früh abstimmen. |
 | R-05 | Zeitprobleme im Team. | Aufgaben klar verteilen. |
 
 ---
@@ -164,18 +153,15 @@ Die Begriffe Ausgabe, Kostenanteil, Saldo, Kreditor und Debitor werden im [E2 �
 
 | Baustein | Relevanz |
 |---|---|
-| [P2 — Architekturüberblick](P2_Architekturueberblick.md) | Systemkontext und grobe Struktur |
-| [F2 — Anwendungsfälle](F2-anwendungsf%23U00e4lle.md) | Aktionen der Nutzer |
-| [F3 — Anwendungsfunktionen](F3-anwendungsfunktionen.md) | Saldenberechnung und Exportlogik |
-| [D1 — Datenmodell](D1_Datenmodell.md) | Fachliche Datenobjekte |
-| [B1 — Dialogspezifikation](B1_Dialogspezifikation.md) | Dialoge der Anwendung |
-| [B3 — Druck- und Exportausgaben](B3_Druckausgaben.md) | PDF- und CSV-Export |
-| [S1 — Nachbarsysteme](S1_Nachbarsysteme.md) | Schnittstellen und externe Systeme |
-| [N1 — Nichtfunktionale Anforderungen](N1_Nichtfunktionale%20Anforderungen.md) | Qualitätsanforderungen |
-| [N2 — Querschnittskonzepte](N2_Querschnittskonzepte.md) | Zugriff, Validierung und Geldbeträge |
-
----
+| [P2 — Architekturüberblick](P2_Architekturueberblick.md) | Systemkontext und grobe Struktur. |
+| [F1 — Geschäftsprozesse](F1-geschaeftsprozesse.md) | Fachliche Abläufe. |
+| [F2 — Anwendungsfälle](F2-anwendungsf%23U00e4lle.md) | Aktionen der Nutzer. |
+| [F3 — Anwendungsfunktionen](F3-anwendungsfunktionen.md) | Kostenaufteilung und Saldenberechnung. |
+| [B1 — Dialogspezifikation](B1_Dialogspezifikation.md) | Dialoge der Anwendung. |
+| [B3 — Druck- und Exportausgaben](B3_Druckausgaben.md) | PDF- und CSV-Export. |
+| [N1 — Nichtfunktionale Anforderungen](N1_Nichtfunktionale%20Anforderungen.md) | Qualitätsanforderungen. |
+| [N2 — Querschnittskonzepte](N2_Querschnittskonzepte.md) | Zugriff, Validierung und allgemeine Regeln. |
 
 ## Eingesetzte KI-Werkzeuge
 
-ChatGPT (OpenAI) wurde unterstützend für Formulierungen, Strukturierung, Mermaid-Diagramme und die Prüfung der Querverweise verwendet. Die fachlichen Inhalte wurden mit den vorhandenen Spezifikationsbausteinen abgeglichen.
+ChatGPT (OpenAI) wurde unterstützend für Formulierungen, Strukturierung und die Prüfung von Querverweisen verwendet. Die fachlichen Inhalte wurden anschließend mit dem Projektkontext und den übrigen Spezifikationsbausteinen abgeglichen.
