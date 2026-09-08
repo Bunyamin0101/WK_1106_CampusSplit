@@ -17,7 +17,7 @@ Im Mittelpunkt stehen dagegen Wertebereiche, Gleichheits- und Ordnungsregeln sow
 
 # D2.2 Identifier
 
-Der Identifier ist der eindeutige technische Schlüssel, über den fachliche Entitäten angesprochen werden. Er kommt unter anderem bei User.id, Group.id, Membership.id, Expense.id, ExpenseShare.id und Category.id zum Einsatz.
+Der Identifier ist der eindeutige technische Schlüssel, über den fachliche Entitäten angesprochen werden. Er kommt unter anderem bei [User](D1_Datenmodell.md#user).id, [Group](D1_Datenmodell.md#group).id, [Membership](D1_Datenmodell.md#membership).id, [Expense](D1_Datenmodell.md#expense).id, [ExpenseShare](D1_Datenmodell.md#expenseshare).id und [Category](D1_Datenmodell.md#category).id zum Einsatz.
 
 ### Wertebereich
 
@@ -44,7 +44,7 @@ Zwei Identifier sind genau dann gleich, wenn ihre Werte exakt übereinstimmen. E
 
 # D2.3 MoneyAmountDT
 
-MoneyAmountDT bildet einen Geldbetrag ab und wird für den Gesamtbetrag einer Ausgabe, für Kostenanteile, für den berechneten Saldo eines Gruppenmitglieds, für Ausgleichsvorschläge zwischen Schuldner und Gläubiger sowie für exportierte Beträge verwendet.
+MoneyAmountDT bildet einen Geldbetrag ab und wird für den Gesamtbetrag einer [Expense](D1_Datenmodell.md#expense), für [ExpenseShare](D1_Datenmodell.md#expenseshare)s, für den berechneten Saldo eines Gruppenmitglieds, für Ausgleichsvorschläge zwischen Schuldner und Gläubiger sowie für exportierte Beträge verwendet.
 
 ### Struktur
 
@@ -126,7 +126,7 @@ Die Unterstützung weiterer Währungen ist nicht Bestandteil der ersten Version.
 
 # D2.5 MembershipRoleDT
 
-MembershipRoleDT legt die Rolle eines Benutzers innerhalb einer Gruppe fest und wird bei Membership.role verwendet.
+MembershipRoleDT legt die Rolle eines Benutzers innerhalb einer Gruppe fest und wird bei [Membership](D1_Datenmodell.md#membership).role verwendet.
 
 | **Wert** | **Bedeutung**                                           |
 | -------- | ------------------------------------------------------- |
@@ -156,7 +156,7 @@ Zwei Rollen sind gleich, wenn ihr Rollenwert identisch ist. Eine natürliche Ord
 
 # D2.6 SplitMethodDT
 
-SplitMethodDT beschreibt, auf welche Weise eine Ausgabe auf die beteiligten Gruppenmitglieder verteilt wird, und kommt bei der Erfassung und Bearbeitung von Ausgaben zum Einsatz.
+SplitMethodDT beschreibt, auf welche Weise eine Ausgabe auf die beteiligten Gruppenmitglieder verteilt wird, und kommt bei der Erfassung und Bearbeitung von [Expense](D1_Datenmodell.md#expense)n zum Einsatz.
 
 | **Wert**      | **Bedeutung**                                                              |
 | ------------- | -------------------------------------------------------------------------- |
@@ -208,7 +208,7 @@ Zwei Aufteilungsarten sind gleich, wenn ihr Wert identisch ist. Eine fachliche O
 
 ### Erweiterbarkeit
 
-Weitere Aufteilungsarten, etwa eine prozentuale Aufteilung, sind nicht Bestandteil der ersten Version. Eine spätere Erweiterung müsste mindestens F2, F3, D1, D2, B1 und die Berechnungslogik anpassen.
+Weitere Aufteilungsarten, etwa eine prozentuale Aufteilung, sind nicht Bestandteil der ersten Version. Eine spätere Erweiterung müsste mindestens [F2](F2-anwendungsfälle.md), [F3](F3-anwendungsfunktionen.md), [D1](D1_Datenmodell.md), D2, [B1](B1_Dialogspezifikation.md) und die Berechnungslogik anpassen.
 
 # D2.7 ExportFormatDT
 
@@ -272,14 +272,14 @@ Bewusst ausgeklammert bleiben folgende Themen:
 
 | **Baustein** | **Relevanz für D2**                                                                                                       |
 | ------------ | --------------------------------------------------------------------------------------------------------------------------- |
-| P1           | Definiert Ziele, Umfang, Nichtziele und Rahmenbedingungen des Projekts                                                    |
-| P2           | Beschreibt CampusSplit, Browser, Datenbank und Exportdateien als relevante Systeme                                        |
-| F1           | Beschreibt den Geschäftsprozess der gemeinsamen Ausgabenverwaltung                                                        |
-| F2           | Nutzt die Datentypen bei Registrierung, Gruppenerstellung, Ausgabenerfassung, Saldenanzeige und Export                    |
-| F3           | Verwendet MoneyAmountDT, CurrencyCodeDT und SplitMethodDT für Kostenaufteilung und Saldenberechnung                       |
-| D1           | Verwendet die hier beschriebenen Datentypen in Entitäten wie User, Group, Expense und ExpenseShare                        |
-| B1           | Dialoge verwenden diese Datentypen in Eingabefeldern, Auswahllisten und Anzeigen                                          |
-| B3           | Druck- und Exportausgaben verwenden ExportFormatDT und MoneyAmountDT                                                      |
-| N1           | Anforderungen an Sicherheit, Datenkonsistenz, Performance und Benutzbarkeit beeinflussen den Umgang mit diesen Datentypen |
-| N2           | Validierung, Autorisierung und Fehlerbehandlung nutzen insbesondere MembershipRoleDT, MoneyAmountDT und SplitMethodDT     |
-| E2           | Das Glossar definiert Begriffe wie Geldbetrag, Währung, Rolle, Aufteilung, Saldo, Schuldner und Gläubiger                 |
+| [P1](P1_Ziele_und_Rahmenbedingungen.md)           | Definiert Ziele, Umfang, Nichtziele und Rahmenbedingungen des Projekts                                                    |
+| [P2](P2_Architekturueberblick.md)           | Beschreibt CampusSplit, Browser, Datenbank und Exportdateien als relevante Systeme                                        |
+| [F1](F1-geschaeftsprozesse.md)           | Beschreibt den Geschäftsprozess der gemeinsamen Ausgabenverwaltung                                                        |
+| [F2](F2-anwendungsfälle.md)           | Nutzt die Datentypen bei Registrierung, Gruppenerstellung, Ausgabenerfassung, Saldenanzeige und Export                    |
+| [F3](F3-anwendungsfunktionen.md)           | Verwendet MoneyAmountDT, CurrencyCodeDT und SplitMethodDT für Kostenaufteilung und Saldenberechnung                       |
+| [D1](D1_Datenmodell.md)           | Verwendet die hier beschriebenen Datentypen in Entitäten wie User, Group, Expense und ExpenseShare                        |
+| [B1](B1_Dialogspezifikation.md)           | Dialoge verwenden diese Datentypen in Eingabefeldern, Auswahllisten und Anzeigen                                          |
+| [B3](B3_Druckausgaben.md)           | Druck- und Exportausgaben verwenden ExportFormatDT und MoneyAmountDT                                                      |
+| [N1](N1_Nichtfunktionale%20Anforderungen.md)           | Anforderungen an Sicherheit, Datenkonsistenz, Performance und Benutzbarkeit beeinflussen den Umgang mit diesen Datentypen |
+| [N2](N2_Querschnittskonzepte.md)           | Validierung, Autorisierung und Fehlerbehandlung nutzen insbesondere MembershipRoleDT, MoneyAmountDT und SplitMethodDT     |
+| [E2](E2_Glossar.md)           | Das Glossar definiert Begriffe wie Geldbetrag, Währung, Rolle, Aufteilung, Saldo, Schuldner und Gläubiger                 |
