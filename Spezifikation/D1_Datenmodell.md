@@ -59,7 +59,6 @@ erDiagram
         Identifier categoryId
         Text description
         MoneyAmountDT amount
-        CurrencyCodeDT currency
         Date expenseDate
         Timestamp createdAt
         Timestamp updatedAt
@@ -86,7 +85,7 @@ User repräsentiert eine registrierte Person, die CampusSplit nutzt.
 
 | Attribut     | Typ        | Beschreibung                                                         |
 | ------------ | ---------- | ---------------------------------------------------------------------|
-| id           | [Identifier](D2_-_Datentypenverzeichnis.md#identifier) | Eindeutige Kennung des Benutzers.                                    |
+| id           | [Identifier](D2_-_Datentypenverzeichnis.md#d22-identifier) | Eindeutige Kennung des Benutzers.                                    |
 | name         | Text       | Anzeigename des Benutzers.                                           |
 | email        | Email      | E-Mail-Adresse zur Anmeldung und Identifikation.                     |
 | passwordHash | Text       | Gehashter Passwortwert. Das Klartextpasswort wird nicht gespeichert. |
@@ -121,10 +120,10 @@ Beispiele:
 
 | Attribut    | Typ           | Beschreibung                                           |
 | ----------- | ------------- | --------------------------------------------------------|
-| id          | [Identifier](D2_-_Datentypenverzeichnis.md#identifier)    | Eindeutige Kennung der Gruppe.                         |
+| id          | [Identifier](D2_-_Datentypenverzeichnis.md#d22-identifier)    | Eindeutige Kennung der Gruppe.                         |
 | name        | Text          | Name der Gruppe.                                       |
 | description | Text \[0..1\] | Optionale Beschreibung der Gruppe.                     |
-| ownerId     | [Identifier](D2_-_Datentypenverzeichnis.md#identifier)    | Verweis auf den [User](#user), der die Gruppe erstellt hat. |
+| ownerId     | [Identifier](D2_-_Datentypenverzeichnis.md#d22-identifier)    | Verweis auf den [User](#user), der die Gruppe erstellt hat. |
 | createdAt   | Timestamp     | Zeitpunkt der Erstellung der Gruppe.                   |
 | updatedAt   | Timestamp     | Zeitpunkt der letzten Änderung der Gruppe.             |
 
@@ -152,10 +151,10 @@ Diese Entität löst die n:m-Beziehung zwischen [User](#user) und [Group](#group
 
 | Attribut | Typ              | Beschreibung                              |
 | -------- | ---------------- | -------------------------------------------|
-| id       | [Identifier](D2_-_Datentypenverzeichnis.md#identifier)       | Eindeutige Kennung der Mitgliedschaft.    |
-| userId   | [Identifier](D2_-_Datentypenverzeichnis.md#identifier)       | Verweis auf den [User](#user).                 |
-| groupId  | [Identifier](D2_-_Datentypenverzeichnis.md#identifier)       | Verweis auf die [Group](#group).                   |
-| role     | [MembershipRoleDT](D2_-_Datentypenverzeichnis.md#membershiproledt) | Rolle des Benutzers innerhalb der Gruppe. |
+| id       | [Identifier](D2_-_Datentypenverzeichnis.md#d22-identifier)       | Eindeutige Kennung der Mitgliedschaft.    |
+| userId   | [Identifier](D2_-_Datentypenverzeichnis.md#d22-identifier)       | Verweis auf den [User](#user).                 |
+| groupId  | [Identifier](D2_-_Datentypenverzeichnis.md#d22-identifier)       | Verweis auf die [Group](#group).                   |
+| role     | [MembershipRoleDT](D2_-_Datentypenverzeichnis.md#d25-membershiproledt) | Rolle des Benutzers innerhalb der Gruppe. |
 | joinedAt | Timestamp        | Zeitpunkt des Beitritts zur Gruppe.       |
 
 ### Beziehungen
@@ -187,14 +186,13 @@ Beispiele:
 
 | Attribut        | Typ                 | Beschreibung                                          |
 | ---------------- | ------------------- | -------------------------------------------------------|
-| id              | [Identifier](D2_-_Datentypenverzeichnis.md#identifier)          | Eindeutige Kennung der Ausgabe.                       |
-| groupId         | [Identifier](D2_-_Datentypenverzeichnis.md#identifier)          | [Group](#group), zu der die Ausgabe gehört.                    |
-| paidByUserId    | [Identifier](D2_-_Datentypenverzeichnis.md#identifier)          | [User](#user), der die Ausgabe bezahlt hat.                |
-| createdByUserId | [Identifier](D2_-_Datentypenverzeichnis.md#identifier)          | [User](#user), der die Ausgabe in CampusSplit erfasst hat. |
-| categoryId      | [Identifier](D2_-_Datentypenverzeichnis.md#identifier) \[0..1\] | Optionale [Category](#category) der Ausgabe.                      |
+| id              | [Identifier](D2_-_Datentypenverzeichnis.md#d22-identifier)          | Eindeutige Kennung der Ausgabe.                       |
+| groupId         | [Identifier](D2_-_Datentypenverzeichnis.md#d22-identifier)          | [Group](#group), zu der die Ausgabe gehört.                    |
+| paidByUserId    | [Identifier](D2_-_Datentypenverzeichnis.md#d22-identifier)          | [User](#user), der die Ausgabe bezahlt hat.                |
+| createdByUserId | [Identifier](D2_-_Datentypenverzeichnis.md#d22-identifier)          | [User](#user), der die Ausgabe in CampusSplit erfasst hat. |
+| categoryId      | [Identifier](D2_-_Datentypenverzeichnis.md#d22-identifier) \[0..1\] | Optionale [Category](#category) der Ausgabe.                      |
 | description     | Text                | Beschreibung der Ausgabe.                             |
-| amount          | [MoneyAmountDT](D2_-_Datentypenverzeichnis.md#moneyamountdt)       | Gesamtbetrag der Ausgabe.                             |
-| currency        | [CurrencyCodeDT](D2_-_Datentypenverzeichnis.md#currencycodedt)      | Währung der Ausgabe, in der ersten Version EUR.       |
+| amount          | [MoneyAmountDT](D2_-_Datentypenverzeichnis.md#d23-moneyamountdt)       | Gesamtbetrag der Ausgabe inklusive Währung (EUR in der ersten Version).                             |
 | expenseDate     | Date                | Datum der Ausgabe.                                    |
 | createdAt       | Timestamp           | Zeitpunkt der Erfassung.                              |
 | updatedAt       | Timestamp           | Zeitpunkt der letzten Änderung.                       |
@@ -225,10 +223,10 @@ Eine Ausgabe kann auf alle oder nur auf ausgewählte Mitglieder einer Gruppe auf
 
 | Attribut    | Typ           | Beschreibung                                      |
 | ------------ | ------------- | ---------------------------------------------------|
-| id          | [Identifier](D2_-_Datentypenverzeichnis.md#identifier)    | Eindeutige Kennung des Kostenanteils.             |
-| expenseId   | [Identifier](D2_-_Datentypenverzeichnis.md#identifier)    | Verweis auf die zugehörige [Expense](#expense).               |
-| userId      | [Identifier](D2_-_Datentypenverzeichnis.md#identifier)    | [User](#user), dem dieser Kostenanteil zugeordnet ist. |
-| shareAmount | [MoneyAmountDT](D2_-_Datentypenverzeichnis.md#moneyamountdt) | Anteil des Benutzers an der Ausgabe.              |
+| id          | [Identifier](D2_-_Datentypenverzeichnis.md#d22-identifier)    | Eindeutige Kennung des Kostenanteils.             |
+| expenseId   | [Identifier](D2_-_Datentypenverzeichnis.md#d22-identifier)    | Verweis auf die zugehörige [Expense](#expense).               |
+| userId      | [Identifier](D2_-_Datentypenverzeichnis.md#d22-identifier)    | [User](#user), dem dieser Kostenanteil zugeordnet ist. |
+| shareAmount | [MoneyAmountDT](D2_-_Datentypenverzeichnis.md#d23-moneyamountdt) | Anteil des Benutzers an der Ausgabe.              |
 
 ### Beziehungen
 
@@ -260,7 +258,7 @@ Beispiele:
 
 | Attribut | Typ        | Beschreibung                      |
 | -------- | ---------- | ------------------------------------|
-| id       | [Identifier](D2_-_Datentypenverzeichnis.md#identifier) | Eindeutige Kennung der Kategorie. |
+| id       | [Identifier](D2_-_Datentypenverzeichnis.md#d22-identifier) | Eindeutige Kennung der Kategorie. |
 | name     | Text       | Name der Kategorie.               |
 
 ### Beziehungen
@@ -276,6 +274,8 @@ Beispiele:
 - Kategorien beeinflussen keine Saldenberechnung.
 
 ## D1.3 Abgeleitete Informationen
+
+> Hinweis: Dieser Abschnitt wandert laut Rückmeldung des Dozenten inhaltlich nach F3. Er bleibt hier vorerst stehen, bis die Übernahme in F3 abgeschlossen ist, damit nichts verloren geht.
 
 Einige Informationen werden in CampusSplit nicht dauerhaft als eigene Entitäten gespeichert. Sie werden aus bestehenden Daten berechnet.
 
