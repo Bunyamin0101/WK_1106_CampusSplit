@@ -6,6 +6,8 @@ Davon abzugrenzen sind die Projektziele und Rahmenbedingungen, die bereits in P1
 
 Zu jeder Anforderung gehört außerdem ein Fit Criterion - daran lässt sich später prüfen, ob sie wirklich erfüllt wurde.
 
+> **Hinweis zur Gliederung:** Die Nummerierung der folgenden Abschnitte (10 bis 17) orientiert sich am **Volere-Requirements-Schema**, einem etablierten Rahmenwerk zur Kategorisierung nichtfunktionaler Anforderungen. Die Kategorien 10 bis 17 entsprechen den dort vorgesehenen Bereichen Look-and-Feel, Benutzbarkeit, Performance/Zuverlässigkeit, Betrieb/Umgebung, Wartbarkeit/Erweiterbarkeit, Sicherheit, Sprache und Konformität.
+
 ## 10\. Look-and-Feel-Anforderungen
 
 ### 10a. Erscheinungsbild
