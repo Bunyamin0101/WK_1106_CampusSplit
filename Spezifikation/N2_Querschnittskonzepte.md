@@ -31,11 +31,11 @@ Daraus folgt direkt: Bis auf Registrierung und Anmeldung braucht jeder fachliche
 - Registrierung und Anmeldung sind die einzigen Bereiche, die ohne Login erreichbar sind.
 - Für alle übrigen Funktionen ist eine authentifizierte Sitzung Voraussetzung.
 - Mit einer erfolgreichen Anmeldung wird automatisch eine Sitzung angelegt.
-- Über diese Sitzung weiß das System, welcher [User](D1_-_Datenmodell.md#user) gerade aktiv ist.
+- Über diese Sitzung weiß das System, welcher [User](D1_Datenmodell.md#user) gerade aktiv ist.
 - Meldet sich jemand ab, wird die Sitzung sofort beendet.
 - Wer nicht angemeldet ist, landet automatisch auf der Anmeldeseite.
 - Passwörter werden zu keinem Zeitpunkt im Klartext gespeichert.
-- Gespeichert wird ausschließlich ein Passwort-Hash (siehe `passwordHash` bei [User](D1_-_Datenmodell.md#user)).
+- Gespeichert wird ausschließlich ein Passwort-Hash (siehe `passwordHash` bei [User](D1_Datenmodell.md#user)).
 
 ### Betroffene Use Cases
 
@@ -66,16 +66,16 @@ Daraus folgt direkt: Bis auf Registrierung und Anmeldung braucht jeder fachliche
 
 | Baustein | Relevanz                                                               |
 | -------- | ---------------------------------------------------------------------- |
-| F2       | Beschreibt Registrierung, Anmeldung und Abmeldung als Use Cases.       |
-| B1       | Beschreibt Login-, Registrierungs- und Abmeldedialoge.                 |
-| [D1](D1_-_Datenmodell.md#user)       | [User](D1_-_Datenmodell.md#user) enthält E-Mail-Adresse und Passwort-Hash. |
-| N1       | Sicherheitsanforderungen fordern Authentifizierung und Passwortschutz. |
+| [F2](F2-anwendungsfälle.md)       | Beschreibt Registrierung, Anmeldung und Abmeldung als Use Cases.       |
+| [B1](B1_Dialogspezifikation.md)       | Beschreibt Login-, Registrierungs- und Abmeldedialoge.                 |
+| [D1](D1_Datenmodell.md#user)       | [User](D1_Datenmodell.md#user) enthält E-Mail-Adresse und Passwort-Hash. |
+| [N1](N1_Nichtfunktionale%20Anforderungen.md)       | Sicherheitsanforderungen fordern Authentifizierung und Passwortschutz. |
 
 ## N2.3 Autorisierung und Gruppenrechte
 
 ### Anliegen
 
-Da CampusSplit von mehreren Personen gleichzeitig genutzt wird, muss klar geregelt sein, wer worauf zugreifen darf: Man sieht grundsätzlich nur die [Group](D1_-_Datenmodell.md#group)n, in denen man selbst Mitglied ist.
+Da CampusSplit von mehreren Personen gleichzeitig genutzt wird, muss klar geregelt sein, wer worauf zugreifen darf: Man sieht grundsätzlich nur die [Group](D1_Datenmodell.md#group)n, in denen man selbst Mitglied ist.
 
 Innerhalb einer Gruppe gibt es außerdem noch einmal Unterschiede, denn nicht jede Aktion darf jedes Mitglied ausführen. Neue Mitglieder hinzuzufügen ist zum Beispiel den Gruppenadministrator:innen vorbehalten.
 
@@ -83,10 +83,10 @@ Autorisierung ist dabei bewusst als **Querschnittskonzept** angelegt: Sie gilt n
 
 ### Strategie
 
-- Jede [Group](D1_-_Datenmodell.md#group) besitzt eine oder mehrere [Membership](D1_-_Datenmodell.md#membership)-Einträge.
-- Eine Membership verknüpft einen [User](D1_-_Datenmodell.md#user) mit einer Group.
+- Jede [Group](D1_Datenmodell.md#group) besitzt eine oder mehrere [Membership](D1_Datenmodell.md#membership)-Einträge.
+- Eine Membership verknüpft einen [User](D1_Datenmodell.md#user) mit einer Group.
 - Ob jemand auf Gruppendaten zugreifen darf, wird immer über diese Membership geprüft.
-- Rollen ([MembershipRoleDT](D2_-_Datentypenverzeichnis.md#d25-membershiproledt)) gelten immer nur innerhalb der jeweiligen Gruppe, nicht gruppenübergreifend.
+- Rollen ([MembershipRoleDT](D2_Datentypenverzeichnis.md#d25-membershiproledt)) gelten immer nur innerhalb der jeweiligen Gruppe, nicht gruppenübergreifend.
 - Der Ersteller einer Gruppe erhält automatisch die Rolle ADMIN.
 - Alle anderen Mitglieder erhalten die Rolle MEMBER.
 - Nur ADMIN darf neue Mitglieder hinzufügen.
@@ -142,11 +142,11 @@ Autorisierung greift in jedem Use Case, der sich auf eine bestehende Gruppe bezi
 
 | Baustein | Relevanz                                                                          |
 | -------- | ------------------------------------------------------------------------------- |
-| F2       | UC-05 bis UC-12 setzen Mitgliedschaft oder Administratorrechte voraus.            |
-| [D1](D1_-_Datenmodell.md#membership)       | [Membership](D1_-_Datenmodell.md#membership) verbindet [User](D1_-_Datenmodell.md#user) und [Group](D1_-_Datenmodell.md#group). |
-| [D2](D2_-_Datentypenverzeichnis.md#d25-membershiproledt)       | [MembershipRoleDT](D2_-_Datentypenverzeichnis.md#d25-membershiproledt) definiert ADMIN und MEMBER. |
-| B1       | Dialoge blenden Aktionen abhängig von Berechtigungen ein oder aus.                |
-| N1       | Zugriffsschutz und Autorisierung werden als Sicherheitsanforderungen beschrieben. |
+| [F2](F2-anwendungsfälle.md)       | UC-05 bis UC-12 setzen Mitgliedschaft oder Administratorrechte voraus.            |
+| [D1](D1_Datenmodell.md#membership)       | [Membership](D1_Datenmodell.md#membership) verbindet [User](D1_Datenmodell.md#user) und [Group](D1_Datenmodell.md#group). |
+| [D2](D2_Datentypenverzeichnis.md#d25-membershiproledt)       | [MembershipRoleDT](D2_Datentypenverzeichnis.md#d25-membershiproledt) definiert ADMIN und MEMBER. |
+| [B1](B1_Dialogspezifikation.md)       | Dialoge blenden Aktionen abhängig von Berechtigungen ein oder aus.                |
+| [N1](N1_Nichtfunktionale%20Anforderungen.md)       | Zugriffsschutz und Autorisierung werden als Sicherheitsanforderungen beschrieben. |
 
 ## N2.4 Validierung
 
@@ -160,11 +160,11 @@ Wichtig ist Validierung deshalb überall dort, wo Nutzer:innen etwas eintragen: 
 
 - Eingaben werden immer vor dem Speichern geprüft, nie danach.
 - Welche Felder tatsächlich Pflichtfelder sind, ist je Bereich unterschiedlich und wird konkret in der Tabelle unten festgelegt, statt es pauschal für alle Formulare gleich zu behandeln.
-- Beträge müssen ein gültiges [MoneyAmountDT](D2_-_Datentypenverzeichnis.md#d23-moneyamountdt)-Format haben.
+- Beträge müssen ein gültiges [MoneyAmountDT](D2_Datentypenverzeichnis.md#d23-moneyamountdt)-Format haben.
 - E-Mail-Adressen müssen ein gültiges Format haben.
 - Wer etwas in einer Gruppe tut, muss auch Mitglied dieser Gruppe sein.
-- Auch Zahler und Beteiligte einer [Expense](D1_-_Datenmodell.md#expense) müssen Mitglieder der Gruppe sein.
-- Die einzelnen [ExpenseShare](D1_-_Datenmodell.md#expenseshare)s müssen in Summe exakt den Gesamtbetrag der Ausgabe ergeben.
+- Auch Zahler und Beteiligte einer [Expense](D1_Datenmodell.md#expense) müssen Mitglieder der Gruppe sein.
+- Die einzelnen [ExpenseShare](D1_Datenmodell.md#expenseshare)s müssen in Summe exakt den Gesamtbetrag der Ausgabe ergeben.
 - Fehlermeldungen werden verständlich direkt im betroffenen Dialog angezeigt.
 - Ist eine Eingabe ungültig, wird nichts gespeichert.
 
@@ -214,12 +214,12 @@ Beispiele:
 
 | Baustein | Relevanz                                                                      |
 | -------- | ------------------------------------------------------------------------------- |
-| F2       | Use Cases beschreiben, wann Eingaben erfolgen.                                |
-| F3       | Kostenaufteilung und Saldenberechnung setzen gültige Eingaben voraus.         |
-| [D1](D1_-_Datenmodell.md#d15-datenmodell-invarianten)       | Datenmodell-Invarianten definieren fachlich erlaubte Zustände.                |
-| [D2](D2_-_Datentypenverzeichnis.md)       | Datentypen bestimmen gültige Wertebereiche.                                   |
-| B1       | Dialoge zeigen Validierungsfehler an.                                         |
-| N1       | Datenkonsistenz und Benutzerfreundlichkeit fordern verständliche Validierung. |
+| [F2](F2-anwendungsfälle.md)       | Use Cases beschreiben, wann Eingaben erfolgen.                                |
+| [F3](F3-anwendungsfunktionen.md)       | Kostenaufteilung und Saldenberechnung setzen gültige Eingaben voraus.         |
+| [D1](D1_Datenmodell.md#d15-datenmodell-invarianten)       | Datenmodell-Invarianten definieren fachlich erlaubte Zustände.                |
+| [D2](D2_Datentypenverzeichnis.md)       | Datentypen bestimmen gültige Wertebereiche.                                   |
+| [B1](B1_Dialogspezifikation.md)       | Dialoge zeigen Validierungsfehler an.                                         |
+| [N1](N1_Nichtfunktionale%20Anforderungen.md)       | Datenkonsistenz und Benutzerfreundlichkeit fordern verständliche Validierung. |
 
 ## N2.5 Geldbetragsverarbeitung
 
@@ -227,12 +227,12 @@ Beispiele:
 
 Da es bei CampusSplit im Kern um Geld geht, muss hier besonders sauber gerechnet werden. Schon kleine Rundungsfehler summieren sich über mehrere Ausgaben hinweg und führen am Ende zu Salden, die nicht mehr stimmen. Deshalb legen wir für den gesamten Umgang mit Geldbeträgen eine einheitliche Regel fest, statt das jeder Funktion einzeln zu überlassen.
 
-> **Hinweis:** Die konkrete Berechnungslogik für Kostenaufteilung, Saldenberechnung und Ausgleichsvorschläge ist sehr umfangreich und wird ausführlich in [F3 - Anwendungsfunktionen.md](F3_-_Anwendungsfunktionen.md) beschrieben. Hier in N2.5 stehen nur die querschnittlichen Grundregeln, die für die Geldverarbeitung überall im System gelten.
+> **Hinweis:** Die konkrete Berechnungslogik für Kostenaufteilung, Saldenberechnung und Ausgleichsvorschläge ist sehr umfangreich und wird ausführlich in [F3-anwendungsfunktionen.md](F3-anwendungsfunktionen.md) beschrieben. Hier in N2.5 stehen nur die querschnittlichen Grundregeln, die für die Geldverarbeitung überall im System gelten.
 
 ### Strategie
 
-- Geldbeträge werden centgenau verarbeitet ([MoneyAmountDT](D2_-_Datentypenverzeichnis.md#d23-moneyamountdt)).
-- Die erste Version verwendet ausschließlich Euro ([CurrencyCodeDT](D2_-_Datentypenverzeichnis.md#d24-currencycodedt)).
+- Geldbeträge werden centgenau verarbeitet ([MoneyAmountDT](D2_Datentypenverzeichnis.md#d23-moneyamountdt)).
+- Die erste Version verwendet ausschließlich Euro ([CurrencyCodeDT](D2_Datentypenverzeichnis.md#d24-currencycodedt)).
 - Beträge werden immer mit zwei Nachkommastellen dargestellt.
 - Ausgaben und Kostenanteile können nicht negativ sein.
 - Ein Saldo dagegen kann positiv, negativ oder genau null sein.
@@ -278,12 +278,12 @@ Wichtig ist dabei, dass die Rundung nachvollziehbar und deterministisch bleibt: 
 
 | Baustein | Relevanz                                                                         |
 | -------- | ----------------------------------------------------------------------------------|
-| F3       | [F3 - Anwendungsfunktionen.md](F3_-_Anwendungsfunktionen.md) beschreibt AF-01, AF-02 und AF-03 mit der vollständigen Berechnungslogik. |
-| [D1](D1_-_Datenmodell.md#expense)       | [Expense](D1_-_Datenmodell.md#expense), [ExpenseShare](D1_-_Datenmodell.md#expenseshare), Balance und SettlementProposal verwenden Geldbeträge. |
-| [D2](D2_-_Datentypenverzeichnis.md#d23-moneyamountdt)       | [MoneyAmountDT](D2_-_Datentypenverzeichnis.md#d23-moneyamountdt) und [CurrencyCodeDT](D2_-_Datentypenverzeichnis.md#d24-currencycodedt) definieren Wertebereiche und Regeln. |
-| B1       | Dialoge erfassen und zeigen Geldbeträge.                                         |
-| B3       | Exportdateien enthalten Geldbeträge und Salden.                                  |
-| N1       | Genauigkeits- und Datenkonsistenzanforderungen beziehen sich auf Geldberechnung. |
+| [F3](F3-anwendungsfunktionen.md)       | [F3-anwendungsfunktionen.md](F3-anwendungsfunktionen.md) beschreibt AF-01, AF-02 und AF-03 mit der vollständigen Berechnungslogik. |
+| [D1](D1_Datenmodell.md#expense)       | [Expense](D1_Datenmodell.md#expense), [ExpenseShare](D1_Datenmodell.md#expenseshare), Balance und SettlementProposal verwenden Geldbeträge. |
+| [D2](D2_Datentypenverzeichnis.md#d23-moneyamountdt)       | [MoneyAmountDT](D2_Datentypenverzeichnis.md#d23-moneyamountdt) und [CurrencyCodeDT](D2_Datentypenverzeichnis.md#d24-currencycodedt) definieren Wertebereiche und Regeln. |
+| [B1](B1_Dialogspezifikation.md)       | Dialoge erfassen und zeigen Geldbeträge.                                         |
+| [B3](B3_Druckausgaben.md)       | Exportdateien enthalten Geldbeträge und Salden.                                  |
+| [N1](N1_Nichtfunktionale%20Anforderungen.md)       | Genauigkeits- und Datenkonsistenzanforderungen beziehen sich auf Geldberechnung. |
 
 ## N2.6 Fehlerbehandlung
 
@@ -324,11 +324,11 @@ Fehler lassen sich nie ganz vermeiden. Die Anwendung muss trotzdem einheitlich r
 
 | Baustein | Relevanz                                                                  |
 | -------- | --------------------------------------------------------------------------|
-| F2       | Exception-Szenarien beschreiben Fehler in Use Cases.                      |
-| B1       | Dialoge zeigen Fehlerzustände und Validierungsfehler.                     |
-| S1       | Schnittstellenfehler werden an Use Cases zurückgegeben.                   |
-| S3       | Funktionstests prüfen zentrale Fehlerfälle nach Inbetriebnahme.           |
-| N1       | Zuverlässigkeit und verständliche Fehlerbehandlung werden dort gefordert. |
+| [F2](F2-anwendungsfälle.md)       | Exception-Szenarien beschreiben Fehler in Use Cases.                      |
+| [B1](B1_Dialogspezifikation.md)       | Dialoge zeigen Fehlerzustände und Validierungsfehler.                     |
+| [S1](S1_Nachbarsysteme.md)       | Schnittstellenfehler werden an Use Cases zurückgegeben.                   |
+| [S3](S3_Inbetriebnahme.md)       | Funktionstests prüfen zentrale Fehlerfälle nach Inbetriebnahme.           |
+| [N1](N1_Nichtfunktionale%20Anforderungen.md)       | Zuverlässigkeit und verständliche Fehlerbehandlung werden dort gefordert. |
 
 ## N2.7 Logging
 
@@ -374,16 +374,16 @@ Dabei geht es uns nur um Fehlersuche und Betrieb - Logging ist ausdrücklich kei
 
 | Baustein | Relevanz                                                    |
 | -------- | -------------------------------------------------------------|
-| N1       | Sicherheitsanforderungen verbieten sensible Daten in Logs.  |
-| S3       | Logdaten werden als betrieblicher Datenbereich beschrieben. |
-| F2       | Fehlerfälle in Use Cases können Logeinträge auslösen.       |
+| [N1](N1_Nichtfunktionale%20Anforderungen.md)       | Sicherheitsanforderungen verbieten sensible Daten in Logs.  |
+| [S3](S3_Inbetriebnahme.md)       | Logdaten werden als betrieblicher Datenbereich beschrieben. |
+| [F2](F2-anwendungsfälle.md)       | Fehlerfälle in Use Cases können Logeinträge auslösen.       |
 | [N2.6](#n26-fehlerbehandlung)     | Fehlerbehandlung und Logging wirken zusammen.               |
 
 ## N2.8 Exportsicherheit
 
 ### Anliegen
 
-CampusSplit kann [Group](D1_-_Datenmodell.md#group)ndaten, [Expense](D1_-_Datenmodell.md#expense)n, [ExpenseShare](D1_-_Datenmodell.md#expenseshare)s und Salden als PDF oder CSV exportieren. Dabei muss sichergestellt sein, dass die Exporte fachlich korrekt sind und keine sensiblen oder unnötigen technischen Informationen enthalten.
+CampusSplit kann [Group](D1_Datenmodell.md#group)ndaten, [Expense](D1_Datenmodell.md#expense)n, [ExpenseShare](D1_Datenmodell.md#expenseshare)s und Salden als PDF oder CSV exportieren. Dabei muss sichergestellt sein, dass die Exporte fachlich korrekt sind und keine sensiblen oder unnötigen technischen Informationen enthalten.
 
 ### Strategie
 
@@ -419,13 +419,13 @@ CampusSplit kann [Group](D1_-_Datenmodell.md#group)ndaten, [Expense](D1_-_Datenm
 
 | Baustein | Relevanz                                                                   |
 | -------- | -----------------------------------------------------------------------------|
-| F2       | UC-12 löst den Export aus.                                                 |
-| F3       | AF-04 bereitet Exportdaten fachlich auf.                                   |
-| [D1](D1_-_Datenmodell.md#group)       | Exportdaten stammen aus [Group](D1_-_Datenmodell.md#group)n, [Membership](D1_-_Datenmodell.md#membership)s, [Expense](D1_-_Datenmodell.md#expense)n und [ExpenseShare](D1_-_Datenmodell.md#expenseshare)s. |
-| [D2](D2_-_Datentypenverzeichnis.md#d27-exportformatdt)       | [ExportFormatDT](D2_-_Datentypenverzeichnis.md#d27-exportformatdt), [MoneyAmountDT](D2_-_Datentypenverzeichnis.md#d23-moneyamountdt) und [CurrencyCodeDT](D2_-_Datentypenverzeichnis.md#d24-currencycodedt) bestimmen Exportwerte. |
-| B1       | DLG-11 beschreibt den Exportdialog.                                        |
-| B3       | Beschreibt Inhalt und Struktur der PDF- und CSV-Ausgaben.                  |
-| N1       | Sicherheits- und Konsistenzanforderungen gelten auch für Exporte.          |
+| [F2](F2-anwendungsfälle.md)       | UC-12 löst den Export aus.                                                 |
+| [F3](F3-anwendungsfunktionen.md)       | AF-04 bereitet Exportdaten fachlich auf.                                   |
+| [D1](D1_Datenmodell.md#group)       | Exportdaten stammen aus [Group](D1_Datenmodell.md#group)n, [Membership](D1_Datenmodell.md#membership)s, [Expense](D1_Datenmodell.md#expense)n und [ExpenseShare](D1_Datenmodell.md#expenseshare)s. |
+| [D2](D2_Datentypenverzeichnis.md#d27-exportformatdt)       | [ExportFormatDT](D2_Datentypenverzeichnis.md#d27-exportformatdt), [MoneyAmountDT](D2_Datentypenverzeichnis.md#d23-moneyamountdt) und [CurrencyCodeDT](D2_Datentypenverzeichnis.md#d24-currencycodedt) bestimmen Exportwerte. |
+| [B1](B1_Dialogspezifikation.md)       | DLG-11 beschreibt den Exportdialog.                                        |
+| [B3](B3_Druckausgaben.md)       | Beschreibt Inhalt und Struktur der PDF- und CSV-Ausgaben.                  |
+| [N1](N1_Nichtfunktionale%20Anforderungen.md)       | Sicherheits- und Konsistenzanforderungen gelten auch für Exporte.          |
 
 ## N2.9 Nicht Bestandteil von N2
 
@@ -447,16 +447,16 @@ Wir nennen diese Punkte hier bewusst, damit klar wird: Das Fehlen dieser Funktio
 
 | Baustein | Relevanz für N2                                                                                                   |
 | -------- | ---------------------------------------------------------------------------------------------------------------------|
-| P1       | Projektziele, Nichtziele und Rahmenbedingungen begrenzen die Querschnittskonzepte.                                |
-| P2       | Systemkontext zeigt, welche Nachbarsysteme von Querschnittskonzepten betroffen sind.                              |
-| F1       | Geschäftsprozess zeigt, wo Authentifizierung, Validierung, Geldberechnung und Export relevant werden.             |
-| F2       | Use Cases bilden die sichtbare Oberfläche der Querschnittskonzepte.                                               |
-| F3       | Anwendungsfunktionen setzen Geldbetragsverarbeitung, Validierung und Exportregeln fachlich um.                    |
-| [D1](D1_-_Datenmodell.md#d15-datenmodell-invarianten)       | Datenmodell-Invarianten bilden die Grundlage für Validierung und Autorisierung. |
-| [D2](D2_-_Datentypenverzeichnis.md)       | Datentypen wie [MoneyAmountDT](D2_-_Datentypenverzeichnis.md#d23-moneyamountdt), [MembershipRoleDT](D2_-_Datentypenverzeichnis.md#d25-membershiproledt), SplitMethodDT und ExportFormatDT stützen die Querschnittsregeln. |
-| B1       | Dialoge zeigen Validierungsfehler, Fehlerzustände und berechtigungsabhängige Aktionen.                            |
-| B3       | Exporte folgen den Regeln der Exportsicherheit.                                                                   |
-| S1       | Schnittstellen müssen Authentifizierung, Autorisierung, Validierung und Fehlerbehandlung berücksichtigen.         |
-| S3       | Inbetriebnahme und Releases müssen Konfiguration, Datenbeständigkeit und Logging berücksichtigen.                 |
-| N1       | Nichtfunktionale Anforderungen definieren messbare Qualitätskriterien für die hier beschriebenen Konzepte.        |
-| E2       | Glossar definiert zentrale Begriffe wie Authentifizierung, Autorisierung, Saldo, Export und Gruppenadministrator. |
+| [P1](P1_Ziele_und_Rahmenbedingungen.md)       | Projektziele, Nichtziele und Rahmenbedingungen begrenzen die Querschnittskonzepte.                                |
+| [P2](P2_Architekturueberblick.md)       | Systemkontext zeigt, welche Nachbarsysteme von Querschnittskonzepten betroffen sind.                              |
+| [F1](F1-geschaeftsprozesse.md)       | Geschäftsprozess zeigt, wo Authentifizierung, Validierung, Geldberechnung und Export relevant werden.             |
+| [F2](F2-anwendungsfälle.md)       | Use Cases bilden die sichtbare Oberfläche der Querschnittskonzepte.                                               |
+| [F3](F3-anwendungsfunktionen.md)       | Anwendungsfunktionen setzen Geldbetragsverarbeitung, Validierung und Exportregeln fachlich um.                    |
+| [D1](D1_Datenmodell.md#d15-datenmodell-invarianten)       | Datenmodell-Invarianten bilden die Grundlage für Validierung und Autorisierung. |
+| [D2](D2_Datentypenverzeichnis.md)       | Datentypen wie [MoneyAmountDT](D2_Datentypenverzeichnis.md#d23-moneyamountdt), [MembershipRoleDT](D2_Datentypenverzeichnis.md#d25-membershiproledt), SplitMethodDT und ExportFormatDT stützen die Querschnittsregeln. |
+| [B1](B1_Dialogspezifikation.md)       | Dialoge zeigen Validierungsfehler, Fehlerzustände und berechtigungsabhängige Aktionen.                            |
+| [B3](B3_Druckausgaben.md)       | Exporte folgen den Regeln der Exportsicherheit.                                                                   |
+| [S1](S1_Nachbarsysteme.md)       | Schnittstellen müssen Authentifizierung, Autorisierung, Validierung und Fehlerbehandlung berücksichtigen.         |
+| [S3](S3_Inbetriebnahme.md)       | Inbetriebnahme und Releases müssen Konfiguration, Datenbeständigkeit und Logging berücksichtigen.                 |
+| [N1](N1_Nichtfunktionale%20Anforderungen.md)       | Nichtfunktionale Anforderungen definieren messbare Qualitätskriterien für die hier beschriebenen Konzepte.        |
+| [E2](E2_Glossar.md)       | Glossar definiert zentrale Begriffe wie Authentifizierung, Autorisierung, Saldo, Export und Gruppenadministrator. |
