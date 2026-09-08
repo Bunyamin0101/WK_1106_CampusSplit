@@ -9,7 +9,7 @@ Der Sinn von N2 ist, diese Konzepte einmal festzulegen, statt sie in jedem Kapit
 ## N2.1 Konzeptkatalog
 
 | ID                                           | Konzept                         | Kurzbeschreibung                                                       |
-| -------------------------------------------- | ------------------------------- | ---------------------------------------------------------------------- |
+| -------------------------------------------- | -------------------------------- | ---------------------------------------------------------------------- |
 | [N2.2](#n22-authentifizierung-und-sitzung)   | Authentifizierung und Sitzung   | Einheitlicher Zugriffsschutz für angemeldete Benutzer:innen            |
 | [N2.3](#n23-autorisierung-und-gruppenrechte) | Autorisierung und Gruppenrechte | Zugriff auf Gruppen und Aktionen abhängig von Mitgliedschaft und Rolle |
 | [N2.4](#n24-validierung)                     | Validierung                     | Einheitliche Prüfung von Eingaben vor Speicherung                      |
@@ -31,11 +31,11 @@ Daraus folgt direkt: Bis auf Registrierung und Anmeldung braucht jeder fachliche
 - Registrierung und Anmeldung sind die einzigen Bereiche, die ohne Login erreichbar sind.
 - Für alle übrigen Funktionen ist eine authentifizierte Sitzung Voraussetzung.
 - Mit einer erfolgreichen Anmeldung wird automatisch eine Sitzung angelegt.
-- Über diese Sitzung weiß das System, welcher Benutzer gerade aktiv ist.
+- Über diese Sitzung weiß das System, welcher [User](D1_-_Datenmodell.md#user) gerade aktiv ist.
 - Meldet sich jemand ab, wird die Sitzung sofort beendet.
 - Wer nicht angemeldet ist, landet automatisch auf der Anmeldeseite.
 - Passwörter werden zu keinem Zeitpunkt im Klartext gespeichert.
-- Gespeichert wird ausschließlich ein Passwort-Hash.
+- Gespeichert wird ausschließlich ein Passwort-Hash (siehe `passwordHash` bei [User](D1_-_Datenmodell.md#user)).
 
 ### Betroffene Use Cases
 
@@ -68,23 +68,25 @@ Daraus folgt direkt: Bis auf Registrierung und Anmeldung braucht jeder fachliche
 | -------- | ---------------------------------------------------------------------- |
 | F2       | Beschreibt Registrierung, Anmeldung und Abmeldung als Use Cases.       |
 | B1       | Beschreibt Login-, Registrierungs- und Abmeldedialoge.                 |
-| D1       | User enthält E-Mail-Adresse und Passwort-Hash.                         |
+| [D1](D1_-_Datenmodell.md#user)       | [User](D1_-_Datenmodell.md#user) enthält E-Mail-Adresse und Passwort-Hash. |
 | N1       | Sicherheitsanforderungen fordern Authentifizierung und Passwortschutz. |
 
 ## N2.3 Autorisierung und Gruppenrechte
 
 ### Anliegen
 
-Da CampusSplit von mehreren Personen gleichzeitig genutzt wird, muss klar geregelt sein, wer worauf zugreifen darf: Man sieht grundsätzlich nur die Gruppen, in denen man selbst Mitglied ist.
+Da CampusSplit von mehreren Personen gleichzeitig genutzt wird, muss klar geregelt sein, wer worauf zugreifen darf: Man sieht grundsätzlich nur die [Group](D1_-_Datenmodell.md#group)n, in denen man selbst Mitglied ist.
 
 Innerhalb einer Gruppe gibt es außerdem noch einmal Unterschiede, denn nicht jede Aktion darf jedes Mitglied ausführen. Neue Mitglieder hinzuzufügen ist zum Beispiel den Gruppenadministrator:innen vorbehalten.
 
+Autorisierung ist dabei bewusst als **Querschnittskonzept** angelegt: Sie gilt nicht nur für einen einzelnen Use Case, sondern greift bei praktisch jeder Aktion, die sich auf eine Gruppe bezieht.
+
 ### Strategie
 
-- Jede Gruppe besitzt eine oder mehrere Mitgliedschaften.
-- Eine Mitgliedschaft verknüpft einen Benutzer mit einer Gruppe.
-- Ob jemand auf Gruppendaten zugreifen darf, wird immer über diese Mitgliedschaft geprüft.
-- Rollen gelten immer nur innerhalb der jeweiligen Gruppe, nicht gruppenübergreifend.
+- Jede [Group](D1_-_Datenmodell.md#group) besitzt eine oder mehrere [Membership](D1_-_Datenmodell.md#membership)-Einträge.
+- Eine Membership verknüpft einen [User](D1_-_Datenmodell.md#user) mit einer Group.
+- Ob jemand auf Gruppendaten zugreifen darf, wird immer über diese Membership geprüft.
+- Rollen ([MembershipRoleDT](D2_-_Datentypenverzeichnis.md#d25-membershiproledt)) gelten immer nur innerhalb der jeweiligen Gruppe, nicht gruppenübergreifend.
 - Der Ersteller einer Gruppe erhält automatisch die Rolle ADMIN.
 - Alle anderen Mitglieder erhalten die Rolle MEMBER.
 - Nur ADMIN darf neue Mitglieder hinzufügen.
@@ -93,14 +95,14 @@ Innerhalb einer Gruppe gibt es außerdem noch einmal Unterschiede, denn nicht je
 ### Rollen
 
 | Rolle  | Bedeutung                                               |
-| ------ | ------------------------------------------------------- |
+| ------ | -------------------------------------------------------- |
 | ADMIN  | Gruppenadministrator mit erweiterten Verwaltungsrechten |
 | MEMBER | Normales Gruppenmitglied                                |
 
 ### Berechtigungen
 
 | Aktion              | ADMIN | MEMBER |
-| ------------------- | ----- | ------ |
+| -------------------- | ----- | ------ |
 | Gruppe anzeigen     | ja    | ja     |
 | Ausgaben anzeigen   | ja    | ja     |
 | Ausgabe erfassen    | ja    | ja     |
@@ -110,10 +112,25 @@ Innerhalb einer Gruppe gibt es außerdem noch einmal Unterschiede, denn nicht je
 | Export erzeugen     | ja    | ja     |
 | Mitglied hinzufügen | ja    | nein   |
 
+### Betroffene Use Cases
+
+Autorisierung greift in jedem Use Case, der sich auf eine bestehende Gruppe bezieht:
+
+| Use Case | Anknüpfende Regel |
+| -------- | ------------------ |
+| UC-05 Gruppe erstellen | AUT-06 (Ersteller wird ADMIN, Gruppe braucht mindestens einen ADMIN) |
+| UC-06 Gruppe anzeigen | AUT-01 |
+| UC-07 Mitglied zur Gruppe hinzufügen | AUT-04 |
+| UC-08 Ausgabe erfassen | AUT-02, AUT-03 |
+| UC-09 Ausgabe bearbeiten | AUT-02, AUT-03 |
+| UC-10 Ausgabe löschen | AUT-02, AUT-03 |
+| UC-11 Salden anzeigen | AUT-01, AUT-02 |
+| UC-12 Ausgabenübersicht exportieren | AUT-01, AUT-02 |
+
 ### Regeln
 
 | ID     | Regel                                                                         |
-| ------ | ----------------------------------------------------------------------------- |
+| ------ | ------------------------------------------------------------------------------ |
 | AUT-01 | Ein Benutzer darf eine Gruppe nur sehen, wenn er Mitglied dieser Gruppe ist.  |
 | AUT-02 | Ein Benutzer darf Ausgaben nur für Gruppen sehen, in denen er Mitglied ist.   |
 | AUT-03 | Ein Benutzer darf nur Ausgaben in Gruppen erfassen, in denen er Mitglied ist. |
@@ -124,10 +141,10 @@ Innerhalb einer Gruppe gibt es außerdem noch einmal Unterschiede, denn nicht je
 ### Querverweise
 
 | Baustein | Relevanz                                                                          |
-| -------- | --------------------------------------------------------------------------------- |
+| -------- | ------------------------------------------------------------------------------- |
 | F2       | UC-05 bis UC-12 setzen Mitgliedschaft oder Administratorrechte voraus.            |
-| D1       | Membership verbindet User und Group.                                              |
-| D2       | MembershipRoleDT definiert ADMIN und MEMBER.                                      |
+| [D1](D1_-_Datenmodell.md#membership)       | [Membership](D1_-_Datenmodell.md#membership) verbindet [User](D1_-_Datenmodell.md#user) und [Group](D1_-_Datenmodell.md#group). |
+| [D2](D2_-_Datentypenverzeichnis.md#d25-membershiproledt)       | [MembershipRoleDT](D2_-_Datentypenverzeichnis.md#d25-membershiproledt) definiert ADMIN und MEMBER. |
 | B1       | Dialoge blenden Aktionen abhängig von Berechtigungen ein oder aus.                |
 | N1       | Zugriffsschutz und Autorisierung werden als Sicherheitsanforderungen beschrieben. |
 
@@ -142,25 +159,27 @@ Wichtig ist Validierung deshalb überall dort, wo Nutzer:innen etwas eintragen: 
 ### Strategie
 
 - Eingaben werden immer vor dem Speichern geprüft, nie danach.
-- Pflichtfelder dürfen nicht leer bleiben.
-- Beträge müssen ein gültiges Geldformat haben.
+- Welche Felder tatsächlich Pflichtfelder sind, ist je Bereich unterschiedlich und wird konkret in der Tabelle unten festgelegt, statt es pauschal für alle Formulare gleich zu behandeln.
+- Beträge müssen ein gültiges [MoneyAmountDT](D2_-_Datentypenverzeichnis.md#d23-moneyamountdt)-Format haben.
 - E-Mail-Adressen müssen ein gültiges Format haben.
 - Wer etwas in einer Gruppe tut, muss auch Mitglied dieser Gruppe sein.
-- Auch Zahler und Beteiligte einer Ausgabe müssen Mitglieder der Gruppe sein.
-- Die einzelnen Kostenanteile müssen in Summe exakt den Gesamtbetrag der Ausgabe ergeben.
+- Auch Zahler und Beteiligte einer [Expense](D1_-_Datenmodell.md#expense) müssen Mitglieder der Gruppe sein.
+- Die einzelnen [ExpenseShare](D1_-_Datenmodell.md#expenseshare)s müssen in Summe exakt den Gesamtbetrag der Ausgabe ergeben.
 - Fehlermeldungen werden verständlich direkt im betroffenen Dialog angezeigt.
 - Ist eine Eingabe ungültig, wird nichts gespeichert.
 
 ### Validierungsbereiche
 
-| Bereich              | Beispiele                                                   |
-| -------------------- | ----------------------------------------------------------- |
-| Registrierung        | Name, E-Mail, Passwort                                      |
-| Anmeldung            | E-Mail, Passwort                                            |
-| Gruppenerstellung    | Gruppenname                                                 |
-| Mitgliederverwaltung | E-Mail-Adresse des neuen Mitglieds                          |
-| Ausgabenerfassung    | Beschreibung, Betrag, Datum, Zahler, Beteiligte, Aufteilung |
-| Export               | Exportformat, optionaler Zeitraum                           |
+Statt pauschal "Pflichtfelder dürfen nicht leer sein" auf alle Formulare anzuwenden, wird hier je Bereich konkret festgelegt, welche Felder tatsächlich verpflichtend sind:
+
+| Bereich              | Pflichtfelder                                              | Optionale Felder                  |
+| --------------------- | ------------------------------------------------------------ | ----------------------------------- |
+| Registrierung        | Name, E-Mail, Passwort                                       | –                                    |
+| Anmeldung            | E-Mail, Passwort                                              | –                                    |
+| Gruppenerstellung    | Gruppenname                                                   | Beschreibung                        |
+| Mitgliederverwaltung | E-Mail-Adresse des neuen Mitglieds                            | –                                    |
+| Ausgabenerfassung    | Betrag, Zahler, mindestens eine beteiligte Person, Aufteilung | Beschreibung, Datum, Kategorie      |
+| Export               | Exportformat                                                  | Zeitraum                            |
 
 ### Regeln
 
@@ -184,7 +203,7 @@ Validierungsfehler werden direkt im jeweiligen Dialog angezeigt.
 Beispiele:
 
 | Situation                          | Beispielmeldung                                            |
-| ---------------------------------- | ---------------------------------------------------------- |
+| ------------------------------------ | -------------------------------------------------------------|
 | Gruppenname fehlt                  | „Bitte geben Sie einen Gruppennamen ein."                  |
 | Betrag ist ungültig                | „Der Betrag muss größer als 0,00 € sein."                  |
 | Keine beteiligte Person ausgewählt | „Bitte wählen Sie mindestens ein Gruppenmitglied aus."     |
@@ -194,11 +213,11 @@ Beispiele:
 ### Querverweise
 
 | Baustein | Relevanz                                                                      |
-| -------- | ----------------------------------------------------------------------------- |
+| -------- | ------------------------------------------------------------------------------- |
 | F2       | Use Cases beschreiben, wann Eingaben erfolgen.                                |
 | F3       | Kostenaufteilung und Saldenberechnung setzen gültige Eingaben voraus.         |
-| D1       | Datenmodell-Invarianten definieren fachlich erlaubte Zustände.                |
-| D2       | Datentypen bestimmen gültige Wertebereiche.                                   |
+| [D1](D1_-_Datenmodell.md#d15-datenmodell-invarianten)       | Datenmodell-Invarianten definieren fachlich erlaubte Zustände.                |
+| [D2](D2_-_Datentypenverzeichnis.md)       | Datentypen bestimmen gültige Wertebereiche.                                   |
 | B1       | Dialoge zeigen Validierungsfehler an.                                         |
 | N1       | Datenkonsistenz und Benutzerfreundlichkeit fordern verständliche Validierung. |
 
@@ -208,10 +227,12 @@ Beispiele:
 
 Da es bei CampusSplit im Kern um Geld geht, muss hier besonders sauber gerechnet werden. Schon kleine Rundungsfehler summieren sich über mehrere Ausgaben hinweg und führen am Ende zu Salden, die nicht mehr stimmen. Deshalb legen wir für den gesamten Umgang mit Geldbeträgen eine einheitliche Regel fest, statt das jeder Funktion einzeln zu überlassen.
 
+> **Hinweis:** Die konkrete Berechnungslogik für Kostenaufteilung, Saldenberechnung und Ausgleichsvorschläge ist sehr umfangreich und wird ausführlich in [F3 - Anwendungsfunktionen.md](F3_-_Anwendungsfunktionen.md) beschrieben. Hier in N2.5 stehen nur die querschnittlichen Grundregeln, die für die Geldverarbeitung überall im System gelten.
+
 ### Strategie
 
-- Geldbeträge werden centgenau verarbeitet.
-- Die erste Version verwendet ausschließlich Euro.
+- Geldbeträge werden centgenau verarbeitet ([MoneyAmountDT](D2_-_Datentypenverzeichnis.md#d23-moneyamountdt)).
+- Die erste Version verwendet ausschließlich Euro ([CurrencyCodeDT](D2_-_Datentypenverzeichnis.md#d24-currencycodedt)).
 - Beträge werden immer mit zwei Nachkommastellen dargestellt.
 - Ausgaben und Kostenanteile können nicht negativ sein.
 - Ein Saldo dagegen kann positiv, negativ oder genau null sein.
@@ -222,7 +243,7 @@ Da es bei CampusSplit im Kern um Geld geht, muss hier besonders sauber gerechnet
 ### Fachliche Bedeutung von Salden
 
 | Saldo   | Bedeutung                    |
-| ------- | ---------------------------- |
+| ------- | ------------------------------ |
 | Positiv | Mitglied bekommt Geld zurück |
 | Negativ | Mitglied schuldet Geld       |
 | 0.00    | Mitglied ist ausgeglichen    |
@@ -231,9 +252,7 @@ Da es bei CampusSplit im Kern um Geld geht, muss hier besonders sauber gerechnet
 
 Lässt sich ein Betrag bei gleichmäßiger Aufteilung nicht glatt durch die Anzahl der Personen teilen, wird trotzdem centgenau aufgeteilt - die Differenz von einem Cent bekommt einfach eine der beteiligten Personen ab.
 
-Beispiel:
-
-10.00 € werden auf drei Personen verteilt.
+Beispiel: 10.00 € werden auf drei Personen verteilt.
 
 | Person   | Anteil |
 | -------- | ------ |
@@ -241,12 +260,12 @@ Beispiel:
 | Person B | 3.33 € |
 | Person C | 3.33 € |
 
-Wichtig ist dabei, dass die Rundung nachvollziehbar und deterministisch bleibt: Bei identischer Eingabe kommt jedes Mal dieselbe Verteilung heraus.
+Wichtig ist dabei, dass die Rundung nachvollziehbar und deterministisch bleibt: Bei identischer Eingabe kommt jedes Mal dieselbe Verteilung heraus. Die genaue Rechenlogik dazu steht in F3.
 
 ### Regeln
 
 | ID       | Regel                                                                |
-| -------- | -------------------------------------------------------------------- |
+| -------- | ----------------------------------------------------------------------|
 | MONEY-01 | Geldbeträge werden nicht mit ungenauen Gleitkommazahlen verarbeitet. |
 | MONEY-02 | Ausgaben müssen größer als 0.00 sein.                                |
 | MONEY-03 | Kostenanteile dürfen nicht negativ sein.                             |
@@ -258,10 +277,10 @@ Wichtig ist dabei, dass die Rundung nachvollziehbar und deterministisch bleibt: 
 ### Querverweise
 
 | Baustein | Relevanz                                                                         |
-| -------- | -------------------------------------------------------------------------------- |
-| F3       | AF-01, AF-02 und AF-03 verwenden Geldbeträge fachlich.                           |
-| D1       | Expense, ExpenseShare, Balance und SettlementProposal verwenden Geldbeträge.     |
-| D2       | MoneyAmountDT und CurrencyCodeDT definieren Wertebereiche und Regeln.            |
+| -------- | ----------------------------------------------------------------------------------|
+| F3       | [F3 - Anwendungsfunktionen.md](F3_-_Anwendungsfunktionen.md) beschreibt AF-01, AF-02 und AF-03 mit der vollständigen Berechnungslogik. |
+| [D1](D1_-_Datenmodell.md#expense)       | [Expense](D1_-_Datenmodell.md#expense), [ExpenseShare](D1_-_Datenmodell.md#expenseshare), Balance und SettlementProposal verwenden Geldbeträge. |
+| [D2](D2_-_Datentypenverzeichnis.md#d23-moneyamountdt)       | [MoneyAmountDT](D2_-_Datentypenverzeichnis.md#d23-moneyamountdt) und [CurrencyCodeDT](D2_-_Datentypenverzeichnis.md#d24-currencycodedt) definieren Wertebereiche und Regeln. |
 | B1       | Dialoge erfassen und zeigen Geldbeträge.                                         |
 | B3       | Exportdateien enthalten Geldbeträge und Salden.                                  |
 | N1       | Genauigkeits- und Datenkonsistenzanforderungen beziehen sich auf Geldberechnung. |
@@ -270,35 +289,30 @@ Wichtig ist dabei, dass die Rundung nachvollziehbar und deterministisch bleibt: 
 
 ### Anliegen
 
-Fehler lassen sich nie ganz vermeiden - sei es, weil jemand etwas Falsches eingibt, keine Berechtigung hat, die Datenbank gerade nicht erreichbar ist oder ein Export fehlschlägt.
+Fehler lassen sich nie ganz vermeiden. Die Anwendung muss trotzdem einheitlich reagieren, verständlich informieren und darf dabei keine Daten verlieren.
 
-Damit die Anwendung in solchen Fällen trotzdem benutzbar bleibt, muss sie einheitlich reagieren, verständlich informieren und darf dabei keine Daten verlieren.
+### Grundregeln
 
-### Strategie
-
-- Fehlermeldungen werden dort angezeigt, wo Benutzer:innen sie auch verstehen und einordnen können.
-- Technische Details werden nicht einfach ungefiltert an die Oberfläche durchgereicht.
-- Ungültige Eingaben verhindern grundsätzlich die Speicherung.
-- Fehlt eine Berechtigung, gibt es eine klare Zugriff-verweigert-Meldung.
-- Schlägt eine Speicheroperation fehl, dürfen keine unvollständigen Daten übrig bleiben.
-- Nach einem Fehler kehrt die Anwendung wieder in einen stabilen Zustand zurück.
-- Aktionen, die wiederholbar sind, können erneut ausgeführt werden.
+- Fehlermeldungen sind verständlich und werden nicht technisch angezeigt.
+- Ungültige Eingaben verhindern die Speicherung.
+- Fehlende Berechtigung führt zu einer klaren Zugriff-verweigert-Meldung.
+- Fehlgeschlagene Speicherung hinterlässt keine unvollständigen Daten.
+- Nach einem Fehler bleibt die Anwendung in einem stabilen, wiederholbaren Zustand.
 
 ### Fehlerarten
 
-| Fehlerart            | Beispiel                              | Verhalten                               |
-| -------------------- | ------------------------------------- | --------------------------------------- |
-| Validierungsfehler   | Betrag ist ungültig                   | Feldbezogene Fehlermeldung              |
-| Autorisierungsfehler | Benutzer ist kein Gruppenmitglied     | Zugriff verweigert                      |
-| Nicht gefunden       | Gruppe existiert nicht                | Fehlermeldung und Rückkehrmöglichkeit   |
-| Persistenzfehler     | Ausgabe kann nicht gespeichert werden | Keine Teilspeicherung, Fehlermeldung    |
-| Exportfehler         | PDF kann nicht erzeugt werden         | Fehlermeldung, erneuter Versuch möglich |
-| Sitzungsfehler       | Sitzung abgelaufen                    | Weiterleitung zur Anmeldung             |
+| Fehlerart            | Beispiel                          | Verhalten                             |
+| ---------------------- | ------------------------------------ | ---------------------------------------|
+| Validierungsfehler    | Betrag ungültig                    | Feldbezogene Meldung                  |
+| Autorisierungsfehler  | Kein Gruppenmitglied               | Zugriff verweigert                    |
+| Nicht gefunden        | Gruppe existiert nicht             | Meldung mit Rückkehrmöglichkeit       |
+| Persistenz-/Exportfehler | Speichern oder Export schlägt fehl | Keine Teilspeicherung, erneut möglich |
+| Sitzungsfehler        | Sitzung abgelaufen                 | Weiterleitung zur Anmeldung           |
 
 ### Regeln
 
 | ID     | Regel                                                                            |
-| ------ | -------------------------------------------------------------------------------- |
+| ------ | ------------------------------------------------------------------------------- |
 | ERR-01 | Benutzer:innen erhalten verständliche Fehlermeldungen.                           |
 | ERR-02 | Technische Fehlermeldungen werden nicht direkt angezeigt.                        |
 | ERR-03 | Bei fehlender Berechtigung wird die Aktion abgelehnt.                            |
@@ -309,7 +323,7 @@ Damit die Anwendung in solchen Fällen trotzdem benutzbar bleibt, muss sie einhe
 ### Querverweise
 
 | Baustein | Relevanz                                                                  |
-| -------- | ------------------------------------------------------------------------- |
+| -------- | --------------------------------------------------------------------------|
 | F2       | Exception-Szenarien beschreiben Fehler in Use Cases.                      |
 | B1       | Dialoge zeigen Fehlerzustände und Validierungsfehler.                     |
 | S1       | Schnittstellenfehler werden an Use Cases zurückgegeben.                   |
@@ -337,7 +351,7 @@ Dabei geht es uns nur um Fehlersuche und Betrieb - Logging ist ausdrücklich kei
 ### Mögliche Logereignisse
 
 | Ereignis                            | Zweck                                  |
-| ----------------------------------- | -------------------------------------- |
+| -------------------------------------- | ------------------------------------------|
 | Fehlgeschlagene Anmeldung           | Erkennen von Zugriffsproblemen         |
 | Zugriff verweigert                  | Nachvollziehen unberechtigter Zugriffe |
 | Fehler beim Speichern einer Ausgabe | Fehlersuche                            |
@@ -348,7 +362,7 @@ Dabei geht es uns nur um Fehlersuche und Betrieb - Logging ist ausdrücklich kei
 ### Regeln
 
 | ID     | Regel                                                                              |
-| ------ | ---------------------------------------------------------------------------------- |
+| ------ | ------------------------------------------------------------------------------------|
 | LOG-01 | Passwörter werden niemals protokolliert.                                           |
 | LOG-02 | Passwort-Hashes werden nicht protokolliert.                                        |
 | LOG-03 | Sessiontokens werden nicht protokolliert.                                          |
@@ -359,17 +373,17 @@ Dabei geht es uns nur um Fehlersuche und Betrieb - Logging ist ausdrücklich kei
 ### Querverweise
 
 | Baustein | Relevanz                                                    |
-| -------- | ----------------------------------------------------------- |
+| -------- | -------------------------------------------------------------|
 | N1       | Sicherheitsanforderungen verbieten sensible Daten in Logs.  |
 | S3       | Logdaten werden als betrieblicher Datenbereich beschrieben. |
 | F2       | Fehlerfälle in Use Cases können Logeinträge auslösen.       |
-| N2.6     | Fehlerbehandlung und Logging wirken zusammen.               |
+| [N2.6](#n26-fehlerbehandlung)     | Fehlerbehandlung und Logging wirken zusammen.               |
 
 ## N2.8 Exportsicherheit
 
 ### Anliegen
 
-CampusSplit kann Gruppendaten, Ausgaben, Kostenanteile und Salden als PDF oder CSV exportieren. Dabei muss sichergestellt sein, dass die Exporte fachlich korrekt sind und keine sensiblen oder unnötigen technischen Informationen enthalten.
+CampusSplit kann [Group](D1_-_Datenmodell.md#group)ndaten, [Expense](D1_-_Datenmodell.md#expense)n, [ExpenseShare](D1_-_Datenmodell.md#expenseshare)s und Salden als PDF oder CSV exportieren. Dabei muss sichergestellt sein, dass die Exporte fachlich korrekt sind und keine sensiblen oder unnötigen technischen Informationen enthalten.
 
 ### Strategie
 
@@ -385,14 +399,14 @@ CampusSplit kann Gruppendaten, Ausgaben, Kostenanteile und Salden als PDF oder C
 ### Exportformate
 
 | Format | Zweck                                            |
-| ------ | ------------------------------------------------ |
+| -------- | --------------------------------------------------|
 | PDF    | Lesbare Übersicht für Dokumentation und Ausdruck |
 | CSV    | Tabellarische Weiterverarbeitung                 |
 
 ### Regeln
 
 | ID         | Regel                                                                     |
-| ---------- | ------------------------------------------------------------------------- |
+| ---------- | ---------------------------------------------------------------------------|
 | EXP-SEC-01 | Nur Gruppenmitglieder dürfen Exporte ihrer Gruppe erzeugen.               |
 | EXP-SEC-02 | Exporte enthalten keine Passwörter oder Passwort-Hashes.                  |
 | EXP-SEC-03 | Exporte enthalten keine Session- oder Tokeninformationen.                 |
@@ -404,11 +418,11 @@ CampusSplit kann Gruppendaten, Ausgaben, Kostenanteile und Salden als PDF oder C
 ### Querverweise
 
 | Baustein | Relevanz                                                                   |
-| -------- | -------------------------------------------------------------------------- |
+| -------- | -----------------------------------------------------------------------------|
 | F2       | UC-12 löst den Export aus.                                                 |
 | F3       | AF-04 bereitet Exportdaten fachlich auf.                                   |
-| D1       | Exportdaten stammen aus Gruppen, Mitgliedern, Ausgaben und Kostenanteilen. |
-| D2       | ExportFormatDT, MoneyAmountDT und CurrencyCodeDT bestimmen Exportwerte.    |
+| [D1](D1_-_Datenmodell.md#group)       | Exportdaten stammen aus [Group](D1_-_Datenmodell.md#group)n, [Membership](D1_-_Datenmodell.md#membership)s, [Expense](D1_-_Datenmodell.md#expense)n und [ExpenseShare](D1_-_Datenmodell.md#expenseshare)s. |
+| [D2](D2_-_Datentypenverzeichnis.md#d27-exportformatdt)       | [ExportFormatDT](D2_-_Datentypenverzeichnis.md#d27-exportformatdt), [MoneyAmountDT](D2_-_Datentypenverzeichnis.md#d23-moneyamountdt) und [CurrencyCodeDT](D2_-_Datentypenverzeichnis.md#d24-currencycodedt) bestimmen Exportwerte. |
 | B1       | DLG-11 beschreibt den Exportdialog.                                        |
 | B3       | Beschreibt Inhalt und Struktur der PDF- und CSV-Ausgaben.                  |
 | N1       | Sicherheits- und Konsistenzanforderungen gelten auch für Exporte.          |
@@ -418,7 +432,7 @@ CampusSplit kann Gruppendaten, Ausgaben, Kostenanteile und Salden als PDF oder C
 Ein paar Querschnittskonzepte, die man sich grundsätzlich vorstellen könnte, haben wir für die erste Version von CampusSplit bewusst ausgeklammert.
 
 | Thema                       | Status           | Begründung                                                                                                                   |
-| --------------------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| ------------------------------ | ------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
 | Mehrmandantenfähigkeit      | nicht vorgesehen | CampusSplit unterscheidet nur zwischen Benutzern und Gruppen - Organisationen oder Mandanten gibt es in diesem Modell nicht. |
 | Zahlungsabwicklung          | nicht vorgesehen | CampusSplit berechnet zwar Salden, führt aber selbst keine Zahlungen aus.                                                    |
 | Bankintegration             | nicht vorgesehen | Es werden keinerlei Bankdaten verarbeitet.                                                                                   |
@@ -432,14 +446,14 @@ Wir nennen diese Punkte hier bewusst, damit klar wird: Das Fehlen dieser Funktio
 ## N2.10 Querverweise
 
 | Baustein | Relevanz für N2                                                                                                   |
-| -------- | ----------------------------------------------------------------------------------------------------------------- |
+| -------- | ---------------------------------------------------------------------------------------------------------------------|
 | P1       | Projektziele, Nichtziele und Rahmenbedingungen begrenzen die Querschnittskonzepte.                                |
 | P2       | Systemkontext zeigt, welche Nachbarsysteme von Querschnittskonzepten betroffen sind.                              |
 | F1       | Geschäftsprozess zeigt, wo Authentifizierung, Validierung, Geldberechnung und Export relevant werden.             |
 | F2       | Use Cases bilden die sichtbare Oberfläche der Querschnittskonzepte.                                               |
 | F3       | Anwendungsfunktionen setzen Geldbetragsverarbeitung, Validierung und Exportregeln fachlich um.                    |
-| D1       | Datenmodell-Invarianten bilden die Grundlage für Validierung und Autorisierung.                                   |
-| D2       | Datentypen wie MoneyAmountDT, MembershipRoleDT, SplitMethodDT und ExportFormatDT stützen die Querschnittsregeln.  |
+| [D1](D1_-_Datenmodell.md#d15-datenmodell-invarianten)       | Datenmodell-Invarianten bilden die Grundlage für Validierung und Autorisierung. |
+| [D2](D2_-_Datentypenverzeichnis.md)       | Datentypen wie [MoneyAmountDT](D2_-_Datentypenverzeichnis.md#d23-moneyamountdt), [MembershipRoleDT](D2_-_Datentypenverzeichnis.md#d25-membershiproledt), SplitMethodDT und ExportFormatDT stützen die Querschnittsregeln. |
 | B1       | Dialoge zeigen Validierungsfehler, Fehlerzustände und berechtigungsabhängige Aktionen.                            |
 | B3       | Exporte folgen den Regeln der Exportsicherheit.                                                                   |
 | S1       | Schnittstellen müssen Authentifizierung, Autorisierung, Validierung und Fehlerbehandlung berücksichtigen.         |
