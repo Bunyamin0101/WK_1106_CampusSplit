@@ -10,7 +10,7 @@ CampusSplit ist eine Webanwendung zur Verwaltung gemeinsamer Ausgaben in Gruppen
 
 Das System soll den Aufwand reduzieren, der bei gemeinsamen Ausgaben oft durch Chatnachrichten, Tabellen oder manuelle Berechnungen entsteht. Statt Beträge selbst nachzurechnen, sollen Nutzer in CampusSplit sehen können, welche Ausgaben erfasst wurden und wer wem noch Geld schuldet.
 
-CampusSplit ersetzt keine echte Zahlungsabwicklung. Die Anwendung dient dazu, gemeinsame Kosten übersichtlich zu dokumentieren, offene Beträge automatisch zu berechnen und Ausgabenübersichten bei Bedarf zu exportieren.
+CampusSplit ersetzt keine echte Zahlungsabwicklung. Die Anwendung dient dazu, gemeinsame Kosten übersichtlich zu dokumentieren, offene Beträge automatisch zu berechnen und Ausgabenübersichten bei Bedarf zu exportieren. Die fachlichen Abläufe werden in [F1 — Geschäftsprozesse](F1-geschaeftsprozesse.md) und [F2 — Anwendungsfälle](F2-anwendungsfaelle.md) genauer beschrieben.
 
 ---
 
