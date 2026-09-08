@@ -1,462 +1,417 @@
-# N2 - Querschnittskonzepte
+# N1 - Nichtfunktionale Anforderungen
 
-Manche Themen lassen sich nicht sauber einem einzelnen Baustein oder Use Case zuordnen, weil sie an mehreren Stellen im System gleichzeitig auftauchen. Solche Themen fassen wir hier als Querschnittskonzepte zusammen, damit wir sie nicht bei jedem Use Case neu erfinden müssen.
+In N1 geht es um die messbaren Qualitätsanforderungen an CampusSplit, also nicht um einzelne fachliche Funktionen, sondern um Eigenschaften, die das System als Ganzes erfüllen soll.
 
-Bei CampusSplit betrifft das vor allem sieben Bereiche: Authentifizierung, Autorisierung, Validierung, Geldbetragsverarbeitung, Fehlerbehandlung, Logging und Exportsicherheit.
+Davon abzugrenzen sind die Projektziele und Rahmenbedingungen, die bereits in [P1](P1_Ziele_und_Rahmenbedingungen.md) festgehalten wurden. N1 baut darauf auf und konkretisiert, was das für Benutzbarkeit, Performance, Zuverlässigkeit, Wartbarkeit, Sicherheit und Konformität bedeutet.
 
-Der Sinn von N2 ist, diese Konzepte einmal festzulegen, statt sie in jedem Kapitel neu und möglicherweise widersprüchlich zu beschreiben.
+Zu jeder Anforderung gehört außerdem ein Fit Criterion - daran lässt sich später prüfen, ob sie wirklich erfüllt wurde.
 
-## N2.1 Konzeptkatalog
+> **Hinweis zur Gliederung:** Die Nummerierung der folgenden Abschnitte (10 bis 17) orientiert sich am **Volere-Requirements-Schema**, einem etablierten Rahmenwerk zur Kategorisierung nichtfunktionaler Anforderungen. Die Kategorien 10 bis 17 entsprechen den dort vorgesehenen Bereichen Look-and-Feel, Benutzbarkeit, Performance/Zuverlässigkeit, Betrieb/Umgebung, Wartbarkeit/Erweiterbarkeit, Sicherheit, Sprache und Konformität.
 
-| ID                                           | Konzept                         | Kurzbeschreibung                                                       |
-| -------------------------------------------- | -------------------------------- | ---------------------------------------------------------------------- |
-| [N2.2](#n22-authentifizierung-und-sitzung)   | Authentifizierung und Sitzung   | Einheitlicher Zugriffsschutz für angemeldete Benutzer:innen            |
-| [N2.3](#n23-autorisierung-und-gruppenrechte) | Autorisierung und Gruppenrechte | Zugriff auf Gruppen und Aktionen abhängig von Mitgliedschaft und Rolle |
-| [N2.4](#n24-validierung)                     | Validierung                     | Einheitliche Prüfung von Eingaben vor Speicherung                      |
-| [N2.5](#n25-geldbetragsverarbeitung)         | Geldbetragsverarbeitung         | Centgenaue und konsistente Verarbeitung von Geldbeträgen               |
-| [N2.6](#n26-fehlerbehandlung)                | Fehlerbehandlung                | Einheitliches Verhalten bei fachlichen und technischen Fehlern         |
-| [N2.7](#n27-logging)                         | Logging                         | Nachvollziehbare Protokollierung ohne sensible Daten                   |
-| [N2.8](#n28-exportsicherheit)                | Exportsicherheit                | Sichere und konsistente Erzeugung von PDF- und CSV-Exporten            |
+## 10\. Look-and-Feel-Anforderungen
 
-## N2.2 Authentifizierung und Sitzung
+### 10a. Erscheinungsbild
 
-### Anliegen
+#### NFR-10a-01: Nutzbar auf Handy und Desktop
 
-In CampusSplit stecken sensible Informationen: wer in welcher Gruppe ist, wer wieviel ausgegeben hat und wie die Salden aussehen. Zugreifen sollen darauf nur angemeldete Benutzer:innen können.
+CampusSplit soll sowohl am Desktop als auch auf dem Smartphone vernünftig nutzbar sein.
 
-Daraus folgt direkt: Bis auf Registrierung und Anmeldung braucht jeder fachliche Use Case eine gültige Sitzung.
+Das heißt konkret: Die Anwendung passt sich an unterschiedliche Bildschirmgrößen an, und zentrale Funktionen wie Anmeldung, Gruppenauswahl, Ausgabenerfassung, Saldenanzeige und Export lassen sich bedienen, ohne dass horizontal gescrollt werden muss.
 
-### Strategie
+**Fit Criterion:**  
+Alle zentralen Dialoge aus [B1](B1_Dialogspezifikation.md) sind auf einem Smartphone-Viewport ab 375px Breite und auf einem Desktop-Viewport ab 1366px Breite vollständig bedienbar.
 
-- Registrierung und Anmeldung sind die einzigen Bereiche, die ohne Login erreichbar sind.
-- Für alle übrigen Funktionen ist eine authentifizierte Sitzung Voraussetzung.
-- Mit einer erfolgreichen Anmeldung wird automatisch eine Sitzung angelegt.
-- Über diese Sitzung weiß das System, welcher [User](D1_Datenmodell.md#user) gerade aktiv ist.
-- Meldet sich jemand ab, wird die Sitzung sofort beendet.
-- Wer nicht angemeldet ist, landet automatisch auf der Anmeldeseite.
-- Passwörter werden zu keinem Zeitpunkt im Klartext gespeichert.
-- Gespeichert wird ausschließlich ein Passwort-Hash (siehe `passwordHash` bei [User](D1_Datenmodell.md#user)).
+#### NFR-10a-02: Einheitliches Erscheinungsbild in allen Dialogen
 
-### Betroffene Use Cases
+CampusSplit muss über alle Dialoge hinweg eine konsistente Oberfläche verwenden.
 
-- UC-01 Registrieren
-- UC-02 Anmelden
-- UC-03 Abmelden
-- UC-04 Dashboard anzeigen
-- UC-05 Gruppe erstellen
-- UC-06 Gruppe anzeigen
-- UC-07 Mitglied zur Gruppe hinzufügen
-- UC-08 Ausgabe erfassen
-- UC-09 Ausgabe bearbeiten
-- UC-10 Ausgabe löschen
-- UC-11 Salden anzeigen
-- UC-12 Ausgabenübersicht exportieren
+Wiederkehrende Elemente wie Navigation, Buttons, Fehlermeldungen, Formulare, Tabellen und Karten sollen einheitlich dargestellt werden.
 
-### Regeln
+**Fit Criterion:**  
+Alle Dialoge verwenden einheitliche Bezeichnungen, einheitliche Navigationsmuster und gleichartige Darstellung für Eingabefelder, Aktionen und Fehlermeldungen.
 
-| ID      | Regel                                                                                                                  |
-| ------- | ---------------------------------------------------------------------------------------------------------------------- |
-| AUTH-01 | Ohne Anmeldung dürfen nur Registrierung und Anmeldung ausgeführt werden.                                               |
-| AUTH-02 | Nach erfolgreicher Anmeldung wird der Benutzer zum Dashboard weitergeleitet.                                           |
-| AUTH-03 | Nach Abmeldung ist kein Zugriff auf geschützte Dialoge mehr möglich.                                                   |
-| AUTH-04 | Passwörter werden nur als Hash gespeichert.                                                                            |
-| AUTH-05 | Fehlgeschlagene Anmeldungen geben keine detaillierten Informationen darüber preis, ob E-Mail oder Passwort falsch war. |
+## 11\. Benutzbarkeit und Bedienbarkeit
 
-### Querverweise
+### 11a. Einfache Bedienung
 
-| Baustein | Relevanz                                                               |
-| -------- | ---------------------------------------------------------------------- |
-| [F2](F2-anwendungsfälle.md)       | Beschreibt Registrierung, Anmeldung und Abmeldung als Use Cases.       |
-| [B1](B1_Dialogspezifikation.md)       | Beschreibt Login-, Registrierungs- und Abmeldedialoge.                 |
-| [D1](D1_Datenmodell.md#user)       | [User](D1_Datenmodell.md#user) enthält E-Mail-Adresse und Passwort-Hash. |
-| [N1](N1_Nichtfunktionale%20Anforderungen.md)       | Sicherheitsanforderungen fordern Authentifizierung und Passwortschutz. |
+#### NFR-11a-01: Ausgabe schnell erfassen können
 
-## N2.3 Autorisierung und Gruppenrechte
+Das Erfassen einer neuen Ausgabe soll für Gruppenmitglieder schnell und verständlich möglich sein.
 
-### Anliegen
+Vom Öffnen einer Gruppe bis zum Speichern einer Ausgabe sollen nur wenige Interaktionen erforderlich sein.
 
-Da CampusSplit von mehreren Personen gleichzeitig genutzt wird, muss klar geregelt sein, wer worauf zugreifen darf: Man sieht grundsätzlich nur die [Group](D1_Datenmodell.md#group)n, in denen man selbst Mitglied ist.
+**Fit Criterion:**  
+Ein angemeldeter Benutzer kann von der Gruppendetailseite aus eine einfache Ausgabe mit gleichmäßiger Aufteilung in höchstens fünf fachlichen Schritten erfassen:
 
-Innerhalb einer Gruppe gibt es außerdem noch einmal Unterschiede, denn nicht jede Aktion darf jedes Mitglied ausführen. Neue Mitglieder hinzuzufügen ist zum Beispiel den Gruppenadministrator:innen vorbehalten.
+- „Ausgabe hinzufügen" wählen
 
-Autorisierung ist dabei bewusst als **Querschnittskonzept** angelegt: Sie gilt nicht nur für einen einzelnen Use Case, sondern greift bei praktisch jeder Aktion, die sich auf eine Gruppe bezieht.
+- Ausgabendaten eingeben
 
-### Strategie
+- Beteiligte prüfen oder auswählen
 
-- Jede [Group](D1_Datenmodell.md#group) besitzt eine oder mehrere [Membership](D1_Datenmodell.md#membership)-Einträge.
-- Eine Membership verknüpft einen [User](D1_Datenmodell.md#user) mit einer Group.
-- Ob jemand auf Gruppendaten zugreifen darf, wird immer über diese Membership geprüft.
-- Rollen ([MembershipRoleDT](D2_Datentypenverzeichnis.md#d25-membershiproledt)) gelten immer nur innerhalb der jeweiligen Gruppe, nicht gruppenübergreifend.
-- Der Ersteller einer Gruppe erhält automatisch die Rolle ADMIN.
-- Alle anderen Mitglieder erhalten die Rolle MEMBER.
-- Nur ADMIN darf neue Mitglieder hinzufügen.
-- MEMBER darf Ausgaben erfassen, bearbeiten, löschen, Salden anzeigen und Exporte erzeugen.
+- Aufteilungsart bestätigen
 
-### Rollen
+- Speichern
 
-| Rolle  | Bedeutung                                               |
-| ------ | -------------------------------------------------------- |
-| ADMIN  | Gruppenadministrator mit erweiterten Verwaltungsrechten |
-| MEMBER | Normales Gruppenmitglied                                |
+#### NFR-11a-02: Salden auf einen Blick verstehen
 
-### Berechtigungen
+Die Saldenübersicht muss für Benutzer:innen ohne zusätzliche Erklärung verständlich sein.
 
-| Aktion              | ADMIN | MEMBER |
-| -------------------- | ----- | ------ |
-| Gruppe anzeigen     | ja    | ja     |
-| Ausgaben anzeigen   | ja    | ja     |
-| Ausgabe erfassen    | ja    | ja     |
-| Ausgabe bearbeiten  | ja    | ja     |
-| Ausgabe löschen     | ja    | ja     |
-| Salden anzeigen     | ja    | ja     |
-| Export erzeugen     | ja    | ja     |
-| Mitglied hinzufügen | ja    | nein   |
+Auf einen Blick muss klar sein, wer Geld bekommt und wer noch etwas schuldet, ebenso wie hoch der offene Betrag ist. Außerdem sollte deutlich werden, dass die eigentliche Zahlung außerhalb von CampusSplit stattfindet.
 
-### Betroffene Use Cases
+**Fit Criterion:**  
+Die Saldenübersicht zeigt für jedes Mitglied einen Betrag mit eindeutiger Bedeutung. Positive und negative Salden werden verständlich beschriftet, zum Beispiel „bekommt zurück" und „schuldet".
 
-Autorisierung greift in jedem Use Case, der sich auf eine bestehende Gruppe bezieht:
+### 11b. Lernanforderungen
 
-| Use Case | Anknüpfende Regel |
-| -------- | ------------------ |
-| UC-05 Gruppe erstellen | AUT-06 (Ersteller wird ADMIN, Gruppe braucht mindestens einen ADMIN) |
-| UC-06 Gruppe anzeigen | AUT-01 |
-| UC-07 Mitglied zur Gruppe hinzufügen | AUT-04 |
-| UC-08 Ausgabe erfassen | AUT-02, AUT-03 |
-| UC-09 Ausgabe bearbeiten | AUT-02, AUT-03 |
-| UC-10 Ausgabe löschen | AUT-02, AUT-03 |
-| UC-11 Salden anzeigen | AUT-01, AUT-02 |
-| UC-12 Ausgabenübersicht exportieren | AUT-01, AUT-02 |
+#### NFR-11b-01: Bedienung ohne Anleitung möglich
 
-### Regeln
+CampusSplit soll ohne Schulung oder externes Handbuch nutzbar sein.
 
-| ID     | Regel                                                                         |
-| ------ | ------------------------------------------------------------------------------ |
-| AUT-01 | Ein Benutzer darf eine Gruppe nur sehen, wenn er Mitglied dieser Gruppe ist.  |
-| AUT-02 | Ein Benutzer darf Ausgaben nur für Gruppen sehen, in denen er Mitglied ist.   |
-| AUT-03 | Ein Benutzer darf nur Ausgaben in Gruppen erfassen, in denen er Mitglied ist. |
-| AUT-04 | Nur Gruppenadministrator:innen dürfen Mitglieder hinzufügen.                  |
-| AUT-05 | Rollen gelten ausschließlich innerhalb der jeweiligen Gruppe.                 |
-| AUT-06 | Jede Gruppe muss mindestens einen Administrator besitzen.                     |
+Die wichtigsten Funktionen müssen durch Beschriftungen, Hinweise und klare Dialogführung verständlich sein.
 
-### Querverweise
+**Fit Criterion:**  
+Ein neuer Benutzer kann ohne Dokumentation ein Konto anlegen, eine Gruppe erstellen, eine Ausgabe erfassen und die Salden anzeigen.
 
-| Baustein | Relevanz                                                                          |
-| -------- | ------------------------------------------------------------------------------- |
-| [F2](F2-anwendungsfälle.md)       | UC-05 bis UC-12 setzen Mitgliedschaft oder Administratorrechte voraus.            |
-| [D1](D1_Datenmodell.md#membership)       | [Membership](D1_Datenmodell.md#membership) verbindet [User](D1_Datenmodell.md#user) und [Group](D1_Datenmodell.md#group). |
-| [D2](D2_Datentypenverzeichnis.md#d25-membershiproledt)       | [MembershipRoleDT](D2_Datentypenverzeichnis.md#d25-membershiproledt) definiert ADMIN und MEMBER. |
-| [B1](B1_Dialogspezifikation.md)       | Dialoge blenden Aktionen abhängig von Berechtigungen ein oder aus.                |
-| [N1](N1_Nichtfunktionale%20Anforderungen.md)       | Zugriffsschutz und Autorisierung werden als Sicherheitsanforderungen beschrieben. |
+### 11c. Barrierearmut
 
-## N2.4 Validierung
+#### NFR-11c-01: Bedienung per Tastatur
 
-### Anliegen
+Zentrale Dialoge müssen mit Tastatur bedienbar sein.
 
-Überall dort, wo Benutzer:innen Daten eingeben, kann auch etwas Falsches oder Unvollständiges dabei sein. Würden solche Daten ungeprüft gespeichert, hätte das direkte Folgen für Saldenberechnung und Exporte - am Ende kämen einfach falsche Zahlen heraus.
+Das betrifft vor allem Login, Registrierung, Gruppe erstellen, Ausgabe erfassen und Export erzeugen.
 
-Wichtig ist Validierung deshalb überall dort, wo Nutzer:innen etwas eintragen: bei Registrierung, Gruppenerstellung, Mitgliederverwaltung, Ausgabenerfassung, Ausgabenbearbeitung und Export.
+**Fit Criterion:**  
+Alle Pflichtfelder und Hauptaktionen der zentralen Formulare sind per Tastatur erreichbar und auslösbar.
 
-### Strategie
+## 12\. Performance, Zuverlässigkeit und Datenqualität
 
-- Eingaben werden immer vor dem Speichern geprüft, nie danach.
-- Welche Felder tatsächlich Pflichtfelder sind, ist je Bereich unterschiedlich und wird konkret in der Tabelle unten festgelegt, statt es pauschal für alle Formulare gleich zu behandeln.
-- Beträge müssen ein gültiges [MoneyAmountDT](D2_Datentypenverzeichnis.md#d23-moneyamountdt)-Format haben.
-- E-Mail-Adressen müssen ein gültiges Format haben.
-- Wer etwas in einer Gruppe tut, muss auch Mitglied dieser Gruppe sein.
-- Auch Zahler und Beteiligte einer [Expense](D1_Datenmodell.md#expense) müssen Mitglieder der Gruppe sein.
-- Die einzelnen [ExpenseShare](D1_Datenmodell.md#expenseshare)s müssen in Summe exakt den Gesamtbetrag der Ausgabe ergeben.
-- Fehlermeldungen werden verständlich direkt im betroffenen Dialog angezeigt.
-- Ist eine Eingabe ungültig, wird nichts gespeichert.
+### 12a. Geschwindigkeit und Antwortzeiten
 
-### Validierungsbereiche
+#### NFR-12a-01: Ladezeiten im Alltag
 
-Statt pauschal "Pflichtfelder dürfen nicht leer sein" auf alle Formulare anzuwenden, wird hier je Bereich konkret festgelegt, welche Felder tatsächlich verpflichtend sind:
+Normale Benutzeraktionen sollen ohne spürbare Verzögerung verarbeitet werden.
 
-| Bereich              | Pflichtfelder                                              | Optionale Felder                  |
-| --------------------- | ------------------------------------------------------------ | ----------------------------------- |
-| Registrierung        | Name, E-Mail, Passwort                                       | –                                    |
-| Anmeldung            | E-Mail, Passwort                                              | –                                    |
-| Gruppenerstellung    | Gruppenname                                                   | Beschreibung                        |
-| Mitgliederverwaltung | E-Mail-Adresse des neuen Mitglieds                            | –                                    |
-| Ausgabenerfassung    | Betrag, Zahler, mindestens eine beteiligte Person, Aufteilung | Beschreibung, Datum, Kategorie      |
-| Export               | Exportformat                                                  | Zeitraum                            |
+Dazu gehören:
 
-### Regeln
+- Dashboard anzeigen
+- Gruppe öffnen
+- Ausgabenliste anzeigen
+- Salden anzeigen
 
-| ID     | Regel                                                                  |
-| ------ | ---------------------------------------------------------------------- |
-| VAL-01 | Pflichtfelder dürfen nicht leer sein.                                  |
-| VAL-02 | E-Mail-Adressen müssen formal gültig sein.                             |
-| VAL-03 | Eine E-Mail-Adresse darf nur einem Benutzerkonto zugeordnet sein.      |
-| VAL-04 | Ein Gruppenname darf nicht leer sein.                                  |
-| VAL-05 | Der Betrag einer Ausgabe muss größer als 0.00 sein.                    |
-| VAL-06 | Der Zahler einer Ausgabe muss Mitglied der Gruppe sein.                |
-| VAL-07 | Jede beteiligte Person einer Ausgabe muss Mitglied der Gruppe sein.    |
-| VAL-08 | Mindestens eine beteiligte Person muss ausgewählt sein.                |
-| VAL-09 | Die Summe aller Kostenanteile muss exakt dem Gesamtbetrag entsprechen. |
-| VAL-10 | Ein Exportformat muss PDF oder CSV sein.                               |
+**Fit Criterion:**  
+Bei normaler Projektgröße lädt jede zentrale Ansicht innerhalb von 2 Sekunden, sofern Datenbank und Server verfügbar sind.
 
-### Fehlerdarstellung
+#### NFR-12a-02: Wie lange ein Export dauern darf
 
-Validierungsfehler werden direkt im jeweiligen Dialog angezeigt.
+Die Erzeugung einer PDF- oder CSV-Datei darf für typische Gruppen nicht unverhältnismäßig lange dauern.
+
+**Fit Criterion:**  
+Ein Export für eine Gruppe mit bis zu 100 Ausgaben wird innerhalb von 5 Sekunden erzeugt oder es wird eine verständliche Fehlermeldung angezeigt.
+
+### 12b. Kapazitätsanforderungen
+
+#### NFR-12b-01: Wie groß eine Gruppe werden darf
+
+CampusSplit ist für kleine bis mittlere Gruppen ausgelegt.
+
+Typische Gruppen sind Wohngemeinschaften, Reisegruppen oder studentische Projektgruppen.
+
+**Fit Criterion:**  
+Das System unterstützt pro Gruppe mindestens:
+
+- 20 Mitglieder
+- 500 Ausgaben
+- 2.000 Kostenanteile
+
+ohne Änderung der fachlichen Bedienlogik.
+
+### 12c. Genauigkeitsanforderungen
+
+#### NFR-12c-01: Geldbeträge müssen exakt stimmen
+
+Geldbeträge müssen in CampusSplit centgenau verarbeitet werden - alles andere führt früher oder später zu Problemen.
+
+Konkret heißt das: Ungenaue Gleitkommarechnungen dürfen nicht dazu führen, dass Salden am Ende nicht mehr stimmen.
+
+**Fit Criterion:**  
+Für jede Ausgabe gilt: Die Summe aller Kostenanteile entspricht exakt dem Gesamtbetrag der Ausgabe. Für jede Gruppe gilt: Die Summe aller Salden ergibt exakt 0,00 €.
+
+#### NFR-12c-02: Rundung bei krummen Beträgen
+
+Bei gleichmäßiger Aufteilung nicht glatt teilbarer Beträge muss die Rundung deterministisch erfolgen.
+
+**Fit Criterion:**  
+Die gleiche Eingabe führt immer zur gleichen Aufteilung. Beispiel: 10,00 € auf drei Personen ergibt immer dieselbe centgenaue Verteilung, zum Beispiel 3,34 €, 3,33 €, 3,33 €.
+
+### 12d. Zuverlässigkeit und Fehlerverhalten
+
+#### NFR-12d-01: Kein halbes Speichern bei Fehlern
+
+Beim Speichern einer Ausgabe dürfen keine unvollständigen Daten entstehen.
+
+Wenn eine Ausgabe nicht vollständig gespeichert werden kann, dürfen auch die zugehörigen Kostenanteile nicht teilweise gespeichert bleiben.
+
+**Fit Criterion:**  
+Wenn beim Speichern einer Ausgabe ein Fehler auftritt, existiert danach entweder die vollständige Ausgabe mit allen Kostenanteilen oder gar keine neue Ausgabe.
+
+#### NFR-12d-02: Fehlermeldungen, die man versteht
+
+Fehler müssen für Benutzer:innen verständlich angezeigt werden.
+
+Technische Details sollen nicht ungefiltert angezeigt werden.
+
+**Fit Criterion:**  
+Bei Fehlern wie ungültiger Eingabe, fehlender Berechtigung, nicht gefundener Gruppe oder fehlgeschlagenem Export zeigt CampusSplit eine verständliche Fehlermeldung und ermöglicht die Rückkehr zu einem stabilen Dialog.
+
+## 13\. Betriebs- und Umgebungsanforderungen
+
+### 13a. Erwartete Nutzungsumgebung
+
+#### NFR-13a-01: Unterstützte Browser
+
+CampusSplit muss in aktuellen Desktop- und mobilen Browsern nutzbar sein.
+
+**Fit Criterion:**  
+Die Anwendung ist in aktuellen Versionen von Chrome, Firefox, Safari und Edge für zentrale Funktionen nutzbar.
+
+### 13b. Technologische Umgebung
+
+#### NFR-13b-01: Aufbau als Webanwendung
+
+CampusSplit wird als Webanwendung mit getrenntem Frontend, Backend und Datenbank betrieben.
+
+**Fit Criterion:**  
+Frontend, Backend und Datenbank können getrennt gestartet und gemeinsam betrieben werden. Die Anwendung ist über den Browser erreichbar.
+
+#### NFR-13b-02: Keine Abhängigkeit von externen Diensten
+
+CampusSplit darf in der ersten Version nicht von externen Zahlungs-, Bank-, OCR-, KI- oder E-Mail-Diensten abhängig sein.
+
+**Fit Criterion:**  
+Alle Kernfunktionen wie Registrierung, Gruppenverwaltung, Ausgabenerfassung, Saldenberechnung und Export funktionieren ohne externe Drittanbieter-APIs.
+
+## 14\. Wartbarkeit und Erweiterbarkeit
+
+### 14a. Wartbarkeit
+
+#### NFR-14a-01: Fachlogik getrennt von der Oberfläche
+
+Fachliche Berechnungen dürfen nicht ausschließlich in der Benutzeroberfläche implementiert werden.
+
+Insbesondere Kostenaufteilung, Saldenberechnung und Ausgleichsvorschläge müssen unabhängig von der konkreten Darstellung testbar sein.
+
+**Fit Criterion:**  
+Die Anwendungsfunktionen aus [F3](F3-anwendungsfunktionen.md) sind durch automatisierte Tests prüfbar, ohne dass ein Browserdialog ausgeführt werden muss.
+
+#### NFR-14a-02: Klare Struktur im Repository
+
+Damit sich im Repository jeder zurechtfindet, braucht es eine nachvollziehbare Struktur.
+
+Dokumentation, Frontend, Backend und Tests sollten dafür klar voneinander getrennt liegen.
+
+**Fit Criterion:**  
+Das Repository enthält klar erkennbare Bereiche für Dokumentation, Frontend, Backend und Tests. Neue Teammitglieder können anhand der Struktur erkennen, wo Spezifikation, Architektur und Quellcode liegen.
+
+### 14b. Testbarkeit
+
+#### NFR-14b-01: Tests für die wichtigste Fachlogik
+
+Die zentrale Fachlogik muss automatisiert getestet werden.
+
+Besonders relevant sind:
+
+- Kostenanteile berechnen
+- Gruppensalden berechnen
+- Ausgleichsvorschläge berechnen
+- Validierung von Ausgaben
+
+**Fit Criterion:**  
+Für die Anwendungsfunktionen AF-01, AF-02 und AF-03 existieren automatisierte Tests mit Normalfällen, Grenzfällen und Rundungsfällen.
+
+### 14c. Erweiterbarkeit
+
+#### NFR-14c-01: Später weitere Aufteilungsarten ergänzen können
+
+Die Architektur und Fachlogik sollen spätere Erweiterungen der Aufteilungsarten ermöglichen.
+
+Die erste Version unterstützt EQUAL und CUSTOM_AMOUNT.
+
+**Fit Criterion:**  
+Eine spätere Aufteilungsart, zum Beispiel prozentuale Aufteilung, kann ergänzt werden, ohne bestehende gespeicherte Ausgaben zu beschädigen.
+
+#### NFR-14c-02: Später weitere Exportformate ergänzen können
+
+CampusSplit unterstützt in der ersten Version PDF und CSV.
+
+Die Struktur soll spätere Exportformate ermöglichen.
+
+**Fit Criterion:**  
+Ein weiteres Exportformat kann ergänzt werden, ohne die bestehenden Formate PDF und CSV fachlich zu verändern.
+
+## 15\. Sicherheitsanforderungen
+
+### 15a. Zugriffsschutz
+
+#### NFR-15a-01: Anmeldung für geschützte Funktionen nötig
+
+Alle fachlichen Funktionen außerhalb von Registrierung und Anmeldung erfordern eine authentifizierte Sitzung.
+
+**Fit Criterion:**  
+Ein nicht angemeldeter Benutzer kann keine Gruppen, Ausgaben, Salden oder Exporte abrufen oder verändern.
+
+#### NFR-15a-02: Passwörter sicher speichern
+
+Aus Sicherheitsgründen dürfen Passwörter nie im Klartext gespeichert werden.
+
+**Fit Criterion:**  
+In der Datenhaltung ist ausschließlich ein Passwort-Hash gespeichert. Das Klartextpasswort ist nach der Registrierung oder Anmeldung nicht mehr abrufbar.
+
+### 15b. Autorisierung
+
+#### NFR-15b-01: Nur eigene Gruppen einsehbar
+
+Benutzer:innen dürfen nur Gruppen sehen und bearbeiten, in denen sie Mitglied sind.
+
+**Fit Criterion:**  
+Der Zugriff auf eine Gruppe wird verweigert, wenn der Benutzer keine Mitgliedschaft in dieser Gruppe besitzt.
+
+#### NFR-15b-02: Mitglieder verwalten nur als Admin
+
+Nur Gruppenadministrator:innen dürfen neue Mitglieder zu einer Gruppe hinzufügen.
+
+**Fit Criterion:**  
+Ein Benutzer mit der Rolle MEMBER kann die Mitgliederverwaltung nicht erfolgreich ausführen.
+
+### 15c. Integrität
+
+#### NFR-15c-01: Keine ungültigen Daten im System
+
+CampusSplit muss verhindern, dass fachlich ungültige Daten gespeichert werden.
+
+**Fit Criterion:**  
+Das System lehnt Ausgaben ab, wenn:
+
+- der Betrag kleiner oder gleich 0,00 € ist
+- kein Zahler ausgewählt wurde
+- der Zahler kein Gruppenmitglied ist
+- keine beteiligte Person ausgewählt wurde
+- die Summe der Kostenanteile nicht dem Gesamtbetrag entspricht
+
+#### NFR-15c-02: Keine sensiblen Daten im Export
+
+Exportdateien dürfen keine sicherheitsrelevanten Informationen enthalten.
+
+**Fit Criterion:**  
+PDF- und CSV-Exporte enthalten keine Passwörter, Passwort-Hashes, Sessiondaten oder sicherheitsrelevanten Konfigurationswerte.
+
+### 15d. Datenschutz
+
+#### NFR-15d-01: Nur notwendige personenbezogene Daten
+
+CampusSplit verarbeitet nur personenbezogene Daten, die für die Nutzung der Anwendung erforderlich sind.
+
+Dazu zählen insbesondere Name, E-Mail-Adresse, Gruppenmitgliedschaften und die erfassten Ausgaben.
+
+**Fit Criterion:**  
+Die Registrierung erfordert keine Daten, die für die Nutzung der Anwendung nicht notwendig sind, zum Beispiel Adresse, Telefonnummer oder Bankdaten.
+
+#### NFR-15d-02: Keine Bankdaten im System
+
+CampusSplit darf keine Bankdaten speichern oder verarbeiten.
+
+**Fit Criterion:**  
+Im Datenmodell und in den Dialogen existieren keine Felder für IBAN, Kreditkartendaten, PayPal-Konto oder andere Zahlungsinformationen.
+
+### 15e. Protokollierung
+
+#### NFR-15e-01: Logs ohne sensible Daten
+
+Logausgaben dürfen keine sensiblen Informationen enthalten.
+
+**Fit Criterion:**  
+Logs enthalten keine Passwörter, Passwort-Hashes, Sessiontokens oder vollständigen Zugangsdaten.
+
+## 16\. Sprach- und Kulturvorgaben
+
+### 16a. Sprache
+
+#### NFR-16a-01: Oberfläche einheitlich auf Deutsch
+
+Die Benutzeroberfläche soll eine einheitliche Sprache verwenden.
+
+Für CampusSplit ist Deutsch als Sprache der Benutzeroberfläche vorgesehen.
+
+**Fit Criterion:**  
+Dialogtitel, Buttons, Fehlermeldungen und Hinweise sind in deutscher Sprache formuliert und innerhalb der Anwendung konsistent.
+
+### 16b. Dokumentationssprache
+
+#### NFR-16b-01: Dokumentation auf Deutsch
+
+Die Spezifikation und begleitende Projektdokumentation werden in deutscher Sprache erstellt.
+
+**Fit Criterion:**  
+Die Dokumentationsbausteine der Spezifikation sind auf Deutsch formuliert. Technische Begriffe dürfen verwendet werden, wenn sie im Glossar erklärt werden.
+
+## 17\. Konformitätsanforderungen
+
+### 17a. Git-Konventionen
+
+#### NFR-17a-01: Conventional Commits
+
+Git-Commit-Nachrichten müssen dem Conventional-Commits-Schema folgen.
 
 Beispiele:
 
-| Situation                          | Beispielmeldung                                            |
-| ------------------------------------ | -------------------------------------------------------------|
-| Gruppenname fehlt                  | „Bitte geben Sie einen Gruppennamen ein."                  |
-| Betrag ist ungültig                | „Der Betrag muss größer als 0,00 € sein."                  |
-| Keine beteiligte Person ausgewählt | „Bitte wählen Sie mindestens ein Gruppenmitglied aus."     |
-| Aufteilungssumme ist falsch        | „Die Summe der Anteile muss dem Gesamtbetrag entsprechen." |
-| Benutzer ist kein Gruppenmitglied  | „Sie haben keinen Zugriff auf diese Gruppe."               |
+feat(expense): add expense creation  
+fix(balance): correct rounding difference  
+docs(spec): add use case descriptions  
+test(balance): add settlement calculation tests
 
-### Querverweise
+**Fit Criterion:**  
+Commit-Nachrichten folgen dem Muster type(scope): description.
 
-| Baustein | Relevanz                                                                      |
-| -------- | ------------------------------------------------------------------------------- |
-| [F2](F2-anwendungsfälle.md)       | Use Cases beschreiben, wann Eingaben erfolgen.                                |
-| [F3](F3-anwendungsfunktionen.md)       | Kostenaufteilung und Saldenberechnung setzen gültige Eingaben voraus.         |
-| [D1](D1_Datenmodell.md#d15-datenmodell-invarianten)       | Datenmodell-Invarianten definieren fachlich erlaubte Zustände.                |
-| [D2](D2_Datentypenverzeichnis.md)       | Datentypen bestimmen gültige Wertebereiche.                                   |
-| [B1](B1_Dialogspezifikation.md)       | Dialoge zeigen Validierungsfehler an.                                         |
-| [N1](N1_Nichtfunktionale%20Anforderungen.md)       | Datenkonsistenz und Benutzerfreundlichkeit fordern verständliche Validierung. |
+### 17b. Dokumentationskonformität
 
-## N2.5 Geldbetragsverarbeitung
+#### NFR-17b-01: Spezifikation, Architektur und Code passen zusammen
 
-### Anliegen
+Die Artefakte müssen nachvollziehbar aufeinander aufbauen.
 
-Da es bei CampusSplit im Kern um Geld geht, muss hier besonders sauber gerechnet werden. Schon kleine Rundungsfehler summieren sich über mehrere Ausgaben hinweg und führen am Ende zu Salden, die nicht mehr stimmen. Deshalb legen wir für den gesamten Umgang mit Geldbeträgen eine einheitliche Regel fest, statt das jeder Funktion einzeln zu überlassen.
+Use Cases aus [F2](F2-anwendungsfälle.md) müssen in der Architektur und im Code wiederauffindbar sein.
 
-> **Hinweis:** Die konkrete Berechnungslogik für Kostenaufteilung, Saldenberechnung und Ausgleichsvorschläge ist sehr umfangreich und wird ausführlich in [F3-anwendungsfunktionen.md](F3-anwendungsfunktionen.md) beschrieben. Hier in N2.5 stehen nur die querschnittlichen Grundregeln, die für die Geldverarbeitung überall im System gelten.
+**Fit Criterion:**  
+Für zentrale Use Cases wie „Ausgabe erfassen", „Salden anzeigen" und „Export erzeugen" kann gezeigt werden, welche Datenobjekte, Anwendungsfunktionen, Architekturkomponenten und Codebereiche beteiligt sind.
 
-### Strategie
+## N1.1 Nicht anwendbare Volere-Bereiche
 
-- Geldbeträge werden centgenau verarbeitet ([MoneyAmountDT](D2_Datentypenverzeichnis.md#d23-moneyamountdt)).
-- Die erste Version verwendet ausschließlich Euro ([CurrencyCodeDT](D2_Datentypenverzeichnis.md#d24-currencycodedt)).
-- Beträge werden immer mit zwei Nachkommastellen dargestellt.
-- Ausgaben und Kostenanteile können nicht negativ sein.
-- Ein Saldo dagegen kann positiv, negativ oder genau null sein.
-- Berechnungen laufen deterministisch ab, also bei gleicher Eingabe immer mit demselben Ergebnis.
-- Die Kostenanteile einer Ausgabe müssen in Summe dem Gesamtbetrag entsprechen.
-- Die Summe aller Salden innerhalb einer Gruppe muss 0.00 ergeben.
+Einige nichtfunktionale Anforderungsbereiche sind für CampusSplit in der ersten Version nicht relevant.
 
-### Fachliche Bedeutung von Salden
+| Bereich                                   | Status                               | Begründung                                                              |
+| ----------------------------------------- | ------------------------------------ | ----------------------------------------------------------------------- |
+| Safety-critical Requirements              | nicht anwendbar                      | CampusSplit ist kein sicherheitskritisches System.                      |
+| Zahlungs-Compliance                       | nicht anwendbar                      | CampusSplit verarbeitet keine Zahlungen.                                |
+| Bankrechtliche Anforderungen              | nicht anwendbar                      | Es gibt keine Bank- oder Zahlungsintegration.                           |
+| Medizinische oder behördliche Regulierung | nicht anwendbar                      | Das Projekt hat keinen entsprechenden Fachkontext.                      |
+| Hochverfügbarkeit                         | nicht anwendbar                      | CampusSplit ist ein Hochschulprojekt und kein produktives Massensystem. |
+| Mehrsprachigkeit                          | nicht Bestandteil der ersten Version | Die Benutzeroberfläche ist in der ersten Version deutsch.               |
 
-| Saldo   | Bedeutung                    |
-| ------- | ------------------------------ |
-| Positiv | Mitglied bekommt Geld zurück |
-| Negativ | Mitglied schuldet Geld       |
-| 0.00    | Mitglied ist ausgeglichen    |
+##
 
-### Rundungsstrategie
+## N1.2 Querverweise
 
-Lässt sich ein Betrag bei gleichmäßiger Aufteilung nicht glatt durch die Anzahl der Personen teilen, wird trotzdem centgenau aufgeteilt - die Differenz von einem Cent bekommt einfach eine der beteiligten Personen ab.
-
-Beispiel: 10.00 € werden auf drei Personen verteilt.
-
-| Person   | Anteil |
-| -------- | ------ |
-| Person A | 3.34 € |
-| Person B | 3.33 € |
-| Person C | 3.33 € |
-
-Wichtig ist dabei, dass die Rundung nachvollziehbar und deterministisch bleibt: Bei identischer Eingabe kommt jedes Mal dieselbe Verteilung heraus. Die genaue Rechenlogik dazu steht in F3.
-
-### Regeln
-
-| ID       | Regel                                                                |
-| -------- | ----------------------------------------------------------------------|
-| MONEY-01 | Geldbeträge werden nicht mit ungenauen Gleitkommazahlen verarbeitet. |
-| MONEY-02 | Ausgaben müssen größer als 0.00 sein.                                |
-| MONEY-03 | Kostenanteile dürfen nicht negativ sein.                             |
-| MONEY-04 | Salden dürfen negativ, positiv oder null sein.                       |
-| MONEY-05 | Die Summe der Kostenanteile entspricht exakt dem Gesamtbetrag.       |
-| MONEY-06 | Die Summe aller Gruppensalden ergibt exakt 0.00.                     |
-| MONEY-07 | Alle Beträge werden in der ersten Version in Euro dargestellt.       |
-
-### Querverweise
-
-| Baustein | Relevanz                                                                         |
-| -------- | ----------------------------------------------------------------------------------|
-| [F3](F3-anwendungsfunktionen.md)       | [F3-anwendungsfunktionen.md](F3-anwendungsfunktionen.md) beschreibt AF-01, AF-02 und AF-03 mit der vollständigen Berechnungslogik. |
-| [D1](D1_Datenmodell.md#expense)       | [Expense](D1_Datenmodell.md#expense), [ExpenseShare](D1_Datenmodell.md#expenseshare), Balance und SettlementProposal verwenden Geldbeträge. |
-| [D2](D2_Datentypenverzeichnis.md#d23-moneyamountdt)       | [MoneyAmountDT](D2_Datentypenverzeichnis.md#d23-moneyamountdt) und [CurrencyCodeDT](D2_Datentypenverzeichnis.md#d24-currencycodedt) definieren Wertebereiche und Regeln. |
-| [B1](B1_Dialogspezifikation.md)       | Dialoge erfassen und zeigen Geldbeträge.                                         |
-| [B3](B3_Druckausgaben.md)       | Exportdateien enthalten Geldbeträge und Salden.                                  |
-| [N1](N1_Nichtfunktionale%20Anforderungen.md)       | Genauigkeits- und Datenkonsistenzanforderungen beziehen sich auf Geldberechnung. |
-
-## N2.6 Fehlerbehandlung
-
-### Anliegen
-
-Fehler lassen sich nie ganz vermeiden. Die Anwendung muss trotzdem einheitlich reagieren, verständlich informieren und darf dabei keine Daten verlieren.
-
-### Grundregeln
-
-- Fehlermeldungen sind verständlich und werden nicht technisch angezeigt.
-- Ungültige Eingaben verhindern die Speicherung.
-- Fehlende Berechtigung führt zu einer klaren Zugriff-verweigert-Meldung.
-- Fehlgeschlagene Speicherung hinterlässt keine unvollständigen Daten.
-- Nach einem Fehler bleibt die Anwendung in einem stabilen, wiederholbaren Zustand.
-
-### Fehlerarten
-
-| Fehlerart            | Beispiel                          | Verhalten                             |
-| ---------------------- | ------------------------------------ | ---------------------------------------|
-| Validierungsfehler    | Betrag ungültig                    | Feldbezogene Meldung                  |
-| Autorisierungsfehler  | Kein Gruppenmitglied               | Zugriff verweigert                    |
-| Nicht gefunden        | Gruppe existiert nicht             | Meldung mit Rückkehrmöglichkeit       |
-| Persistenz-/Exportfehler | Speichern oder Export schlägt fehl | Keine Teilspeicherung, erneut möglich |
-| Sitzungsfehler        | Sitzung abgelaufen                 | Weiterleitung zur Anmeldung           |
-
-### Regeln
-
-| ID     | Regel                                                                            |
-| ------ | ------------------------------------------------------------------------------- |
-| ERR-01 | Benutzer:innen erhalten verständliche Fehlermeldungen.                           |
-| ERR-02 | Technische Fehlermeldungen werden nicht direkt angezeigt.                        |
-| ERR-03 | Bei fehlender Berechtigung wird die Aktion abgelehnt.                            |
-| ERR-04 | Bei fehlerhafter Ausgabeerfassung entsteht keine Teilspeicherung.                |
-| ERR-05 | Nach einem Fehler bleibt ein stabiler Systemzustand erhalten.                    |
-| ERR-06 | Wiederholbare Aktionen wie Export oder Speichern können erneut ausgelöst werden. |
-
-### Querverweise
-
-| Baustein | Relevanz                                                                  |
-| -------- | --------------------------------------------------------------------------|
-| [F2](F2-anwendungsfälle.md)       | Exception-Szenarien beschreiben Fehler in Use Cases.                      |
-| [B1](B1_Dialogspezifikation.md)       | Dialoge zeigen Fehlerzustände und Validierungsfehler.                     |
-| [S1](S1_Nachbarsysteme.md)       | Schnittstellenfehler werden an Use Cases zurückgegeben.                   |
-| [S3](S3_Inbetriebnahme.md)       | Funktionstests prüfen zentrale Fehlerfälle nach Inbetriebnahme.           |
-| [N1](N1_Nichtfunktionale%20Anforderungen.md)       | Zuverlässigkeit und verständliche Fehlerbehandlung werden dort gefordert. |
-
-## N2.7 Logging
-
-### Anliegen
-
-Damit sich technische Fehler und wichtige Ereignisse im Nachhinein nachvollziehen lassen, braucht CampusSplit ein grundlegendes Logging.
-
-Dabei geht es uns nur um Fehlersuche und Betrieb - Logging ist ausdrücklich kein vollständiges Audit-System und ersetzt auch keine fachliche Historie der Zahlungen.
-
-### Strategie
-
-- Technische Fehler werden protokolliert, damit sie sich später nachvollziehen lassen.
-- Auch sicherheitsrelevante Ereignisse können protokolliert werden.
-- Passwörter oder Passwort-Hashes tauchen in Logeinträgen nicht auf.
-- Sessiontokens werden ebenfalls nicht protokolliert.
-- Vollständige sensible Zugangsdaten landen grundsätzlich nicht im Log.
-- Fachliche Inhalte werden nur dann protokolliert, wenn sie für die Fehlersuche nötig und gleichzeitig unkritisch sind.
-- Benutzer:innen bekommen keine technischen Logdetails zu sehen.
-
-### Mögliche Logereignisse
-
-| Ereignis                            | Zweck                                  |
-| -------------------------------------- | ------------------------------------------|
-| Fehlgeschlagene Anmeldung           | Erkennen von Zugriffsproblemen         |
-| Zugriff verweigert                  | Nachvollziehen unberechtigter Zugriffe |
-| Fehler beim Speichern einer Ausgabe | Fehlersuche                            |
-| Fehler bei Exporterzeugung          | Fehlersuche                            |
-| Fehler beim Datenbankzugriff        | Betrieb und Diagnose                   |
-| Anwendung gestartet                 | Betriebsinformation                    |
-
-### Regeln
-
-| ID     | Regel                                                                              |
-| ------ | ------------------------------------------------------------------------------------|
-| LOG-01 | Passwörter werden niemals protokolliert.                                           |
-| LOG-02 | Passwort-Hashes werden nicht protokolliert.                                        |
-| LOG-03 | Sessiontokens werden nicht protokolliert.                                          |
-| LOG-04 | Technische Fehler können mit Zeitstempel protokolliert werden.                     |
-| LOG-05 | Benutzer:innen sehen verständliche Fehlermeldungen, keine technischen Stacktraces. |
-| LOG-06 | Logs dienen nicht als fachliche Zahlungshistorie.                                  |
-
-### Querverweise
-
-| Baustein | Relevanz                                                    |
-| -------- | -------------------------------------------------------------|
-| [N1](N1_Nichtfunktionale%20Anforderungen.md)       | Sicherheitsanforderungen verbieten sensible Daten in Logs.  |
-| [S3](S3_Inbetriebnahme.md)       | Logdaten werden als betrieblicher Datenbereich beschrieben. |
-| [F2](F2-anwendungsfälle.md)       | Fehlerfälle in Use Cases können Logeinträge auslösen.       |
-| [N2.6](#n26-fehlerbehandlung)     | Fehlerbehandlung und Logging wirken zusammen.               |
-
-## N2.8 Exportsicherheit
-
-### Anliegen
-
-CampusSplit kann [Group](D1_Datenmodell.md#group)ndaten, [Expense](D1_Datenmodell.md#expense)n, [ExpenseShare](D1_Datenmodell.md#expenseshare)s und Salden als PDF oder CSV exportieren. Dabei muss sichergestellt sein, dass die Exporte fachlich korrekt sind und keine sensiblen oder unnötigen technischen Informationen enthalten.
-
-### Strategie
-
-- Exporte dürfen nur von Mitgliedern der jeweiligen Gruppe erzeugt werden.
-- Ein Export bezieht sich immer auf genau eine Gruppe.
-- Die Exportdaten werden jedes Mal aus dem aktuellen Datenbestand berechnet.
-- Die exportierten Salden müssen mit der Berechnung aus F3 übereinstimmen.
-- Passwörter, Passwort-Hashes und Sessioninformationen tauchen in keiner Exportdatei auf.
-- Technische IDs werden nur exportiert, wenn sie fachlich tatsächlich gebraucht werden.
-- Exporte verändern keine gespeicherten Daten.
-- In der ersten Version werden Exportdateien nicht dauerhaft als eigene fachliche Entität gespeichert.
-
-### Exportformate
-
-| Format | Zweck                                            |
-| -------- | --------------------------------------------------|
-| PDF    | Lesbare Übersicht für Dokumentation und Ausdruck |
-| CSV    | Tabellarische Weiterverarbeitung                 |
-
-### Regeln
-
-| ID         | Regel                                                                     |
-| ---------- | ---------------------------------------------------------------------------|
-| EXP-SEC-01 | Nur Gruppenmitglieder dürfen Exporte ihrer Gruppe erzeugen.               |
-| EXP-SEC-02 | Exporte enthalten keine Passwörter oder Passwort-Hashes.                  |
-| EXP-SEC-03 | Exporte enthalten keine Session- oder Tokeninformationen.                 |
-| EXP-SEC-04 | Exportierte Beträge werden in Euro mit zwei Nachkommastellen dargestellt. |
-| EXP-SEC-05 | Exportierte Salden stimmen mit der aktuellen Berechnung überein.          |
-| EXP-SEC-06 | Exporte führen keine Zahlungen aus.                                       |
-| EXP-SEC-07 | Exporte verändern keine gespeicherten Daten.                              |
-
-### Querverweise
-
-| Baustein | Relevanz                                                                   |
-| -------- | -----------------------------------------------------------------------------|
-| [F2](F2-anwendungsfälle.md)       | UC-12 löst den Export aus.                                                 |
-| [F3](F3-anwendungsfunktionen.md)       | AF-04 bereitet Exportdaten fachlich auf.                                   |
-| [D1](D1_Datenmodell.md#group)       | Exportdaten stammen aus [Group](D1_Datenmodell.md#group)n, [Membership](D1_Datenmodell.md#membership)s, [Expense](D1_Datenmodell.md#expense)n und [ExpenseShare](D1_Datenmodell.md#expenseshare)s. |
-| [D2](D2_Datentypenverzeichnis.md#d27-exportformatdt)       | [ExportFormatDT](D2_Datentypenverzeichnis.md#d27-exportformatdt), [MoneyAmountDT](D2_Datentypenverzeichnis.md#d23-moneyamountdt) und [CurrencyCodeDT](D2_Datentypenverzeichnis.md#d24-currencycodedt) bestimmen Exportwerte. |
-| [B1](B1_Dialogspezifikation.md)       | DLG-11 beschreibt den Exportdialog.                                        |
-| [B3](B3_Druckausgaben.md)       | Beschreibt Inhalt und Struktur der PDF- und CSV-Ausgaben.                  |
-| [N1](N1_Nichtfunktionale%20Anforderungen.md)       | Sicherheits- und Konsistenzanforderungen gelten auch für Exporte.          |
-
-## N2.9 Nicht Bestandteil von N2
-
-Ein paar Querschnittskonzepte, die man sich grundsätzlich vorstellen könnte, haben wir für die erste Version von CampusSplit bewusst ausgeklammert.
-
-| Thema                       | Status           | Begründung                                                                                                                   |
-| ------------------------------ | ------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
-| Mehrmandantenfähigkeit      | nicht vorgesehen | CampusSplit unterscheidet nur zwischen Benutzern und Gruppen - Organisationen oder Mandanten gibt es in diesem Modell nicht. |
-| Zahlungsabwicklung          | nicht vorgesehen | CampusSplit berechnet zwar Salden, führt aber selbst keine Zahlungen aus.                                                    |
-| Bankintegration             | nicht vorgesehen | Es werden keinerlei Bankdaten verarbeitet.                                                                                   |
-| Mehrwährungslogik           | nicht vorgesehen | Die erste Version verwendet ausschließlich Euro.                                                                             |
-| Vollständige Audit-Historie | nicht vorgesehen | Änderungen an Daten werden nicht als eigene fachliche Historie mitgeschrieben.                                               |
-| Echtzeit-Kommunikation      | nicht vorgesehen | Weder Live-Chat noch Echtzeit-Synchronisation gehören zum Projektumfang.                                                     |
-| E-Mail-Benachrichtigungen   | nicht vorgesehen | Ein externer E-Mail-Dienst ist nicht vorgesehen.                                                                             |
-
-Wir nennen diese Punkte hier bewusst, damit klar wird: Das Fehlen dieser Funktionen ist keine Lücke, sondern eine bewusste Entscheidung, um den Projektumfang realistisch zu halten.
-
-## N2.10 Querverweise
-
-| Baustein | Relevanz für N2                                                                                                   |
-| -------- | ---------------------------------------------------------------------------------------------------------------------|
-| [P1](P1_Ziele_und_Rahmenbedingungen.md)       | Projektziele, Nichtziele und Rahmenbedingungen begrenzen die Querschnittskonzepte.                                |
-| [P2](P2_Architekturueberblick.md)       | Systemkontext zeigt, welche Nachbarsysteme von Querschnittskonzepten betroffen sind.                              |
-| [F1](F1-geschaeftsprozesse.md)       | Geschäftsprozess zeigt, wo Authentifizierung, Validierung, Geldberechnung und Export relevant werden.             |
-| [F2](F2-anwendungsfälle.md)       | Use Cases bilden die sichtbare Oberfläche der Querschnittskonzepte.                                               |
-| [F3](F3-anwendungsfunktionen.md)       | Anwendungsfunktionen setzen Geldbetragsverarbeitung, Validierung und Exportregeln fachlich um.                    |
-| [D1](D1_Datenmodell.md#d15-datenmodell-invarianten)       | Datenmodell-Invarianten bilden die Grundlage für Validierung und Autorisierung. |
-| [D2](D2_Datentypenverzeichnis.md)       | Datentypen wie [MoneyAmountDT](D2_Datentypenverzeichnis.md#d23-moneyamountdt), [MembershipRoleDT](D2_Datentypenverzeichnis.md#d25-membershiproledt), SplitMethodDT und ExportFormatDT stützen die Querschnittsregeln. |
-| [B1](B1_Dialogspezifikation.md)       | Dialoge zeigen Validierungsfehler, Fehlerzustände und berechtigungsabhängige Aktionen.                            |
-| [B3](B3_Druckausgaben.md)       | Exporte folgen den Regeln der Exportsicherheit.                                                                   |
-| [S1](S1_Nachbarsysteme.md)       | Schnittstellen müssen Authentifizierung, Autorisierung, Validierung und Fehlerbehandlung berücksichtigen.         |
-| [S3](S3_Inbetriebnahme.md)       | Inbetriebnahme und Releases müssen Konfiguration, Datenbeständigkeit und Logging berücksichtigen.                 |
-| [N1](N1_Nichtfunktionale%20Anforderungen.md)       | Nichtfunktionale Anforderungen definieren messbare Qualitätskriterien für die hier beschriebenen Konzepte.        |
-| [E2](E2_Glossar.md)       | Glossar definiert zentrale Begriffe wie Authentifizierung, Autorisierung, Saldo, Export und Gruppenadministrator. |
+| Baustein | Relevanz für N1                                                                                                                  |
+| -------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| [P1](P1_Ziele_und_Rahmenbedingungen.md)       | Definiert Ziele, Rahmenbedingungen, Umfang und Nichtziele, aus denen Qualitätsanforderungen abgeleitet werden.                   |
+| [P2](P2_Architekturueberblick.md)       | Beschreibt die Systemlandschaft mit Browser, CampusSplit, Datenbank und Exportdateien.                                           |
+| [F1](F1-geschaeftsprozesse.md)       | Der Geschäftsprozess zeigt, welche Qualitätsanforderungen für Ausgabenerfassung, Saldenanzeige und Export relevant sind.         |
+| [F2](F2-anwendungsfälle.md)       | Use Cases konkretisieren, wo Anforderungen an Bedienbarkeit, Sicherheit und Fehlerbehandlung wirken.                             |
+| [F3](F3-anwendungsfunktionen.md)       | Kostenaufteilung, Saldenberechnung und Exportaufbereitung müssen korrekt, testbar und nachvollziehbar sein.                      |
+| [D1](D1_Datenmodell.md#d15-datenmodell-invarianten)       | Datenmodell-Invarianten stützen Anforderungen an Datenkonsistenz und Zugriffsschutz.                                             |
+| [D2](D2_Datentypenverzeichnis.md)       | Fachliche Datentypen wie MoneyAmountDT, SplitMethodDT und ExportFormatDT bestimmen Anforderungen an Genauigkeit und Validierung. |
+| [B1](B1_Dialogspezifikation.md)       | Dialoge müssen benutzbar, responsiv und verständlich sein.                                                                       |
+| [B3](B3_Druckausgaben.md)       | Exportdateien müssen konsistent, sicher und fachlich korrekt erzeugt werden.                                                     |
+| [S1](S1_Nachbarsysteme.md)       | Schnittstellen zu Browser, Datenbank und Exportdateien müssen zuverlässig und sicher genutzt werden.                             |
+| [S3](S3_Inbetriebnahme.md)       | Inbetriebnahme muss sicherstellen, dass zentrale Funktionen nach Start und Release prüfbar sind.                                 |
+| [N2](N2_Querschnittskonzepte.md)       | Querschnittskonzepte konkretisieren Authentifizierung, Autorisierung, Validierung, Fehlerbehandlung und Logging.                 |
+| [E2](E2_Glossar.md)       | Glossar erklärt zentrale Begriffe wie Saldo, Kostenanteil, Gruppe, Export und Administrator.                                     |
