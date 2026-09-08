@@ -135,7 +135,7 @@ Geldbeträge müssen in CampusSplit centgenau verarbeitet werden - alles andere 
 Konkret heißt das: Ungenaue Gleitkommarechnungen dürfen nicht dazu führen, dass Salden am Ende nicht mehr stimmen.
 
 **Fit Criterion:**  
-Für jede Ausgabe gilt: Die Summe aller Kostenanteile entspricht exakt dem Gesamtbetrag der Ausgabe. Für jede Gruppe gilt: Die Summe aller Salden ergibt exakt 0,00 €.
+Für jede Ausgabe gilt: Die Summe aller Kostenanteile entspricht exakt dem Abrechnungsbetrag (settlementAmount) der Ausgabe in Gruppenwährung. Für jede Gruppe gilt: Die Summe aller Salden ergibt exakt 0,00 in der Gruppenwährung.
 
 #### NFR-12c-02: Rundung bei krummen Beträgen
 
@@ -150,7 +150,7 @@ Die gleiche Eingabe führt immer zur gleichen Aufteilung. Beispiel: 10,00 € au
 
 Beim Speichern einer Ausgabe dürfen keine unvollständigen Daten entstehen.
 
-Wenn eine Ausgabe nicht vollständig gespeichert werden kann, dürfen auch die zugehörigen Kostenanteile nicht teilweise gespeichert bleiben.
+Wenn eine Ausgabe nicht vollständig gespeichert werden kann, dürfen auch die zugehörigen Kostenanteile nicht teilweise gespeichert bleiben. Das gilt auch, wenn bei einer Fremdwährungsausgabe kein Wechselkurs ermittelt werden konnte.
 
 **Fit Criterion:**  
 Wenn beim Speichern einer Ausgabe ein Fehler auftritt, existiert danach entweder die vollständige Ausgabe mit allen Kostenanteilen oder gar keine neue Ausgabe.
@@ -162,7 +162,7 @@ Fehler müssen für Benutzer:innen verständlich angezeigt werden.
 Technische Details sollen nicht ungefiltert angezeigt werden.
 
 **Fit Criterion:**  
-Bei Fehlern wie ungültiger Eingabe, fehlender Berechtigung, nicht gefundener Gruppe oder fehlgeschlagenem Export zeigt CampusSplit eine verständliche Fehlermeldung und ermöglicht die Rückkehr zu einem stabilen Dialog.
+Bei Fehlern wie ungültiger Eingabe, fehlender Berechtigung, nicht gefundener Gruppe, nicht erreichbarem Wechselkursdienst oder fehlgeschlagenem Export zeigt CampusSplit eine verständliche Fehlermeldung und ermöglicht die Rückkehr zu einem stabilen Dialog.
 
 ## 13\. Betriebs- und Umgebungsanforderungen
 
@@ -184,12 +184,12 @@ CampusSplit wird als Webanwendung mit getrenntem Frontend, Backend und Datenbank
 **Fit Criterion:**  
 Frontend, Backend und Datenbank können getrennt gestartet und gemeinsam betrieben werden. Die Anwendung ist über den Browser erreichbar.
 
-#### NFR-13b-02: Keine Abhängigkeit von externen Diensten
+#### NFR-13b-02: Abhängigkeit von externen Diensten auf das Nötige beschränken
 
-CampusSplit darf in der ersten Version nicht von externen Zahlungs-, Bank-, OCR-, KI- oder E-Mail-Diensten abhängig sein.
+CampusSplit darf in der ersten Version nicht von externen Zahlungs-, Bank-, OCR-, KI- oder E-Mail-Diensten abhängig sein. Ausgenommen ist der externe Wechselkursdienst, der ausschließlich zur Umrechnung von Fremdwährungsausgaben in die Gruppenwährung verwendet wird (siehe [S1](S1_Nachbarsysteme.md)).
 
 **Fit Criterion:**  
-Alle Kernfunktionen wie Registrierung, Gruppenverwaltung, Ausgabenerfassung, Saldenberechnung und Export funktionieren ohne externe Drittanbieter-APIs.
+Alle Kernfunktionen wie Registrierung, Gruppenverwaltung, Ausgabenerfassung in Gruppenwährung, Saldenberechnung und Export funktionieren ohne externe Drittanbieter-APIs. Einzige Ausnahme ist die Umrechnung von Fremdwährungsausgaben, die den in S1 beschriebenen Wechselkursdienst benötigt.
 
 ## 14\. Wartbarkeit und Erweiterbarkeit
 
@@ -225,9 +225,10 @@ Besonders relevant sind:
 - Gruppensalden berechnen
 - Ausgleichsvorschläge berechnen
 - Validierung von Ausgaben
+- Umrechnung von Fremdwährungsausgaben
 
 **Fit Criterion:**  
-Für die Anwendungsfunktionen AF-01, AF-02 und AF-03 existieren automatisierte Tests mit Normalfällen, Grenzfällen und Rundungsfällen.
+Für die Anwendungsfunktionen AF-01, AF-02 und AF-03 existieren automatisierte Tests mit Normalfällen, Grenzfällen, Rundungsfällen und Fremdwährungsfällen.
 
 ### 14c. Erweiterbarkeit
 
@@ -292,11 +293,12 @@ CampusSplit muss verhindern, dass fachlich ungültige Daten gespeichert werden.
 **Fit Criterion:**  
 Das System lehnt Ausgaben ab, wenn:
 
-- der Betrag kleiner oder gleich 0,00 € ist
+- der Betrag kleiner oder gleich 0,00 ist
 - kein Zahler ausgewählt wurde
 - der Zahler kein Gruppenmitglied ist
 - keine beteiligte Person ausgewählt wurde
-- die Summe der Kostenanteile nicht dem Gesamtbetrag entspricht
+- die Summe der Kostenanteile nicht dem Abrechnungsbetrag entspricht
+- bei einer Fremdwährungsausgabe kein Wechselkurs ermittelt werden konnte
 
 #### NFR-15c-02: Keine sensiblen Daten im Export
 
@@ -314,7 +316,7 @@ CampusSplit verarbeitet nur personenbezogene Daten, die für die Nutzung der Anw
 Dazu zählen insbesondere Name, E-Mail-Adresse, Gruppenmitgliedschaften und die erfassten Ausgaben.
 
 **Fit Criterion:**  
-Die Registrierung erfordert keine Daten, die für die Nutzung der Anwendung nicht notwendig sind, zum Beispiel Adresse, Telefonnummer oder Bankdaten.
+Die Registrierung erfordert keine Daten, die für die Nutzung der Anwendung nicht notwendig sind, zum Beispiel Adresse, Telefonnummer oder Bankdaten. An den Wechselkursdienst werden keine personenbezogenen Daten übertragen.
 
 #### NFR-15d-02: Keine Bankdaten im System
 
@@ -408,10 +410,10 @@ Einige nichtfunktionale Anforderungsbereiche sind für CampusSplit in der ersten
 | [F2](F2-anwendungsfälle.md)       | Use Cases konkretisieren, wo Anforderungen an Bedienbarkeit, Sicherheit und Fehlerbehandlung wirken.                             |
 | [F3](F3-anwendungsfunktionen.md)       | Kostenaufteilung, Saldenberechnung und Exportaufbereitung müssen korrekt, testbar und nachvollziehbar sein.                      |
 | [D1](D1_Datenmodell.md#d15-datenmodell-invarianten)       | Datenmodell-Invarianten stützen Anforderungen an Datenkonsistenz und Zugriffsschutz.                                             |
-| [D2](D2_Datentypenverzeichnis.md)       | Fachliche Datentypen wie MoneyAmountDT, SplitMethodDT und ExportFormatDT bestimmen Anforderungen an Genauigkeit und Validierung. |
+| [D2](D2_Datentypenverzeichnis.md)       | Fachliche Datentypen wie MoneyAmountDT, CurrencyCodeDT, ExchangeRateDT, SplitMethodDT und ExportFormatDT bestimmen Anforderungen an Genauigkeit und Validierung. |
 | [B1](B1_Dialogspezifikation.md)       | Dialoge müssen benutzbar, responsiv und verständlich sein.                                                                       |
 | [B3](B3_Druckausgaben.md)       | Exportdateien müssen konsistent, sicher und fachlich korrekt erzeugt werden.                                                     |
-| [S1](S1_Nachbarsysteme.md)       | Schnittstellen zu Browser, Datenbank und Exportdateien müssen zuverlässig und sicher genutzt werden.                             |
+| [S1](S1_Nachbarsysteme.md)       | Externer Wechselkursdienst muss zuverlässig und sicher genutzt werden; Ausfälle dürfen keine unvollständigen Daten erzeugen.     |
 | [S3](S3_Inbetriebnahme.md)       | Inbetriebnahme muss sicherstellen, dass zentrale Funktionen nach Start und Release prüfbar sind.                                 |
 | [N2](N2_Querschnittskonzepte.md)       | Querschnittskonzepte konkretisieren Authentifizierung, Autorisierung, Validierung, Fehlerbehandlung und Logging.                 |
 | [E2](E2_Glossar.md)       | Glossar erklärt zentrale Begriffe wie Saldo, Kostenanteil, Gruppe, Export und Administrator.                                     |
