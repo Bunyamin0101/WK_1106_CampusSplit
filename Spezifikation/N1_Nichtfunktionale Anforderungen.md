@@ -2,7 +2,7 @@
 
 In N1 geht es um die messbaren Qualitätsanforderungen an CampusSplit, also nicht um einzelne fachliche Funktionen, sondern um Eigenschaften, die das System als Ganzes erfüllen soll.
 
-Davon abzugrenzen sind die Projektziele und Rahmenbedingungen, die bereits in P1 festgehalten wurden. N1 baut darauf auf und konkretisiert, was das für Benutzbarkeit, Performance, Zuverlässigkeit, Wartbarkeit, Sicherheit und Konformität bedeutet.
+Davon abzugrenzen sind die Projektziele und Rahmenbedingungen, die bereits in [P1](P1_Ziele_und_Rahmenbedingungen.md) festgehalten wurden. N1 baut darauf auf und konkretisiert, was das für Benutzbarkeit, Performance, Zuverlässigkeit, Wartbarkeit, Sicherheit und Konformität bedeutet.
 
 Zu jeder Anforderung gehört außerdem ein Fit Criterion - daran lässt sich später prüfen, ob sie wirklich erfüllt wurde.
 
@@ -19,7 +19,7 @@ CampusSplit soll sowohl am Desktop als auch auf dem Smartphone vernünftig nutzb
 Das heißt konkret: Die Anwendung passt sich an unterschiedliche Bildschirmgrößen an, und zentrale Funktionen wie Anmeldung, Gruppenauswahl, Ausgabenerfassung, Saldenanzeige und Export lassen sich bedienen, ohne dass horizontal gescrollt werden muss.
 
 **Fit Criterion:**  
-Alle zentralen Dialoge aus B1 sind auf einem Smartphone-Viewport ab 375px Breite und auf einem Desktop-Viewport ab 1366px Breite vollständig bedienbar.
+Alle zentralen Dialoge aus [B1](B1_Dialogspezifikation.md) sind auf einem Smartphone-Viewport ab 375px Breite und auf einem Desktop-Viewport ab 1366px Breite vollständig bedienbar.
 
 #### NFR-10a-02: Einheitliches Erscheinungsbild in allen Dialogen
 
@@ -202,7 +202,7 @@ Fachliche Berechnungen dürfen nicht ausschließlich in der Benutzeroberfläche 
 Insbesondere Kostenaufteilung, Saldenberechnung und Ausgleichsvorschläge müssen unabhängig von der konkreten Darstellung testbar sein.
 
 **Fit Criterion:**  
-Die Anwendungsfunktionen aus F3 sind durch automatisierte Tests prüfbar, ohne dass ein Browserdialog ausgeführt werden muss.
+Die Anwendungsfunktionen aus [F3](F3-anwendungsfunktionen.md) sind durch automatisierte Tests prüfbar, ohne dass ein Browserdialog ausgeführt werden muss.
 
 #### NFR-14a-02: Klare Struktur im Repository
 
@@ -378,7 +378,7 @@ Commit-Nachrichten folgen dem Muster type(scope): description.
 
 Die Artefakte müssen nachvollziehbar aufeinander aufbauen.
 
-Use Cases aus F2 müssen in der Architektur und im Code wiederauffindbar sein.
+Use Cases aus [F2](F2-anwendungsfälle.md) müssen in der Architektur und im Code wiederauffindbar sein.
 
 **Fit Criterion:**  
 Für zentrale Use Cases wie „Ausgabe erfassen", „Salden anzeigen" und „Export erzeugen" kann gezeigt werden, welche Datenobjekte, Anwendungsfunktionen, Architekturkomponenten und Codebereiche beteiligt sind.
@@ -402,16 +402,16 @@ Einige nichtfunktionale Anforderungsbereiche sind für CampusSplit in der ersten
 
 | Baustein | Relevanz für N1                                                                                                                  |
 | -------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| P1       | Definiert Ziele, Rahmenbedingungen, Umfang und Nichtziele, aus denen Qualitätsanforderungen abgeleitet werden.                   |
-| P2       | Beschreibt die Systemlandschaft mit Browser, CampusSplit, Datenbank und Exportdateien.                                           |
-| F1       | Der Geschäftsprozess zeigt, welche Qualitätsanforderungen für Ausgabenerfassung, Saldenanzeige und Export relevant sind.         |
-| F2       | Use Cases konkretisieren, wo Anforderungen an Bedienbarkeit, Sicherheit und Fehlerbehandlung wirken.                             |
-| F3       | Kostenaufteilung, Saldenberechnung und Exportaufbereitung müssen korrekt, testbar und nachvollziehbar sein.                      |
-| D1       | Datenmodell-Invarianten stützen Anforderungen an Datenkonsistenz und Zugriffsschutz.                                             |
-| D2       | Fachliche Datentypen wie MoneyAmountDT, SplitMethodDT und ExportFormatDT bestimmen Anforderungen an Genauigkeit und Validierung. |
-| B1       | Dialoge müssen benutzbar, responsiv und verständlich sein.                                                                       |
-| B3       | Exportdateien müssen konsistent, sicher und fachlich korrekt erzeugt werden.                                                     |
-| S1       | Schnittstellen zu Browser, Datenbank und Exportdateien müssen zuverlässig und sicher genutzt werden.                             |
-| S3       | Inbetriebnahme muss sicherstellen, dass zentrale Funktionen nach Start und Release prüfbar sind.                                 |
-| N2       | Querschnittskonzepte konkretisieren Authentifizierung, Autorisierung, Validierung, Fehlerbehandlung und Logging.                 |
-| E2       | Glossar erklärt zentrale Begriffe wie Saldo, Kostenanteil, Gruppe, Export und Administrator.                                     |
+| [P1](P1_Ziele_und_Rahmenbedingungen.md)       | Definiert Ziele, Rahmenbedingungen, Umfang und Nichtziele, aus denen Qualitätsanforderungen abgeleitet werden.                   |
+| [P2](P2_Architekturueberblick.md)       | Beschreibt die Systemlandschaft mit Browser, CampusSplit, Datenbank und Exportdateien.                                           |
+| [F1](F1-geschaeftsprozesse.md)       | Der Geschäftsprozess zeigt, welche Qualitätsanforderungen für Ausgabenerfassung, Saldenanzeige und Export relevant sind.         |
+| [F2](F2-anwendungsfälle.md)       | Use Cases konkretisieren, wo Anforderungen an Bedienbarkeit, Sicherheit und Fehlerbehandlung wirken.                             |
+| [F3](F3-anwendungsfunktionen.md)       | Kostenaufteilung, Saldenberechnung und Exportaufbereitung müssen korrekt, testbar und nachvollziehbar sein.                      |
+| [D1](D1_Datenmodell.md#d15-datenmodell-invarianten)       | Datenmodell-Invarianten stützen Anforderungen an Datenkonsistenz und Zugriffsschutz.                                             |
+| [D2](D2_Datentypenverzeichnis.md)       | Fachliche Datentypen wie MoneyAmountDT, SplitMethodDT und ExportFormatDT bestimmen Anforderungen an Genauigkeit und Validierung. |
+| [B1](B1_Dialogspezifikation.md)       | Dialoge müssen benutzbar, responsiv und verständlich sein.                                                                       |
+| [B3](B3_Druckausgaben.md)       | Exportdateien müssen konsistent, sicher und fachlich korrekt erzeugt werden.                                                     |
+| [S1](S1_Nachbarsysteme.md)       | Schnittstellen zu Browser, Datenbank und Exportdateien müssen zuverlässig und sicher genutzt werden.                             |
+| [S3](S3_Inbetriebnahme.md)       | Inbetriebnahme muss sicherstellen, dass zentrale Funktionen nach Start und Release prüfbar sind.                                 |
+| [N2](N2_Querschnittskonzepte.md)       | Querschnittskonzepte konkretisieren Authentifizierung, Autorisierung, Validierung, Fehlerbehandlung und Logging.                 |
+| [E2](E2_Glossar.md)       | Glossar erklärt zentrale Begriffe wie Saldo, Kostenanteil, Gruppe, Export und Administrator.                                     |
