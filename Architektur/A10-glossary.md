@@ -1,4 +1,4 @@
-# 12 Glossar
+# 10 Glossar
 
 Dieses Glossar definiert Begriffe, die in der Architekturdokumentation von CampusSplit verwendet werden. Fachliche Domänenbegriffe wie Ausgabe, Gruppe, Mitglied, Saldo, Debitor, Kreditor, Kostenanteil oder Ausgleichsvorschlag sind verbindlich im Spezifikationsglossar [`E2 — Glossar`](../Spezifikation/E2_Glossar.md) beschrieben. Dieses Kapitel ergänzt vor allem Architektur- und Implementierungsbegriffe.
 
