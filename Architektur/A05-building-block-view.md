@@ -48,13 +48,13 @@ flowchart LR
 
 | Nr. | Baustein | Geplante Code-Artefakte | Verantwortung |
 |---|---|---|---|
-| 5.1.1 | Browser Frontend | `frontend/src/` | Dialoge anzeigen, Eingaben erfassen, API aufrufen, Ergebnisse darstellen. |
-| 5.1.2 | REST API / Web Layer | `backend/src/main/java/.../controller/`, `.../dto/` | HTTP-Endpunkte, Request/Response-DTOs, Validierung, Statuscodes. |
-| 5.1.3 | Application Services | `.../service/` | Use-Case-nahe Abläufe koordinieren. |
-| 5.1.4 | Domain Model und Money Logic | `.../domain/`, `.../money/`, `.../balance/` | Fachliche Regeln, Kostenaufteilung, Salden, Ausgleichsvorschläge. |
-| 5.1.5 | Persistence | `.../entity/`, `.../repository/`, `backend/src/main/resources/db/` | Dauerhafte Speicherung über PostgreSQL. |
-| 5.1.6 | Export Module | `.../export/` | PDF- und CSV-Export erzeugen. |
-| 5.1.7 | Currency Integration | `.../currency/` | Frankfurter API anbinden und Wechselkurse kapseln. |
+| [5.1.1](#511-blackbox-browser-frontend) | Browser Frontend | `frontend/src/` | Dialoge anzeigen, Eingaben erfassen, API aufrufen, Ergebnisse darstellen. |
+| [5.1.2](#512-blackbox-rest-api--web-layer) | REST API / Web Layer | `backend/src/main/java/.../controller/`, `.../dto/` | HTTP-Endpunkte, Request/Response-DTOs, Validierung, Statuscodes. |
+| [5.1.3](#513-blackbox-application-services) | Application Services | `.../service/` | Use-Case-nahe Abläufe koordinieren. |
+| [5.1.4](#514-blackbox-domain-model-und-money-logic) | Domain Model und Money Logic | `.../domain/`, `.../money/`, `.../balance/` | Fachliche Regeln, Kostenaufteilung, Salden, Ausgleichsvorschläge. |
+| [5.1.5](#515-blackbox-persistence) | Persistence | `.../entity/`, `.../repository/`, `backend/src/main/resources/db/` | Dauerhafte Speicherung über PostgreSQL. |
+| [5.1.6](#516-blackbox-export-module) | Export Module | `.../export/` | PDF- und CSV-Export erzeugen. |
+| [5.1.7](#517-blackbox-currency-integration) | Currency Integration | `.../currency/` | Frankfurter API anbinden und Wechselkurse kapseln. |
 
 ### Lokale Beziehungen
 
@@ -376,14 +376,3 @@ flowchart LR
 | HTTP Client | Spring WebClient oder RestClient | Führt synchronen HTTPS-Aufruf aus. |
 | Response Mapper | Mapping-Komponente | Wandelt JSON-Antwort in `ExchangeRate` um. |
 | Error Mapper | Fehlerkomponente | Wandelt technische Fehler in fachlich verständliche Fehler um. |
-
-Wichtige Invarianten:
-
-| ID | Invariante |
-|---|---|
-| FX-A01 | Der Adapter wird nur aufgerufen, wenn Originalwährung und Gruppenwährung verschieden sind. |
-| FX-A02 | Es werden nur Währungscodes und Datum übertragen, keine personenbezogenen Daten. |
-| FX-A03 | Ohne gültige Antwort wird kein Wechselkurs erfunden. |
-| FX-A04 | Eine Fremdwährungsausgabe wird nicht unvollständig gespeichert. |
-| FX-A05 | Providerdetails bleiben im Adapter und gelangen nicht in Domain Services. |
-
