@@ -1,6 +1,8 @@
 # 7 Verteilungssicht
 
-Die Verteilungssicht ordnet die Bausteine aus [A05 — Building Block View](A05-building-block-view.md) den vorgesehenen Ausführungsumgebungen zu. Für CampusSplit sind vor allem zwei Umgebungen relevant: die lokale Entwicklungsumgebung und eine Review-/Demo-Umgebung für Präsentation und Abnahme im Hochschulprojekt.
+Die Verteilungssicht ordnet die wichtigsten Architekturbausteine von CampusSplit den vorgesehenen Ausführungsumgebungen zu. Für CampusSplit sind vor allem zwei Umgebungen relevant: die lokale Entwicklungsumgebung und eine Review-/Demo-Umgebung für Präsentation und Abnahme im Hochschulprojekt.
+
+CampusSplit wird in der aktuellen Teamentscheidung als Spring-Boot-Webanwendung mit Thymeleaf umgesetzt. Das bedeutet: Die Anwendung besteht nicht aus einem getrennten React-/Vite-Frontend und einem separaten Backend, sondern aus einer Spring-Boot-Anwendung, die HTML-Seiten serverseitig mit Thymeleaf rendert, fachliche Aktionen verarbeitet, Daten in PostgreSQL speichert und bei Bedarf externe Wechselkurse abruft.
 
 Eine produktive Hochverfügbarkeitsumgebung ist nicht Bestandteil des Projektumfangs. CampusSplit wird als Hochschulprojekt entwickelt und muss nachvollziehbar lokal startbar, testbar und präsentierbar sein. Die Inbetriebnahmebedingungen sind fachlich in [`S3 — Inbetriebnahme`](../Spezifikation/S3_Inbetriebnahme.md) beschrieben.
 
@@ -10,81 +12,81 @@ Eine produktive Hochverfügbarkeitsumgebung ist nicht Bestandteil des Projektumf
 
 ### 7.1.1 Lokale Entwicklungsumgebung
 
-Die lokale Entwicklungsumgebung unterstützt die arbeitsteilige Entwicklung von Frontend, Backend und Datenbank.
+Die lokale Entwicklungsumgebung unterstützt die Entwicklung einer Spring-Boot-Anwendung mit Java 21, Thymeleaf und PostgreSQL.
 
 ```mermaid
 flowchart LR
     DEV[Entwicklerrechner]
+    BROWSER[Webbrowser]
 
     subgraph LOCAL[Lokale Entwicklungsumgebung]
-        FE[React Frontend\nVite Dev Server]
-        BE[Spring Boot Backend\nJava 21]
+        APP[Spring Boot Anwendung\nJava 21 + Thymeleaf]
         DB[(PostgreSQL Datenbank)]
     end
 
     FX[Frankfurter API]
     GIT[GitHub Repository]
 
-    DEV -->|Browser| FE
-    FE -->|HTTP/JSON REST| BE
-    BE -->|JDBC/JPA| DB
-    BE -->|HTTPS/JSON bei Fremdwährung| FX
+    DEV -->|öffnet Anwendung im Browser| BROWSER
+    BROWSER -->|HTTP/HTML/Formulare| APP
+    APP -->|HTML-Seiten, Weiterleitungen, Dateiantworten| BROWSER
+    APP -->|JDBC/JPA| DB
+    APP -->|HTTPS/JSON bei Fremdwährung| FX
     DEV -->|Git Push/Pull| GIT
 ```
 
 | Element | Realisierung | Zweck |
 |---|---|---|
-| Entwicklerrechner | Lokale Installation oder IDE-Umgebung | Entwicklung, Test und Start der Anwendung. |
-| React Frontend | Vite Dev Server, z. B. Port `5173` | Darstellung der Dialoge aus B1. |
-| Spring Boot Backend | Java 21, z. B. Port `8080` | REST-API, Fachlogik, Validierung, Autorisierung, Export. |
-| PostgreSQL | Lokale PostgreSQL-Instanz oder Docker-Container | Dauerhafte Speicherung der Anwendungsdaten. |
+| Entwicklerrechner | Lokale IDE-Umgebung, z. B. IntelliJ IDEA oder VS Code | Entwicklung, Test und Start der Anwendung. |
+| Webbrowser | Browser des Benutzers/Entwicklers | Nutzung der durch Thymeleaf gerenderten HTML-Oberfläche. |
+| Spring-Boot-Anwendung | Java 21, Spring MVC, Thymeleaf, Spring Data JPA, Spring Security | Weboberfläche, Controller, Fachlogik, Validierung, Autorisierung, Persistenz, Export und Wechselkursanbindung. |
+| PostgreSQL | Lokale PostgreSQL-Datenbank | Dauerhafte Speicherung der fachlichen Anwendungsdaten. |
 | Frankfurter API | Externer REST-Dienst | Wechselkurse für Fremdwährungsausgaben. |
 | GitHub | Repository des Projektteams | Versionierung von Spezifikation, Architektur und Code. |
 
 **Zuordnung der Bausteine:**
 
-| Architekturbaustein aus A05 | Laufzeitort |
+| Architekturbaustein | Laufzeitort |
 |---|---|
-| Browser Frontend | Browser des Nutzers, ausgeliefert durch Vite im Entwicklungsmodus. |
-| REST API / Web Layer | Spring-Boot-Prozess. |
-| Application Services | Spring-Boot-Prozess. |
-| Domain Model und Money Logic | Spring-Boot-Prozess. |
+| Thymeleaf-Oberfläche | Wird von der Spring-Boot-Anwendung serverseitig gerendert und im Browser angezeigt. |
+| Web Controller | Spring-Boot-Prozess; nimmt Seitenaufrufe und Formularaktionen entgegen. |
+| Application Services | Spring-Boot-Prozess; koordiniert fachliche Abläufe. |
+| Domain Model und Money Logic | Spring-Boot-Prozess; berechnet Kostenanteile, Salden und Ausgleichsvorschläge. |
 | Persistence | Spring-Boot-Prozess plus PostgreSQL-Datenbank. |
-| Export Module | Spring-Boot-Prozess; erzeugt PDF/CSV als Antwortdatei. |
-| Currency Integration | Spring-Boot-Prozess; ruft externen Wechselkursdienst auf. |
+| Export Module | Spring-Boot-Prozess; erzeugt PDF/CSV als Dateiantwort. |
+| Currency Integration | Spring-Boot-Prozess; ruft den externen Wechselkursdienst auf. |
 
 ---
 
 ### 7.1.2 Review- und Demo-Umgebung
 
-Für Vorführung, Review und Abgabe kann CampusSplit lokal oder auf einem einfachen Server gestartet werden. Entscheidend ist, dass alle Kernfunktionen demonstrierbar sind: Registrierung/Anmeldung, Gruppen, Mitglieder, Ausgaben, Salden, Ausgleichsvorschläge und Export.
+Für Vorführung, Review und Abgabe kann CampusSplit lokal oder auf einem einfachen Server gestartet werden. Entscheidend ist, dass alle Kernfunktionen demonstrierbar sind: Registrierung/Anmeldung, Gruppen, Mitglieder, Ausgaben, Salden, Ausgleichsvorschläge, Fremdwährung und Export.
 
 ```mermaid
 flowchart TD
     USER[Prüfer / Nutzer]
     BROWSER[Webbrowser]
 
-    subgraph DEMO[Demo-Umgebung]
-        APPFE[Gebautes React Frontend]
-        APPBE[Spring Boot Backend]
-        APPDB[(PostgreSQL)]
+    subgraph DEMO[Review- und Demo-Umgebung]
+        APP[Spring Boot Anwendung\nThymeleaf + Fachlogik]
+        DB[(PostgreSQL)]
     end
 
     FX[Frankfurter API]
     FILE[PDF / CSV Download]
 
     USER --> BROWSER
-    BROWSER --> APPFE
-    APPFE -->|REST| APPBE
-    APPBE --> APPDB
-    APPBE -->|bei Fremdwährung| FX
-    APPBE --> FILE
+    BROWSER -->|HTTP/HTML/Formulare| APP
+    APP -->|HTML-Seiten| BROWSER
+    APP -->|JDBC/JPA| DB
+    APP -->|bei Fremdwährung| FX
+    APP -->|Dateiantwort| FILE
     FILE --> USER
 ```
 
 | Aspekt | Festlegung |
 |---|---|
-| Startbarkeit | Backend, Frontend und Datenbank müssen mit dokumentierten Schritten startbar sein. |
+| Startbarkeit | Spring-Boot-Anwendung und PostgreSQL müssen mit dokumentierten Schritten startbar sein. |
 | Testdaten | Für die Präsentation können Beispielbenutzer, Gruppen, Ausgaben und Salden vorbereitet werden. |
 | Externe API | Internetzugriff ist nur für Fremdwährungsausgaben nötig. Ausgaben in Gruppenwährung funktionieren ohne Wechselkursdienst. |
 | Export | PDF/CSV wird auf Anforderung erzeugt und heruntergeladen. |
@@ -92,134 +94,113 @@ flowchart TD
 
 ---
 
-### 7.1.3 Optionale Containerisierung
-
-Docker ist für CampusSplit sinnvoll, aber nicht zwingend fachlicher Bestandteil. Eine optionale Docker-Compose-Umgebung kann die Entwicklung vereinfachen.
-
-```mermaid
-flowchart LR
-    B[Browser]
-
-    subgraph COMPOSE[Docker Compose optional]
-        FE[frontend\nReact/Vite]
-        BE[backend\nSpring Boot]
-        DB[(db\nPostgreSQL)]
-    end
-
-    FX[Frankfurter API]
-
-    B --> FE
-    FE --> BE
-    BE --> DB
-    BE --> FX
-```
-
-| Service | Aufgabe | Typische Ports |
-|---|---|---|
-| `frontend` | React/Vite Entwicklungsserver | `5173` |
-| `backend` | Spring Boot REST API | `8080` |
-| `db` | PostgreSQL Datenbank | `5432` |
-
-Vorteil der Containerisierung ist eine einheitliche Entwicklungsumgebung. Nachteil ist zusätzlicher Einrichtungsaufwand. Für das Hochschulprojekt reicht auch eine lokale PostgreSQL-Installation, solange die Startanleitung eindeutig ist.
-
----
-
 ## 7.2 Infrastruktur Level 2 — Build und Start
 
-### 7.2.1 Backend
+### 7.2.1 Anwendung
 
 | Schritt | Ergebnis |
 |---|---|
-| Java 21 bereitstellen | Spring Boot kann gestartet werden. |
-| Abhängigkeiten über Maven laden | Backend-Build ist reproduzierbar. |
-| Konfiguration setzen | Datenbankzugang, Ports und optionale API-Konfiguration stehen bereit. |
-| Datenbankschema erzeugen oder migrieren | Tabellen für Benutzer, Gruppen, Mitgliedschaften, Ausgaben usw. existieren. |
-| Backend starten | REST-API ist erreichbar. |
+| Java 21 bereitstellen | Die Spring-Boot-Anwendung kann gestartet werden. |
+| PostgreSQL bereitstellen | Die Datenbank ist erreichbar und kann fachliche Daten speichern. |
+| Abhängigkeiten über Maven laden | Der Build ist reproduzierbar. |
+| Konfiguration setzen | Datenbankzugang, Port und Wechselkurs-API-Basis-URL stehen bereit. |
+| Datenbankschema erzeugen oder migrieren | Tabellen für Benutzer, Gruppen, Mitgliedschaften, Ausgaben, Kostenanteile usw. existieren. |
+| Anwendung starten | CampusSplit ist im Browser erreichbar. |
 
 Beispielhafte technische Struktur:
 
 ```text
-backend/
+campussplit/
 ├── pom.xml
 ├── src/main/java/de/thm/campussplit/
-└── src/main/resources/application.yml
+├── src/main/resources/application.yml
+├── src/main/resources/templates/
+└── src/main/resources/static/
 ```
 
----
-
-### 7.2.2 Frontend
-
-| Schritt | Ergebnis |
+| Verzeichnis | Zweck |
 |---|---|
-| Node.js bereitstellen | Frontend-Abhängigkeiten können installiert werden. |
-| Abhängigkeiten installieren | React/Vite-Projekt ist buildfähig. |
-| API-Basis-URL konfigurieren | Frontend erreicht das Backend. |
-| Entwicklungsserver oder Build starten | Dialoge sind im Browser nutzbar. |
-
-Beispielhafte technische Struktur:
-
-```text
-frontend/
-├── package.json
-├── src/
-└── vite.config.ts
-```
+| `src/main/java/de/thm/campussplit/` | Java-Code für Controller, Services, Entities, Repositories und Konfiguration. |
+| `src/main/resources/templates/` | Thymeleaf-Templates für HTML-Seiten. |
+| `src/main/resources/static/` | Statische Dateien wie CSS, JavaScript und Bilder. |
+| `src/main/resources/application.yml` | Konfiguration der Anwendung. |
 
 ---
 
-### 7.2.3 Datenbank
+### 7.2.2 Datenbank
 
 | Aspekt | Festlegung |
 |---|---|
 | Datenbankprodukt | PostgreSQL |
-| Zugriff | Backend über JDBC/Spring Data JPA |
-| Persistente Daten | Benutzer, Gruppen, Mitgliedschaften, Ausgaben, Kostenanteile, Kategorien, ggf. Wechselkursdaten |
+| Zugriff | Spring Boot über JDBC/Spring Data JPA |
+| Persistente Daten | Benutzer, Gruppen, Mitgliedschaften, Ausgaben, Kostenanteile, Kategorien und verwendete Wechselkursdaten |
 | Nicht persistent | Berechnete Salden und Ausgleichsvorschläge; sie werden aus Ausgaben und Kostenanteilen berechnet. |
 | Migration aus Altsystem | Nicht vorgesehen; siehe S2. |
 
 ---
 
-## 7.3 Konfiguration
+## 7.3 Ports und lokale Erreichbarkeit
+
+Die konkreten Ports können in der Implementierung angepasst werden. Für Entwicklung und Präsentation sollten sie jedoch einheitlich dokumentiert werden.
+
+| Komponente | Typischer Port | Bemerkung |
+|---|---:|---|
+| Spring-Boot-Anwendung | `8080` | Einstiegspunkt für Browseraufrufe, Formularaktionen, Login, Gruppen, Ausgaben, Salden und Export. |
+| PostgreSQL | `5432` | Nur für die Anwendung bzw. lokale Entwicklung erreichbar, nicht direkt für Endnutzer. |
+| Frankfurter API | `443` | Externer HTTPS-Aufruf nur bei Fremdwährungsausgaben. |
+
+Da Thymeleaf serverseitig durch Spring Boot gerendert wird, ist kein separater Vite- oder React-Entwicklungsserver notwendig.
+
+---
+
+## 7.4 Konfiguration
 
 Die Konfiguration muss zwischen Entwicklungsumgebung und Demo-Umgebung unterscheidbar sein. Sensible Werte dürfen nicht im Repository stehen.
 
 | Konfiguration | Beispiel | Ort |
 |---|---|---|
-| Backend-Port | `SERVER_PORT=8080` | Umgebungsvariable oder `application.yml` |
-| Datenbank-URL | `jdbc:postgresql://localhost:5432/campussplit` | Umgebungsvariable |
-| Datenbankbenutzer | `campussplit` | Umgebungsvariable |
-| Datenbankpasswort | nicht im Klartext im Repo | Umgebungsvariable |
-| Frontend API URL | `http://localhost:8080/api` | `.env` im Frontend |
+| Anwendungsport | `SERVER_PORT=8080` | Umgebungsvariable oder `application.yml` |
+| Datenbank-URL | `jdbc:postgresql://localhost:5432/campussplit` | Umgebungsvariable oder lokales Profil |
+| Datenbankbenutzer | `campussplit` | Umgebungsvariable oder lokales Profil |
+| Datenbankpasswort | nicht im Klartext im Repository | Umgebungsvariable |
 | Wechselkurs-API Base URL | `https://api.frankfurter.dev` | Backend-Konfiguration |
+| Aktives Spring-Profil | `dev`, `test` oder `demo` | Umgebungsvariable oder Startparameter |
+
+Beispielhafte Startlogik:
+
+```text
+java -jar campussplit.jar --spring.profiles.active=demo
+```
 
 ---
 
-## 7.4 Persistente und nicht persistente Flächen
+## 7.5 Persistente und nicht persistente Flächen
 
 | Bereich | Persistent? | Begründung |
 |---|---:|---|
 | PostgreSQL-Datenbank | Ja | Fachliche Daten müssen dauerhaft erhalten bleiben. |
+| Verwendeter Wechselkurs je Fremdwährungsausgabe | Ja | Der zur Abrechnung genutzte Kurs muss nachvollziehbar bleiben. |
 | Logdateien | Teilweise | Fehleranalyse; keine sensiblen Inhalte. |
-| PDF/CSV-Dateien | Nein | Werden bei Bedarf erzeugt und heruntergeladen, nicht dauerhaft verwaltet. |
-| Frontend-Build-Artefakte | Nein | Können aus dem Quellcode neu erzeugt werden. |
-| Wechselkursantworten | Optional | Können gespeichert werden, wenn Nachvollziehbarkeit für Fremdwährungsausgaben erforderlich ist. |
+| PDF/CSV-Dateien | Nein | Werden bei Bedarf erzeugt und heruntergeladen, aber nicht dauerhaft als eigene Fachobjekte verwaltet. |
+| API-Rohantwort des Wechselkursdienstes | Optional | Für die fachliche Nachvollziehbarkeit reicht der verwendete Kurs; die komplette Rohantwort muss nicht zwingend gespeichert werden. |
 
 ---
 
-## 7.5 Qualitäts- und Sicherheitsaspekte
+## 7.6 Qualitäts- und Sicherheitsaspekte
 
 | Thema | Umsetzung in der Verteilung |
 |---|---|
-| Gruppenzugriff | Zugriff wird im Backend geprüft; Frontend-Ausblendung allein genügt nicht. |
+| Gruppenzugriff | Zugriff wird in der Spring-Boot-Anwendung geprüft; ausgeblendete Schaltflächen allein reichen nicht aus. |
 | Passwörter | Passwort-Hashes werden in der Datenbank gespeichert, niemals Klartext. |
-| Externe API | Frankfurter API wird nur vom Backend aufgerufen. |
-| Personenbezogene Daten | Werden nicht an den Wechselkursdienst übertragen. |
-| Export | Exportdateien enthalten keine Passwörter, Tokens oder technischen Interna. |
+| Externe API | Die Frankfurter API wird nur serverseitig durch die Anwendung aufgerufen. |
+| Personenbezogene Daten | An den Wechselkursdienst werden keine Namen, E-Mails, Gruppennamen, Beschreibungen oder Mitgliederlisten übertragen. |
+| Export | Exportdateien enthalten keine Passwörter, Tokens, Sessiondaten oder technischen Interna. |
 | Datenkonsistenz | Speichervorgänge für Ausgaben und Kostenanteile müssen transaktional erfolgen. |
+| Konfiguration | Datenbankpasswörter und andere sensible Werte stehen nicht im Repository. |
 
 ---
 
-## 7.6 Abgrenzung
+## 7.7 Abgrenzung
 
 Nicht Bestandteil dieser Verteilungssicht sind:
 
@@ -227,9 +208,10 @@ Nicht Bestandteil dieser Verteilungssicht sind:
 - automatische Skalierung,
 - Cloud-native Infrastruktur,
 - Kubernetes,
+- Docker-Compose-Architektur,
 - Zahlungsprovider-Deployment,
 - Bankenschnittstellen,
 - OCR- oder KI-Infrastruktur,
 - detaillierte Betriebshandbücher.
 
-Diese Themen sind für den Projektumfang von CampusSplit nicht notwendig.
+Diese Themen sind für den Projektumfang von CampusSplit nicht notwendig oder gehören nicht zum aktuellen Stand der Teamentscheidung.
