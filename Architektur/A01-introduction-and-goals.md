@@ -8,9 +8,9 @@ Dieses Kapitel fasst die Anforderungen und Qualitätsziele zusammen, die die Arc
 
 ## 1.1 Anforderungsüberblick
 
-Der fachliche Kern von CampusSplit besteht aus folgendem Ablauf: Eine angemeldete Person erstellt oder öffnet eine Gruppe, fügt bei Bedarf Mitglieder hinzu und erfasst gemeinsame Ausgaben. Für jede Ausgabe werden Zahler, Betrag, Währung, Datum, Beteiligte und Aufteilungsart festgelegt. CampusSplit berechnet daraus Kostenanteile, Gruppensalden sowie Ausgleichsvorschläge zwischen Debitoren und Kreditoren. Optional kann eine Ausgabenübersicht als PDF oder CSV exportiert werden.
+CampusSplit ermöglicht angemeldeten Nutzern, Gruppen zu verwalten und gemeinsame Ausgaben zu erfassen. Aus den Angaben zu Betrag, Währung, Zahler und Beteiligten berechnet das System Kostenanteile, Salden und Ausgleichsvorschläge. Fremdwährungen werden bei Bedarf automatisch in die Gruppenwährung umgerechnet. Zusätzlich können Übersichten als PDF oder CSV exportiert werden.
 
-Die Verarbeitung erfolgt synchron durch Benutzeraktionen. CampusSplit führt keine echten Zahlungen aus, besitzt keine Bankintegration, keine Chatfunktion, keine OCR-Belegerkennung und keine KI-Funktion zur Laufzeit.
+CampusSplit führt keine echten Zahlungen aus. Weitere fachliche Abgrenzungen und Nichtziele sind in [`P1 — Ziele und Rahmenbedingungen`](../Spezifikation/P1_Ziele_und_Rahmenbedingungen.md) | und Rahmenbedingungen festgelegt.
 
 Autoritative Quellen in der Spezifikation:
 
@@ -34,20 +34,20 @@ Autoritative Quellen in der Spezifikation:
 
 ## 1.2 Qualitätsziele
 
-Die folgenden Qualitätsziele leiten die wichtigsten Architekturentscheidungen. Sie sind bewusst auf die Anforderungen des Hochschulprojekts und den fachlichen Kern von CampusSplit zugeschnitten.
+Die folgenden Qualitätsziele leiten die wichtigsten Architekturentscheidungen. Sie sind auf die Anforderungen des Hochschulprojekts und den fachlichen Kern von CampusSplit zugeschnitten.
 
 | ID | Qualitätsziel | ISO-25010-Kategorie | Szenario / Messbarkeit | Architekturwirkung |
 |---|---|---|---|---|
-| QG-01 | **Korrekte Geldberechnung** | Functional Suitability / Reliability | Kostenanteile und Salden sind centgenau; die Summe aller Kostenanteile entspricht dem Abrechnungsbetrag; die Summe aller Salden einer Gruppe ergibt 0,00. | Geldlogik wird zentral im Backend gekapselt und automatisiert testbar gemacht. |
-| QG-02 | **Nachvollziehbare Salden** | Usability / Functional Suitability | Benutzer erkennen eindeutig, wer Geld schuldet und wer Geld zurückbekommt. | Debitoren, Kreditoren und Ausgleichsvorschläge werden als eigene fachliche Konzepte modelliert. |
-| QG-03 | **Sicherer Gruppenzugriff** | Security | Benutzer sehen nur Gruppen, in denen sie Mitglied sind; nur Administratoren können Mitglieder hinzufügen. | Authentifizierung und Autorisierung werden backendseitig geprüft, nicht nur im Frontend ausgeblendet. |
-| QG-04 | **Wartbare und verständliche Struktur** | Maintainability | Teammitglieder können ihren Bereich erklären und ändern, ohne die gesamte Anwendung zu verstehen. | Trennung in Frontend, REST-API, Services, Domäne, Persistenz und Exportmodul. |
-| QG-05 | **Responsive Webnutzung** | Usability / Portability | Zentrale Funktionen sind auf Desktop und mobilen Browsern nutzbar. | Frontend wird als browserbasierte React-Anwendung umgesetzt. |
-| QG-06 | **Robuster Umgang mit externer API** | Reliability / Maintainability | Fällt der Wechselkursdienst aus, wird keine Fremdwährungsausgabe mit erfundenem Kurs gespeichert. | Wechselkursdienst wird über einen eigenen Adapter gekapselt; Fehler werden kontrolliert behandelt. |
-| QG-07 | **Einfacher Betrieb im Projektkontext** | Portability / Maintainability | Das System ist lokal startbar und für Review, Entwicklung und Präsentation nachvollziehbar betreibbar. | Klare Konfiguration, dokumentierte Startschritte und getrennte Komponenten. |
-| QG-08 | **Export ohne sensible Daten** | Security / Compatibility | PDF- und CSV-Export enthalten keine Passwörter, Tokens oder technischen Interna. | Exportdaten werden fachlich aufbereitet und sicherheitsrelevante Daten ausgeschlossen. |
+| QG-01 | **Korrekte Geldberechnung** | Functional Suitability / Reliability | Kostenanteile, Währungsumrechnungen und Salden sind centgenau; die Summe aller Kostenanteile entspricht dem Abrechnungsbetrag und die Summe aller Salden einer Gruppe ergibt 0,00. | Die Geld- und Berechnungslogik wird zentral umgesetzt und automatisiert testbar gemacht. |
+| QG-02 | **Nachvollziehbare Salden** | Usability / Functional Suitability | Benutzer erkennen eindeutig, wer Geld schuldet und wer Geld zurückbekommt. | Debitoren, Kreditoren und Ausgleichsvorschläge werden als eigene fachliche Konzepte berücksichtigt. |
+| QG-03 | **Sicherer Gruppenzugriff** | Security | Benutzer sehen nur Gruppen, in denen sie Mitglied sind; nur Administratoren können Mitglieder hinzufügen. | Authentifizierung und Autorisierung werden serverseitig geprüft. |
+| QG-04 | **Wartbare und verständliche Struktur** | Maintainability | Teammitglieder können einzelne Bereiche ändern und nachvollziehen, ohne die gesamte Anwendung kennen zu müssen. | Fachlogik, Benutzeroberfläche, Persistenz und Export werden klar voneinander getrennt. |
+| QG-05 | **Responsive Webnutzung** | Usability / Portability | Zentrale Funktionen sind auf Desktop und mobilen Browsern nutzbar. | Die Benutzeroberfläche wird für unterschiedliche Bildschirmgrößen ausgelegt. |
+| QG-06 | **Robuster Umgang mit dem Wechselkursdienst** | Reliability / Maintainability | Ist der Wechselkursdienst nicht erreichbar, wird keine Fremdwährungsausgabe mit einem ungültigen oder erfundenen Kurs umgerechnet. | Der Wechselkursdienst wird klar von der fachlichen Berechnungslogik getrennt angebunden und Fehler werden kontrolliert behandelt. |
+| QG-07 | **Einfacher Betrieb im Projektkontext** | Portability / Maintainability | Das System ist lokal startbar und für Entwicklung, Review und Präsentation nachvollziehbar betreibbar. | Konfiguration und Startschritte werden verständlich dokumentiert. |
+| QG-08 | **Export ohne sensible Daten** | Security / Compatibility | PDF- und CSV-Exporte enthalten keine Passwörter, Sitzungsdaten oder technischen Interna. | Exportdaten werden fachlich aufbereitet und sensible Daten ausgeschlossen. |
 
-QG-01 und QG-02 sind die wichtigsten fachlichen Qualitätsziele: Wenn Kostenanteile, Salden und Ausgleichsvorschläge nicht korrekt oder nicht nachvollziehbar sind, erfüllt CampusSplit seinen Kernzweck nicht.
+QG-01 und QG-02 sind besonders wichtig, da korrekte und nachvollziehbare Berechnungen den Kern von CampusSplit bilden. Zusätzlich müssen Gruppendaten geschützt und Fehler bei der Währungsumrechnung kontrolliert behandelt werden.
 
 QG-03, QG-06 und QG-08 schützen die Vertrauenswürdigkeit der Anwendung: Gruppendaten dürfen nicht fremden Personen sichtbar werden, externe API-Fehler dürfen keine falschen Abrechnungen erzeugen und Exporte dürfen keine sensiblen Daten enthalten.
 
@@ -55,31 +55,31 @@ QG-03, QG-06 und QG-08 schützen die Vertrauenswürdigkeit der Anwendung: Gruppe
 
 ## 1.3 Stakeholder
 
-| Rolle | Bezug zur Architektur | Architekturerwartung |
-|---|---|---|
-| Gast | Nutzt Registrierung und Anmeldung. | Einfacher Einstieg, verständliche Fehlermeldungen, keine unnötige Komplexität. |
-| Nutzer / Gruppenmitglied | Nutzt Gruppen, Ausgaben, Salden und Export. | Korrekte Berechnung, übersichtliche Bedienung, Zugriff nur auf eigene Gruppen. |
-| Gruppenadministrator | Verwaltet Gruppenmitglieder. | Klare Rechteprüfung und verständliche Verwaltungsfunktionen. |
-| Entwicklungsteam | Plant, implementiert, testet und präsentiert die Anwendung. | Verständliche Struktur, klare Verantwortlichkeiten, testbare Fachlogik. |
-| Dozent / Prüfer | Bewertet Spezifikation, Architektur und Implementierung. | Nachvollziehbarer Zusammenhang zwischen Spezifikation, Architekturentscheidungen und Code. |
-| Datenbank | Speichert fachliche Daten dauerhaft. | Konsistente Datenstruktur, kontrollierte Zugriffe, keine unvollständigen Speicherzustände. |
-| Frankfurter Wechselkursdienst | Liefert Wechselkurse bei Fremdwährungsausgaben. | Klar abgegrenzter REST-Aufruf ohne personenbezogene Daten. |
+| Rolle | Architekturerwartung |
+|---|---|
+| Gast | Einfacher Einstieg über Registrierung und Anmeldung. |
+| Nutzer / Gruppenmitglied | Korrekte Berechnungen, verständliche Bedienung und geschützter Zugriff auf Gruppendaten. |
+| Gruppenadministrator | Verlässliche Verwaltung von Mitgliedern und Gruppenrechten. |
+| Entwicklungsteam | Verständliche Struktur, klare Verantwortlichkeiten und testbare Fachlogik. |
+| Dozent / Prüfer | Nachvollziehbarer Zusammenhang zwischen Spezifikation, Architektur und Implementierung. |
+
+Technische Systeme und externe Dienste werden im Systemkontext in A03 beschrieben.
 
 ---
 
 ## 1.4 Architekturtreiber
 
-Die folgenden Punkte beeinflussen die Architektur besonders stark:
+Die folgenden Punkte beeinflussen die Architektur von CampusSplit besonders stark:
 
 | Treiber | Konsequenz für die Architektur |
 |---|---|
-| Gemeinsame Ausgaben müssen centgenau berechnet werden | Zentrale Geldlogik im Backend; keine Berechnung nur im Frontend. |
-| Benutzer dürfen nur eigene Gruppen sehen | Autorisierung muss bei jeder gruppenbezogenen Backend-Anfrage geprüft werden. |
-| Frontend und Backend sind getrennt | Kommunikation erfolgt über eine REST-API. |
-| Daten müssen dauerhaft gespeichert werden | Relationale Datenbank mit klaren Entitäten und Beziehungen. |
-| PDF/CSV-Export ist Teil des Umfangs | Eigenes Exportmodul oder klar abgegrenzte Exportlogik. |
-| Fremdwährungsausgaben benötigen Wechselkurse | Externe REST-Schnittstelle wird isoliert angebunden. |
-| Hochschulprojekt mit begrenzter Zeit | MVP-orientierte Architektur ohne unnötige Zusatzdienste. |
+| Gemeinsame Ausgaben müssen centgenau berechnet werden | Die Geld- und Berechnungslogik wird zentral umgesetzt und automatisiert getestet. |
+| Benutzer dürfen nur auf eigene Gruppen zugreifen | Berechtigungen müssen bei allen gruppenbezogenen Zugriffen geprüft werden. |
+| Browserbasierte Nutzung | CampusSplit muss über einen aktuellen Webbrowser nutzbar sein. |
+| Daten müssen dauerhaft gespeichert werden | Fachliche Daten werden in einer relationalen Datenbank gespeichert. |
+| PDF- und CSV-Export ist Teil des Umfangs | Die Exportfunktion wird klar von der übrigen Fachlogik abgegrenzt. |
+| Fremdwährungsausgaben müssen in die Gruppenwährung umgerechnet werden | Ein externer Wechselkursdienst wird über eine klar abgegrenzte Schnittstelle angebunden. |
+| Hochschulprojekt mit begrenzter Zeit | Die Architektur konzentriert sich auf die für den MVP notwendigen Funktionen. |
 
 ---
 
