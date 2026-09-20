@@ -27,6 +27,7 @@ CampusSplit ersetzt keine echte Zahlungsabwicklung. Die Anwendung dokumentiert g
 | Z-07 | Kreditoren und Debitoren werden verständlich angezeigt. |
 | Z-08 | Ausgabenübersichten können exportiert werden. |
 | Z-09 | Die Anwendung soll einfach bedienbar sein. |
+| Z-10 | Fremdwährungsausgaben können für die Berechnung automatisch in die Gruppenwährung umgerechnet werden. |
 
 Ein Kreditor ist ein Gruppenmitglied, das Geld zurückbekommt. Ein Debitor ist ein Gruppenmitglied, das noch Geld schuldet. Die Berechnung dieser Beträge wird in [F3 — Anwendungsfunktionen](F3-anwendungsfunktionen.md) beschrieben.
 
@@ -74,7 +75,7 @@ Einige Funktionen werden in der ersten Version bewusst nicht umgesetzt. Dadurch 
 | NZ-02 | Bankanbindung | Für die Grundfunktion nicht notwendig. |
 | NZ-03 | Mobile App | Eine Webanwendung reicht aus. |
 | NZ-04 | Chatfunktion | Kommunikation ist nicht der Schwerpunkt. |
-| NZ-05 | Mehrere Währungen | Die erste Version nutzt nur Euro. |
+| NZ-05 | Komplexe Mehrwährungsverwaltung | Eine Ausgabe kann in einer anderen Währung erfasst und automatisch in die Gruppenwährung umgerechnet werden. Eine manuelle Pflege von Wechselkursen oder mehrere Gruppenwährungen gleichzeitig sind nicht vorgesehen. |
 | NZ-06 | OCR-Erkennung von Belegen | Würde den Umfang zu stark erhöhen. |
 | NZ-07 | Datenmigration | CampusSplit wird neu entwickelt. |
 | NZ-08 | KI-Funktionen | KI ist kein Bestandteil der ersten Version. |
