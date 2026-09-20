@@ -1,1 +1,48 @@
 target/
+!.mvn/wrapper/maven-wrapper.jar
+!checkstyle.xml
+
+# Log-Dateien & Crashes
+*.log
+*.log.*
+*.sys
+
+# ==========================================
+# Umgebungsvariablen & Secrets
+# ==========================================
+.env
+.env.local
+.env.*.local
+
+# ==========================================
+# Betriebssystem-spezifische Dateien
+# ==========================================
+# macOS
+.DS_Store
+.AppleDouble
+.lsbundle
+._*
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+Desktop.ini
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# ==========================================
+# Datenbanken & Sonstiges
+# ==========================================
+*.db
+*.mv.db
+*.trace.db
