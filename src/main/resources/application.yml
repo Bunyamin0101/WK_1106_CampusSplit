@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: CampusSplit
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/campussplit}
+    username: ${DB_USER:campussplit}
+    password: ${DB_PASSWORD:}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  mvc:
+    format:
+      date: iso
+server:
+  port: ${SERVER_PORT:8080}
+  servlet:
+    session:
+      timeout: 30m
+      cookie:
+        http-only: true
+        same-site: lax
+  error:
+    include-message: never
+    include-stacktrace: never
+campussplit:
+  currency:
+    base-url: ${FRANKFURTER_BASE_URL:https://api.frankfurter.dev}
