@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Gruppe')}">
+</head>
+<body>
+<header th:replace="~{fragments :: nav}">
+</header>
+<main>
+<a th:href="@{/dashboard}">← Meine Gruppen</a>
+<div class="heading">
+<div>
+<span class="eyebrow" th:text="'GRUPPENWÄHRUNG · ' + ${summary.group.currency}">
+</span>
+<h1 th:text="${summary.group.name}">
+</h1>
+<p th:text="${summary.group.description}">
+</p>
+</div>
+<a class="button" th:href="@{/groups/{id}/expenses/new(id=${summary.group.id})}">+ Ausgabe erfassen</a>
+</div>
+<p class="notice" th:if="${message}" th:text="${message}" role="status">
+</p>
+<section class="columns">
+<article>
+<h2>Salden</h2>
+<p>Positiv: bekommt zurück · Negativ: schuldet</p>
+<div class="balance" th:each="b : ${summary.balances}">
+<span th:text="${b.name}">
+</span>
+<strong th:class="${b.amount.signum() &lt; 0 ? 'negative' : 'positive'}" th:text="${b.amount} + ' ' + ${summary.group.currency}">
+</strong>
+</div>
+</article>
+<article>
+<h2>Debitor → Kreditor</h2>
+<p th:if="${#lists.isEmpty(summary.settlements)}">Alle Salden sind ausgeglichen.</p>
+<div class="balance" th:each="s : ${summary.settlements}">
+<span th:text="${s.from} + ' → ' + ${s.to}">
+</span>
+<strong th:text="${s.amount} + ' ' + ${summary.group.currency}">
+</strong>
+</div>
+<small>Ausgleichsvorschläge, keine ausgeführten Zahlungen.</small>
+</article>
+</section>
+<section>
+<h2>Ausgaben</h2>
+<p class="empty" th:if="${#lists.isEmpty(summary.expenses)}">Noch keine Ausgaben. Erfasse euren ersten gemeinsamen Einkauf.</p>
+<article class="expense" th:each="e : ${summary.expenses}">
+<div class="heading">
+<div>
+<span class="muted" th:text="${e.expenseDate}">
+</span>
+<h3 th:text="${e.description}">
+</h3>
+<p>
+<span th:text="${e.paidBy.name}">
+</span> hat bezahlt <span th:if="${e.category != null}" th:text="' · ' + ${e.category.name}">
+</span>
+</p>
+</div>
+<strong class="amount" th:text="${e.settlementAmount} + ' ' + ${summary.group.currency}">
+</strong>
+</div>
+<p th:if="${e.exchangeRate != null}">
+<span th:text="${e.originalAmount} + ' ' + ${e.originalCurrency}">
+</span> · Kurs <span th:text="${e.exchangeRate}">
+</span> vom <span th:text="${e.rateDate}">
+</span>
+</p>
+<div class="shares">
+<span class="pill" th:each="s : ${e.shares}" th:text="${s.user.name} + ': ' + ${s.shareAmount} + ' ' + ${summary.group.currency}">
+</span>
+</div>
+<div class="actions">
+<a th:href="@{/groups/{g}/expenses/{e}/edit(g=${summary.group.id},e=${e.id})}">Bearbeiten</a>
+<form th:action="@{/groups/{g}/expenses/{e}/delete(g=${summary.group.id},e=${e.id})}" method="post">
+<input type="hidden" name="version" th:value="${e.version}">
+<button class="quiet danger">Ausgabe löschen</button>
+</form>
+</div>
+</article>
+</section>
+<section class="columns">
+<article>
+<h2>Mitglieder</h2>
+<div class="balance" th:each="m : ${summary.members}">
+<span th:text="${m.user.name}">
+</span>
+<small th:text="${m.role.name() == 'ADMIN' ? 'Administrator' : 'Mitglied'}">
+</small>
+</div>
+<form th:if="${summary.admin}" th:action="@{/groups/{id}/members(id=${summary.group.id})}" method="post">
+<label>Registriertes Mitglied hinzufügen<input type="email" name="email" placeholder="name@beispiel.de" required maxlength="254">
+</label>
+<button class="secondary">Hinzufügen</button>
+</form>
+</article>
+<article>
+<h2>Abrechnung exportieren</h2>
+<p>Mit Ausgaben, Kostenanteilen, Salden und Ausgleichsvorschlägen.</p>
+<form th:action="@{/groups/{id}/export(id=${summary.group.id})}" method="get">
+<div class="columns">
+<label>Von (optional)<input type="date" name="from">
+</label>
+<label>Bis (optional)<input type="date" name="to">
+</label>
+</div>
+<label>Format<select name="format">
+<option value="pdf">PDF</option>
+<option value="csv">CSV-Dateien als ZIP</option>
+</select>
+</label>
+<button class="secondary">Herunterladen</button>
+</form>
+<small>Bei Zeitraumwahl beziehen sich auch Salden und Vorschläge nur auf diese Ausgaben.</small>
+</article>
+</section>
+</main>
+<footer th:replace="~{fragments :: footer}">
+</footer>
+</body>
+</html>

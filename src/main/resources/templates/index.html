@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Gemeinsam fair teilen')}">
+</head>
+<body>
+<header th:replace="~{fragments :: nav}">
+</header>
+<main>
+<section class="hero">
+<span class="eyebrow">FÜR WG, REISE &amp; CAMPUS</span>
+<h1>Zusammen erleben.<br>
+<em>Fair aufteilen.</em>
+</h1>
+<p>Ein Einkauf, viele Beteiligte. Behalte gemeinsame Ausgaben im Blick und sieh auf einen Blick, wer wem wie viel schuldet.</p>
+<div class="actions">
+<a class="button" th:href="@{/register}">Kostenlos starten ↗</a>
+<a class="button secondary" th:href="@{/login}">Anmelden</a>
+</div>
+</section>
+<section class="cards">
+<article>
+<span class="step">01</span>
+<h2>Gruppe erstellen</h2>
+<p>Für eure WG, den nächsten Urlaub oder euer Projekt.</p>
+</article>
+<article>
+<span class="step">02</span>
+<h2>Ausgaben teilen</h2>
+<p>Gleichmäßig oder mit individuellen Kostenanteilen.</p>
+</article>
+<article>
+<span class="step">03</span>
+<h2>Überblick behalten</h2>
+<p>Klare Salden und nachvollziehbare Ausgleichsvorschläge.</p>
+</article>
+</section>
+</main>
+<footer th:replace="~{fragments :: footer}">
+</footer>
+</body>
+</html>

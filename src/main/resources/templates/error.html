@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Aktion nicht möglich')}">
+</head>
+<body>
+<header th:replace="~{fragments :: nav}">
+</header>
+<main>
+<section class="narrow">
+<span class="eyebrow">AKTION NICHT MÖGLICH</span>
+<h1>Das hat nicht geklappt.</h1>
+<p class="notice error" th:text="${message ?: 'Bitte prüfe deine Eingaben oder versuche es später erneut.'}">
+</p>
+<a class="button" th:href="@{/dashboard}">Zu meinen Gruppen</a>
+</section>
+</main>
+<footer th:replace="~{fragments :: footer}">
+</footer>
+</body>
+</html>

@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Neue Gruppe')}">
+</head>
+<body>
+<header th:replace="~{fragments :: nav}">
+</header>
+<main>
+<section class="narrow">
+<a th:href="@{/dashboard}">← Meine Gruppen</a>
+<h1>Neue Gruppe</h1>
+<form th:action="@{/groups}" method="post" th:object="${form}">
+<div th:replace="~{fragments :: errors}">
+</div>
+<label>Gruppenname<input th:field="*{name}" maxlength="100" required placeholder="z. B. WG Sonnenallee">
+</label>
+<label>Beschreibung<textarea th:field="*{description}" maxlength="500">
+</textarea>
+</label>
+<label>Gruppenwährung<input th:field="*{currency}" maxlength="3" pattern="[A-Z]{3}" required list="currencies">
+</label>
+<datalist id="currencies">
+<option value="EUR">
+</option>
+<option value="USD">
+</option>
+<option value="GBP">
+</option>
+<option value="CHF">
+</option>
+</datalist>
+<small>ISO-Währungscode, z. B. EUR. Die Gruppenwährung bleibt nach Erstellung fest.</small>
+<button>Gruppe erstellen</button>
+</form>
+</section>
+</main>
+<footer th:replace="~{fragments :: footer}">
+</footer>
+</body>
+</html>
