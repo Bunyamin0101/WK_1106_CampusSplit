@@ -1,4 +1,8 @@
 spring:
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 11MB
   application:
     name: CampusSplit
   datasource:
@@ -24,5 +28,9 @@ server:
     include-message: never
     include-stacktrace: never
 campussplit:
+  google:
+    enabled: ${GOOGLE_LOGIN_ENABLED:false}
+    client-id: ${GOOGLE_CLIENT_ID:}
+    client-secret: ${GOOGLE_CLIENT_SECRET:}
   currency:
     base-url: ${FRANKFURTER_BASE_URL:https://api.frankfurter.dev}
