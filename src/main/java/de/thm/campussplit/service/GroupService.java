@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional(readOnly = true)
 public class GroupService {
+  @jakarta.persistence.PersistenceContext private jakarta.persistence.EntityManager em;
   private final GroupRepository groups;
   private final MembershipRepository members;
   private final UserRepository users;
@@ -65,6 +66,18 @@ public class GroupService {
     membership.setRole(Role.ADMIN);
     members.save(membership);
     return group;
+  }
+
+  @Transactional
+  public void setArchived(Long groupId, boolean archived, String actor) {
+    var membership = requireMember(groupId, actor);
+    if (membership.getRole() != Role.ADMIN)
+      throw new AccessDeniedException(
+          "Nur Gruppenadministratoren dürfen Gruppen archivieren oder wiederherstellen.");
+    var group = membership.getGroup();
+    em.lock(group, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
+    if (group.isArchived() != archived)
+      group.setArchivedAt(archived ? java.time.Instant.now() : null);
   }
 
   @Transactional
