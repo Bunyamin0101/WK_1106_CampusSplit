@@ -60,11 +60,11 @@ public class ExpenseService {
     var rows =
         expenses.findByGroupIdOrderByExpenseDateDescIdDesc(groupId).stream()
             .filter(
-                e ->
-                    (from == null || !e.getExpenseDate().isBefore(from))
-                        && (to == null || !e.getExpenseDate().isAfter(to)))
+                expense ->
+                    (from == null || !expense.getExpenseDate().isBefore(from))
+                        && (to == null || !expense.getExpenseDate().isAfter(to)))
             .toList();
-    rows.forEach(e -> e.getShares().size());
+    rows.forEach(expense -> expense.getShares().size());
     var payments =
         repayments.findByGroupIdOrderByPaymentDateDescIdDesc(groupId).stream()
             .filter(
@@ -90,18 +90,18 @@ public class ExpenseService {
 
   public ExpenseCommand editForm(Long groupId, Long id, String actor) {
     groups.requireMember(groupId, actor);
-    var e = find(groupId, id);
+    var expense = find(groupId, id);
     var form = new ExpenseCommand();
-    form.setDescription(e.getDescription());
-    form.setAmount(e.getOriginalAmount());
-    form.setCurrency(e.getOriginalCurrency());
-    form.setDate(e.getExpenseDate());
-    form.setPayerId(e.getPaidBy().getId());
-    form.setCategoryId(e.getCategory() == null ? null : e.getCategory().getId());
-    form.setSplitMethod(e.getSplitMethod());
-    form.setVersion(e.getVersion());
-    form.setParticipants(e.getShares().stream().map(s -> s.getUser().getId()).toList());
-    e.getShares().forEach(s -> form.getCustom().put(s.getUser().getId(), s.getShareAmount()));
+    form.setDescription(expense.getDescription());
+    form.setAmount(expense.getOriginalAmount());
+    form.setCurrency(expense.getOriginalCurrency());
+    form.setDate(expense.getExpenseDate());
+    form.setPayerId(expense.getPaidBy().getId());
+    form.setCategoryId(expense.getCategory() == null ? null : expense.getCategory().getId());
+    form.setSplitMethod(expense.getSplitMethod());
+    form.setVersion(expense.getVersion());
+    form.setParticipants(expense.getShares().stream().map(s -> s.getUser().getId()).toList());
+    expense.getShares().forEach(s -> form.getCustom().put(s.getUser().getId(), s.getShareAmount()));
     return form;
   }
 
@@ -117,11 +117,11 @@ public class ExpenseService {
     var group = membership.getGroup();
     entityManager.lock(group, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
     var memberList = groups.members(groupId, actor);
-    var byId = new HashMap<Long, User>();
-    memberList.forEach(m -> byId.put(m.getUser().getId(), m.getUser()));
-    if (!byId.containsKey(form.getPayerId())
+    var membersById = new HashMap<Long, User>();
+    memberList.forEach(m -> membersById.put(m.getUser().getId(), m.getUser()));
+    if (!membersById.containsKey(form.getPayerId())
         || form.getParticipants() == null
-        || !byId.keySet().containsAll(form.getParticipants()))
+        || !membersById.keySet().containsAll(form.getParticipants()))
       throw new BusinessException("Zahler und Beteiligte müssen Mitglieder dieser Gruppe sein.");
     GroupService.validateCurrency(form.getCurrency());
     if (form.getAmount() == null
@@ -131,26 +131,26 @@ public class ExpenseService {
         || form.getDate() == null
         || form.getDate().isAfter(LocalDate.now()))
       throw new BusinessException("Bitte Betrag und Datum prüfen.");
-    var e = id == null ? new Expense() : find(groupId, id);
-    if (id != null && !Objects.equals(e.getVersion(), form.getVersion()))
+    var expense = id == null ? new Expense() : find(groupId, id);
+    if (id != null && !Objects.equals(expense.getVersion(), form.getVersion()))
       throw new BusinessException("Die Ausgabe wurde inzwischen geändert. Bitte erneut öffnen.");
     // Shares are inverse child entities; force an aggregate version change even when only shares
     // change.
     if (id != null)
-      entityManager.lock(e, jakarta.persistence.LockModeType.OPTIMISTIC_FORCE_INCREMENT);
-    var before = id == null ? Map.<String, String>of() : history.snapshot(e);
+      entityManager.lock(expense, jakarta.persistence.LockModeType.OPTIMISTIC_FORCE_INCREMENT);
+    var before = id == null ? Map.<String, String>of() : history.snapshot(expense);
     boolean sameConversion =
         id != null
-            && Objects.equals(e.getOriginalCurrency(), form.getCurrency())
-            && e.getOriginalAmount().compareTo(form.getAmount()) == 0
-            && Objects.equals(e.getExpenseDate(), form.getDate());
+            && Objects.equals(expense.getOriginalCurrency(), form.getCurrency())
+            && expense.getOriginalAmount().compareTo(form.getAmount()) == 0
+            && Objects.equals(expense.getExpenseDate(), form.getDate());
     BigDecimal rate = null;
     LocalDate rateDate = null;
     BigDecimal total = form.getAmount().setScale(2);
     if (!form.getCurrency().equals(group.getCurrency())) {
       if (sameConversion) {
-        rate = e.getExchangeRate();
-        rateDate = e.getRateDate();
+        rate = expense.getExchangeRate();
+        rateDate = expense.getRateDate();
       } else {
         var quote = rates.getRate(form.getCurrency(), group.getCurrency(), form.getDate());
         rate = quote.rate();
@@ -169,49 +169,54 @@ public class ExpenseService {
             : categories
                 .findById(form.getCategoryId())
                 .orElseThrow(() -> new BusinessException("Kategorie nicht gefunden."));
-    e.setGroup(group);
-    if (id == null) e.setCreatedBy(membership.getUser());
-    e.setPaidBy(byId.get(form.getPayerId()));
-    e.setDescription(form.getDescription().strip());
-    e.setOriginalAmount(form.getAmount());
-    e.setOriginalCurrency(form.getCurrency());
-    e.setSettlementAmount(total);
-    e.setExchangeRate(rate);
-    e.setRateDate(rateDate);
-    e.setExpenseDate(form.getDate());
-    e.setCategory(category);
-    e.setSplitMethod(form.getSplitMethod());
+    expense.setGroup(group);
+    if (id == null) expense.setCreatedBy(membership.getUser());
+    expense.setPaidBy(membersById.get(form.getPayerId()));
+    expense.setDescription(form.getDescription().strip());
+    expense.setOriginalAmount(form.getAmount());
+    expense.setOriginalCurrency(form.getCurrency());
+    expense.setSettlementAmount(total);
+    expense.setExchangeRate(rate);
+    expense.setRateDate(rateDate);
+    expense.setExpenseDate(form.getDate());
+    expense.setCategory(category);
+    expense.setSplitMethod(form.getSplitMethod());
+    updateShares(expense, shares, membersById);
+    expenses.saveAndFlush(expense);
+    history.changed(expense, membership.getUser(), before);
+  }
+
+  private void updateShares(
+      Expense expense, Map<Long, BigDecimal> shares, Map<Long, User> membersById) {
     // Reuse existing shares to avoid delete/insert ordering conflicts with the unique key.
-    e.getShares().removeIf(s -> !shares.containsKey(s.getUser().getId()));
+    expense.getShares().removeIf(s -> !shares.containsKey(s.getUser().getId()));
     shares.forEach(
         (userId, value) -> {
           var share =
-              e.getShares().stream()
+              expense.getShares().stream()
                   .filter(s -> s.getUser().getId().equals(userId))
                   .findFirst()
                   .orElseGet(
                       () -> {
                         var added = new ExpenseShare();
-                        added.setExpense(e);
-                        added.setUser(byId.get(userId));
-                        e.getShares().add(added);
+                        added.setExpense(expense);
+                        added.setUser(membersById.get(userId));
+                        expense.getShares().add(added);
                         return added;
                       });
           share.setShareAmount(value);
         });
-    expenses.saveAndFlush(e);
-    history.changed(e, membership.getUser(), before);
   }
 
   @Transactional
   public void delete(Long groupId, Long id, Long version, String actor) {
     var membership = groups.requireMember(groupId, actor);
     entityManager.lock(membership.getGroup(), jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
-    var e = find(groupId, id);
-    if (!Objects.equals(e.getVersion(), version))
+    var expense = find(groupId, id);
+    if (!Objects.equals(expense.getVersion(), version))
       throw new BusinessException("Die Ausgabe wurde inzwischen geändert. Bitte Seite neu laden.");
-    history.record(e, membership.getUser(), "Ausgabe gelöscht: " + e.getDescription());
-    expenses.delete(e);
+    history.record(expense, membership.getUser(), "Ausgabe gelöscht: " + expense.getDescription());
+    expenses.delete(expense);
     expenses.flush();
   }
 }
