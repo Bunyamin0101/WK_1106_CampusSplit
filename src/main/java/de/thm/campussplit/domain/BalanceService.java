@@ -27,23 +27,36 @@ public class BalanceService {
   public List<Balance> calculate(
       List<Membership> members, List<Expense> expenses, List<Repayment> payments) {
     Map<Long, BigDecimal> amounts = new LinkedHashMap<>();
-    members.forEach(m -> amounts.put(m.getUser().getId(), new BigDecimal("0.00")));
-    for (var e : expenses) {
-      amounts.compute(e.getPaidBy().getId(), (id, v) -> v.add(e.getSettlementAmount()));
-      e.getShares()
+    members.forEach(
+        membership -> amounts.put(membership.getUser().getId(), new BigDecimal("0.00")));
+    for (var expense : expenses) {
+      amounts.compute(
+          expense.getPaidBy().getId(),
+          (id, currentAmount) -> currentAmount.add(expense.getSettlementAmount()));
+      expense
+          .getShares()
           .forEach(
-              s -> amounts.compute(s.getUser().getId(), (id, v) -> v.subtract(s.getShareAmount())));
+              share ->
+                  amounts.compute(
+                      share.getUser().getId(),
+                      (id, currentAmount) -> currentAmount.subtract(share.getShareAmount())));
     }
     for (var payment : payments) {
       if (payment.isCancelled()) continue;
-      amounts.compute(payment.getSender().getId(), (id, v) -> v.add(payment.getAmount()));
-      amounts.compute(payment.getRecipient().getId(), (id, v) -> v.subtract(payment.getAmount()));
+      amounts.compute(
+          payment.getSender().getId(),
+          (id, currentAmount) -> currentAmount.add(payment.getAmount()));
+      amounts.compute(
+          payment.getRecipient().getId(),
+          (id, currentAmount) -> currentAmount.subtract(payment.getAmount()));
     }
     return members.stream()
         .map(
-            m ->
+            membership ->
                 new Balance(
-                    m.getUser().getId(), m.getUser().getName(), amounts.get(m.getUser().getId())))
+                    membership.getUser().getId(),
+                    membership.getUser().getName(),
+                    amounts.get(membership.getUser().getId())))
         .toList();
   }
 
@@ -55,16 +68,18 @@ public class BalanceService {
     var remaining = new HashMap<Long, BigDecimal>();
     balances.forEach(b -> remaining.put(b.userId(), b.amount().abs()));
     var result = new ArrayList<Settlement>();
-    int i = 0, j = 0;
-    while (i < debtors.size() && j < creditors.size()) {
-      var d = debtors.get(i);
-      var c = creditors.get(j);
-      var value = remaining.get(d.userId()).min(remaining.get(c.userId()));
-      result.add(new Settlement(d.name(), c.name(), value, d.userId(), c.userId()));
-      remaining.compute(d.userId(), (k, v) -> v.subtract(value));
-      remaining.compute(c.userId(), (k, v) -> v.subtract(value));
-      if (remaining.get(d.userId()).signum() == 0) i++;
-      if (remaining.get(c.userId()).signum() == 0) j++;
+    int debtorIndex = 0, creditorIndex = 0;
+    while (debtorIndex < debtors.size() && creditorIndex < creditors.size()) {
+      var debtor = debtors.get(debtorIndex);
+      var creditor = creditors.get(creditorIndex);
+      var value = remaining.get(debtor.userId()).min(remaining.get(creditor.userId()));
+      result.add(
+          new Settlement(
+              debtor.name(), creditor.name(), value, debtor.userId(), creditor.userId()));
+      remaining.compute(debtor.userId(), (k, currentAmount) -> currentAmount.subtract(value));
+      remaining.compute(creditor.userId(), (k, currentAmount) -> currentAmount.subtract(value));
+      if (remaining.get(debtor.userId()).signum() == 0) debtorIndex++;
+      if (remaining.get(creditor.userId()).signum() == 0) creditorIndex++;
     }
     return result;
   }
