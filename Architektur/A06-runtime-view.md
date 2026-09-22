@@ -2,7 +2,7 @@
 
 Die Laufzeitsicht zeigt, wie die Bausteine aus [A05 — Building Block View](A05-building-block-view.md) in wichtigen Szenarien zusammenarbeiten. Es werden nicht alle CRUD-Abläufe vollständig wiederholt, sondern nur die Abläufe, die architektonisch besonders relevant sind.
 
-Ausgewählt wurden Szenarien, die zentrale Architekturentscheidungen sichtbar machen: Authentifizierung, Gruppenzugriff, Kostenaufteilung, Fremdwährungsumrechnung, Saldenberechnung und Export.
+Ausgewählt wurden Szenarien, die zentrale Architekturentscheidungen sichtbar machen: Authentifizierung, Gruppenzugriff, Kostenaufteilung, Fremdwährungsumrechnung, Saldenberechnung und Export. Zusätzlich berücksichtigt die Laufzeitsicht die inzwischen im Projekt angelegten Abläufe für Google-Anmeldung, Rückzahlungen, Belege, Änderungshistorie und Gruppenarchivierung.
 
 CampusSplit wird als serverseitig gerenderte Spring-Boot-Webanwendung mit Thymeleaf umgesetzt. Benutzeraktionen werden über HTTP-Anfragen an Spring-MVC-Controller verarbeitet. Nach erfolgreichen schreibenden Aktionen wird nach Möglichkeit das Muster **POST → Redirect → GET** verwendet.
 
@@ -18,6 +18,7 @@ CampusSplit wird als serverseitig gerenderte Spring-Boot-Webanwendung mit Thymel
 | [6.4](#64-fremdwährungsausgabe-erfassen) Fremdwährungsausgabe erfassen | UC-08, S1 | Externe API, Wechselkurs, Fehlerfall ohne unvollständige Speicherung. |
 | [6.5](#65-salden-und-ausgleichsvorschläge-anzeigen) Salden und Ausgleichsvorschläge anzeigen | UC-11 | Backendseitige Geldlogik, Debitor/Kreditor, deterministische Berechnung. |
 | [6.6](#66-pdf-oder-csv-export-erzeugen) PDF- oder CSV-Export erzeugen | UC-12 | Exportdaten, Exportsicherheit, Datei als Datenfluss. |
+| [6.7](#67-weitere-implementierte-abläufe) Weitere implementierte Abläufe | Erweiterter Funktionsumfang | Google-Anmeldung, Rückzahlungen, Belege, Historie und Archivierung. |
 
 Alle fachlichen Aktionen werden durch Benutzerinteraktionen ausgelöst. Es gibt keine Batch-Verarbeitung, keine Queue und keine Hintergrundjobs.
 
@@ -82,6 +83,38 @@ Fehlerfälle:
 | Datenbank nicht erreichbar | Technischer Fehler, kein Login und keine halbe Registrierung. |
 
 ---
+
+## 6.1.1 Anmeldung mit Google
+
+Neben dem klassischen Form-Login ist im aktuellen Projektstand eine Anmeldung über Google mit OAuth2/OpenID Connect vorgesehen. Spring Security übernimmt den OAuth2-Ablauf. Nach erfolgreicher Anmeldung wird auch hier eine serverseitige CampusSplit-Session verwendet.
+
+```mermaid
+sequenceDiagram
+    actor Nutzer
+    participant Browser
+    participant Security as Spring Security
+    participant Google as Google OIDC
+    participant Account as GoogleAccountService
+    participant DB as PostgreSQL
+
+    Nutzer->>Browser: Mit Google anmelden
+    Browser->>Security: GET /oauth2/authorization/google
+    Security-->>Browser: Redirect zu Google
+    Browser->>Google: Anmeldung und Freigabe
+    Google-->>Browser: Redirect mit Authorization Code
+    Browser->>Security: OAuth2 Callback
+    Security->>Google: Identität validieren / UserInfo laden
+    Google-->>Security: verifizierte Google-Identität
+    Security->>Account: Google-Identität lokal zuordnen
+    Account->>DB: Benutzer suchen / zuordnen
+    DB-->>Account: CampusSplit-Benutzer
+    Account-->>Security: lokaler Benutzer
+    Security->>Security: serverseitige Session erzeugen
+    Security-->>Browser: Redirect /dashboard
+```
+
+Ein vorhandenes CampusSplit-Konto kann außerdem über das Profil mit Google verknüpft werden. Die Verknüpfung wird nur nach erneuter Bestätigung des lokalen Passworts gestartet. Bei Konflikten oder einem fehlgeschlagenen Google-Login wird keine fremde Identität stillschweigend einem Konto zugeordnet.
+
 
 ## 6.2 Gruppe erstellen und Mitglied hinzufügen
 
@@ -382,7 +415,71 @@ Fehlerfälle:
 
 ---
 
-## 6.7 Gemeinsame Laufzeitregeln
+## 6.7 Weitere implementierte Abläufe
+
+### 6.7.1 Rückzahlung erfassen und stornieren
+
+Eine Rückzahlung dokumentiert einen bereits erfolgten Ausgleich zwischen zwei Gruppenmitgliedern. Sie wird in der Gruppenwährung gespeichert und beeinflusst die berechneten offenen Salden. Die Anwendung führt selbst keine Bankzahlung aus.
+
+```mermaid
+sequenceDiagram
+    actor Mitglied
+    participant Browser
+    participant Controller as GroupController
+    participant Service as RepaymentService
+    participant Repo as RepaymentRepository
+    participant DB as PostgreSQL
+
+    Mitglied->>Browser: Rückzahlung erfassen
+    Browser->>Controller: POST /groups/{groupId}/repayments
+    Controller->>Service: record(groupId, sender, recipient, amount, actor, requestId)
+    Service->>Service: Membership und Betrag prüfen
+    Service->>Repo: Rückzahlung speichern
+    Repo->>DB: INSERT Repayment
+    DB-->>Repo: gespeichert
+    Service-->>Controller: erfolgreich
+    Controller-->>Browser: Redirect /groups/{groupId}
+```
+
+Eine Rückzahlung wird bei einer Korrektur nicht gelöscht, sondern kann mit Begründung storniert werden. Dadurch bleibt der Vorgang nachvollziehbar und die Salden können neu berechnet werden.
+
+### 6.7.2 Beleg zu einer Ausgabe
+
+Belege können einer Ausgabe zugeordnet werden. Upload, Download und Löschen laufen über den `ReceiptController`. Vor dem Zugriff wird geprüft, ob der aktuelle Benutzer Zugriff auf die zugehörige Gruppe und Ausgabe hat.
+
+```mermaid
+sequenceDiagram
+    actor Mitglied
+    participant Browser
+    participant Controller as ReceiptController
+    participant Service as ReceiptService
+    participant Repo as ReceiptRepository
+    participant DB as PostgreSQL
+
+    Mitglied->>Browser: Beleg auswählen
+    Browser->>Controller: POST /groups/{groupId}/expenses/{expenseId}/receipts
+    Controller->>Service: upload(...)
+    Service->>Service: Zugriff und Datei prüfen
+    Service->>Repo: Beleg speichern
+    Repo->>DB: INSERT Receipt
+    Service-->>Controller: erfolgreich
+    Controller-->>Browser: Redirect /groups/{groupId}
+```
+
+Beim Download setzt der Controller einen passenden Content-Type sowie `Content-Disposition: attachment`, `Cache-Control: no-store` und `X-Content-Type-Options: nosniff`.
+
+### 6.7.3 Änderungshistorie
+
+Änderungen an Ausgaben und Belegen können als `ExpenseChange` protokolliert und in der Gruppenansicht zusammen mit Rückzahlungen als Aktivität dargestellt werden. Die Historie dient der Nachvollziehbarkeit; sie ersetzt nicht das technische Anwendungslog.
+
+### 6.7.4 Gruppe archivieren und wiederherstellen
+
+Ein Gruppenadministrator kann eine Gruppe archivieren und später wiederherstellen. Archivieren ist kein Löschen: Die Gruppe und ihre fachlichen Daten bleiben erhalten und können im Archiv weiterhin eingesehen werden.
+
+Der Ablauf verwendet eine schreibende `POST`-Anfrage und anschließend einen Redirect auf die Gruppenseite.
+
+
+## 6.8 Gemeinsame Laufzeitregeln
 
 | Regel | Gilt für |
 |---|---|
@@ -394,4 +491,7 @@ Fehlerfälle:
 | Serverseitige Fachlogik | Verbindliche Berechnungen passieren in Services und Domain-Komponenten, nicht in Thymeleaf. |
 | Verständliche Fehler | Technische Details werden nicht ungefiltert an Benutzer ausgegeben. |
 | Keine sensiblen Daten nach außen | Exporte und Wechselkurs-API erhalten keine Passwörter, Sessions oder privaten Gruppendetails. |
+| Externe Anmeldung bleibt getrennt | Google authentifiziert die Identität; die CampusSplit-Sitzung und fachlichen Rechte werden weiterhin von CampusSplit verwaltet. |
+| Rückzahlungen sind Dokumentation | CampusSplit dokumentiert Rückzahlungen und berechnet Salden neu, führt aber keine Banktransaktion aus. |
+| Belegzugriff ist gruppengebunden | Upload und Download von Belegen benötigen Zugriff auf die zugehörige Gruppe und Ausgabe. |
 

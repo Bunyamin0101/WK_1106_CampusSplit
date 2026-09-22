@@ -18,11 +18,12 @@ CampusSplit wird als serverseitig gerenderte Spring-Boot-Webanwendung mit Thymel
 | [8.5](#85-validierung) | Validierung | N2.4 |
 | [8.6](#86-geldbetragsverarbeitung) | Geldbetragsverarbeitung | F3, D2, N2.5 |
 | [8.7](#87-fremdwährung-und-wechselkursdienst) | Fremdwährung und Wechselkursdienst | S1, D1, D2 |
-| [8.8](#88-fehlerbehandlung) | Fehlerbehandlung | N2.6 |
-| [8.9](#89-logging) | Logging | N2.7 |
-| [8.10](#810-exportsicherheit) | Exportsicherheit | B3, N2.8 |
-| [8.11](#811-ui-architektur) | UI-Architektur | B1, N1 |
-| [8.12](#812-testkonzept) | Testkonzept | F3, N1 |
+| [8.8](#88-rückzahlungen-belege-historie-und-archivierung) | Rückzahlungen, Belege, Historie und Archivierung | erweiterter Funktionsumfang |
+| [8.9](#89-fehlerbehandlung) | Fehlerbehandlung | N2.6 |
+| [8.10](#810-logging) | Logging | N2.7 |
+| [8.11](#811-exportsicherheit) | Exportsicherheit | B3, N2.8 |
+| [8.12](#812-ui-architektur) | UI-Architektur | B1, N1 |
+| [8.13](#813-testkonzept) | Testkonzept | F3, N1 |
 
 ---
 
@@ -52,6 +53,9 @@ flowchart LR
 | Expense | `ExpenseEntity` / Tabelle `expenses` | Enthält Zahler, Ersteller, Originalbetrag, Abrechnungsbetrag und Datum. |
 | ExpenseShare | `ExpenseShareEntity` / Tabelle `expense_shares` | Enthält Kostenanteil je beteiligtem Mitglied. |
 | Category | `CategoryEntity` / Tabelle `categories` | Optionale Klassifikation von Ausgaben. |
+| Repayment | `Repayment` / Persistenz über `RepaymentRepository` | Dokumentiert Rückzahlungen zwischen Gruppenmitgliedern; Stornierung bleibt nachvollziehbar. |
+| Receipt | `Receipt` / Persistenz über `ReceiptRepository` | Beleg, der einer Ausgabe zugeordnet ist. |
+| ExpenseChange | `ExpenseChange` / Persistenz über `ExpenseChangeRepository` | Fachliche Änderungshistorie für Ausgaben und Belegvorgänge. |
 | Balance | DTO / berechnetes Ergebnis | Wird aus Expenses und ExpenseShares berechnet. |
 | SettlementProposal | DTO / berechnetes Ergebnis | Wird aus Salden berechnet. |
 
@@ -70,9 +74,9 @@ flowchart LR
 
 ## 8.3 Authentifizierung und Sitzung
 
-CampusSplit schützt alle fachlichen Funktionen außer Registrierung und Anmeldung. Die technische Umsetzung erfolgt mit Spring Security und einer serverseitigen HTTP-Session.
+CampusSplit schützt alle fachlichen Funktionen außer Registrierung und Anmeldung. Die technische Umsetzung erfolgt mit Spring Security und einer serverseitigen HTTP-Session. Als Anmeldewege stehen das klassische Form-Login mit E-Mail und Passwort sowie – bei aktivierter Konfiguration – Google OAuth2/OpenID Connect zur Verfügung.
 
-Nach erfolgreicher Anmeldung verwaltet das Backend die Sitzung. Der Browser erhält ein HTTP-only Session-Cookie. Authentifizierungsdaten werden nicht im Local Storage gespeichert. Ein separates JWT-Konzept ist für den MVP nicht vorgesehen.
+Nach erfolgreicher Anmeldung verwaltet das Backend unabhängig vom Anmeldeweg die Sitzung. Der Browser erhält ein HTTP-only Session-Cookie. Authentifizierungsdaten werden nicht im Local Storage gespeichert. Ein separates JWT-Konzept ist für den MVP nicht vorgesehen.
 
 ```mermaid
 sequenceDiagram
@@ -104,6 +108,33 @@ sequenceDiagram
 
 ---
 
+### Google OAuth2 / OpenID Connect
+
+Google wird nur für die externe Authentifizierung verwendet. Die Zuordnung zur lokalen CampusSplit-Identität erfolgt im Backend. Spring Security validiert den OIDC-Ablauf; fachliche Rollen und Gruppenrechte bleiben vollständig in CampusSplit.
+
+```mermaid
+flowchart LR
+    B[Browser] --> SS[Spring Security]
+    SS --> G[Google OIDC]
+    G --> SS
+    SS --> GA[GoogleOidcUserService]
+    GA --> U[(lokaler CampusSplit User)]
+    U --> S[serverseitige Session]
+```
+
+Ein bestehendes lokales Konto kann über das Profil mit Google verknüpft werden. Vor Beginn der Verknüpfung wird das lokale Passwort erneut geprüft. Ein kurzlebiger Link-Intent in der Session bindet den Vorgang an den bereits angemeldeten Benutzer. Konflikte bei der Zuordnung führen zu einem kontrollierten Fehler statt zu einer automatischen Kontoübernahme.
+
+Zusätzliche Regeln:
+
+| Regel | Umsetzung |
+|---|---|
+| AUTH-07 | Google-Login ist optional und kann per Konfiguration deaktiviert werden. |
+| AUTH-08 | Nach Google-Login wird dieselbe serverseitige Session-Architektur wie beim Form-Login verwendet. |
+| AUTH-09 | Gruppenrollen und Autorisierung werden nicht von Google übernommen. |
+| AUTH-10 | Eine Google-Kontoverknüpfung erfordert eine erneute lokale Bestätigung und einen kurzlebigen Verknüpfungsvorgang. |
+| AUTH-11 | Account-Konflikte werden geschlossen behandelt; Konten werden nicht stillschweigend zusammengeführt. |
+
+
 ## 8.4 Autorisierung und Gruppenrechte
 
 Autorisierung wird nicht der Benutzeroberfläche überlassen. Thymeleaf darf Buttons abhängig von Rechten ausblenden, aber das Backend entscheidet verbindlich, ob eine Aktion erlaubt ist.
@@ -116,6 +147,9 @@ Autorisierung wird nicht der Benutzeroberfläche überlassen. Thymeleaf darf But
 | Ausgabe bearbeiten/löschen | Ist der aktuelle Benutzer Mitglied der Gruppe? |
 | Salden anzeigen | Ist der aktuelle Benutzer Mitglied der Gruppe? |
 | Export erzeugen | Ist der aktuelle Benutzer Mitglied der Gruppe? |
+| Beleg hoch-/herunterladen/löschen | Hat der aktuelle Benutzer Zugriff auf die zugehörige Gruppe und Ausgabe? |
+| Rückzahlung erfassen/stornieren | Ist der aktuelle Benutzer berechtigtes Gruppenmitglied und sind Sender/Empfänger gültig? |
+| Gruppe archivieren/wiederherstellen | Besitzt der aktuelle Benutzer die erforderliche Gruppenberechtigung? |
 
 Empfohlener Service:
 
@@ -127,7 +161,7 @@ MembershipGuard
 
 ### Architekturregel
 
-Jeder gruppenbezogene Controller ruft vor der eigentlichen Fachlogik eine Membership-Prüfung auf. Dadurch wird verhindert, dass ein Benutzer über eine direkte REST-Anfrage auf fremde Gruppendaten zugreift.
+Jeder gruppenbezogene Controller ruft vor der eigentlichen Fachlogik eine Membership-Prüfung auf. Dadurch wird verhindert, dass ein Benutzer über direkt aufgerufene URLs oder manipulierte Formularanfragen auf fremde Gruppendaten zugreift.
 
 ---
 
@@ -227,7 +261,31 @@ CurrencyRateClient
 
 ---
 
-## 8.8 Fehlerbehandlung
+
+## 8.8 Rückzahlungen, Belege, Historie und Archivierung
+
+Diese Funktionen sind im aktuellen Projektstand als zusätzliche fachliche Bausteine angelegt. Sie werden getrennt von der eigentlichen Ausgabenberechnung gehalten, greifen aber auf dieselben Membership- und Sicherheitsregeln zurück.
+
+### Rückzahlungen
+
+`Repayment` dokumentiert einen bereits erfolgten Ausgleich zwischen Sender und Empfänger. Der Betrag wird in der Gruppenwährung gespeichert. Eine Rückzahlung kann mit Begründung storniert werden; sie wird nicht einfach gelöscht. Eine `requestId` dient dazu, doppelte Erfassung desselben Vorgangs zu vermeiden.
+
+Wichtig: CampusSplit führt keine Banktransaktion aus. Es dokumentiert die Rückzahlung und berücksichtigt sie bei den offenen Salden.
+
+### Belege
+
+`Receipt` ordnet einer Ausgabe einen hochgeladenen Beleg zu. Upload, Download und Löschen werden über einen eigenen Controller bzw. Service gekapselt. Beim Download werden Sicherheitsheader gesetzt; der Browser soll den Inhalt als Datei behandeln und nicht unkontrolliert inline ausführen.
+
+### Änderungshistorie
+
+`ExpenseChange` hält fachlich relevante Änderungen an einer Ausgabe bzw. zugehörigen Belegvorgängen fest. Diese Historie ist von technischem Logging zu unterscheiden: Sie ist Teil der fachlichen Nachvollziehbarkeit und kann in der Gruppenansicht angezeigt werden.
+
+### Gruppenarchivierung
+
+Archivierte Gruppen bleiben gespeichert und einsehbar. Archivierung ist deshalb ein Statuswechsel und kein physisches Löschen. Eine archivierte Gruppe kann wiederhergestellt werden.
+
+
+## 8.9 Fehlerbehandlung
 
 Fehler werden einheitlich behandelt, damit Benutzer keine technischen Details sehen und Daten konsistent bleiben.
 
@@ -239,6 +297,9 @@ Fehler werden einheitlich behandelt, damit Benutzer keine technischen Details se
 | Nicht gefunden | Gruppe existiert nicht | Fehlerseite oder passende 404-Behandlung. |
 | Externe API nicht erreichbar | Wechselkursdienst antwortet nicht | Verständliche Fehlermeldung im Formular, keine Speicherung mit erfundenem Kurs. |
 | Technischer Fehler | Datenbankfehler | Allgemeine Fehlerseite bzw. Fehlermeldung, technische Details nur im Log. |
+| Google-Anmeldung fehlgeschlagen | OAuth2/OIDC-Fehler oder Kontokonflikt | Kontrollierte Rückkehr zur Login-Seite; keine automatische falsche Kontoverknüpfung. |
+| Ungültiger Beleg | Datei nicht zulässig oder Zugriff fehlt | Upload/Download wird abgelehnt; bestehende Ausgabendaten bleiben unverändert. |
+| Rückzahlung ungültig | Betrag, Beteiligte oder Stornierung unzulässig | Vorgang wird nicht gespeichert bzw. nicht verändert. |
 
 ### Architekturregel
 
@@ -246,7 +307,7 @@ Controller und Fehlerseiten geben keine Stacktraces, SQL-Fehler oder internen Kl
 
 ---
 
-## 8.9 Logging
+## 8.10 Logging
 
 Logging dient der Fehleranalyse, darf aber keine sensiblen Daten offenlegen.
 
@@ -262,7 +323,7 @@ Empfohlene Regel: Logs sollen bei Fehlern helfen, aber nicht zu einer zweiten Da
 
 ---
 
-## 8.10 Exportsicherheit
+## 8.11 Exportsicherheit
 
 PDF- und CSV-Export sind ausgehende Datenflüsse. Deshalb gelten besondere Regeln.
 
@@ -286,7 +347,7 @@ ExportController
 
 ---
 
-## 8.11 UI-Architektur
+## 8.12 UI-Architektur
 
 Die Benutzeroberfläche wird mit Thymeleaf serverseitig gerendert. Spring-MVC-Controller bereiten die benötigten Daten vor und übergeben sie über das Model an Templates. Formulare werden als Form Objects bzw. DTOs an Controller gebunden und serverseitig validiert.
 
@@ -323,7 +384,7 @@ Lesende Seiten werden über `GET` geladen. Schreibende Formularaktionen verwende
 
 ---
 
-## 8.12 Testkonzept
+## 8.13 Testkonzept
 
 Tests konzentrieren sich zuerst auf die fachlich riskanten Stellen.
 
@@ -348,10 +409,15 @@ Tests konzentrieren sich zuerst auf die fachlich riskanten Stellen.
 | T-06 | Fremdwährungsausgabe ohne gültigen Kurs wird nicht gespeichert. |
 | T-07 | Export enthält keine sensiblen Daten. |
 | T-08 | Erfolgreiche schreibende Formulare verwenden einen Redirect und werden beim Neuladen nicht erneut abgesendet. |
+| T-09 | Google-Login ordnet eine gültige Google-Identität dem richtigen lokalen Benutzer zu. |
+| T-10 | Konflikte bei Google-Konten führen nicht zu einer ungewollten Kontoverknüpfung. |
+| T-11 | Rückzahlungen verändern die offenen Salden korrekt; stornierte Rückzahlungen werden entsprechend berücksichtigt. |
+| T-12 | Belege sind nur für berechtigte Gruppenmitglieder abrufbar. |
+| T-13 | Archivieren löscht keine Gruppendaten und eine Gruppe kann wiederhergestellt werden. |
 
 ---
 
-## 8.13 Abgrenzung
+## 8.14 Abgrenzung
 
 Nicht Bestandteil der Querschnittskonzepte sind:
 
