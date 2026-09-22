@@ -7,20 +7,6 @@ import java.util.*;
 @Entity
 @Table(name = "expense_group")
 public class Group extends BaseEntity {
-  private Instant archivedAt;
-
-  public Instant getArchivedAt() {
-    return archivedAt;
-  }
-
-  public boolean isArchived() {
-    return archivedAt != null;
-  }
-
-  public void setArchivedAt(Instant value) {
-    archivedAt = value;
-  }
-
   @Column(nullable = false, length = 100)
   private String name;
 

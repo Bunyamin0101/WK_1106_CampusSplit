@@ -13,18 +13,8 @@ public class User extends BaseEntity {
   @Column(nullable = false, unique = true, length = 254)
   private String email;
 
-  @Column private String passwordHash;
-
-  @Column(unique = true, length = 255)
-  private String googleSubject;
-
-  public String getGoogleSubject() {
-    return googleSubject;
-  }
-
-  public void setGoogleSubject(String subject) {
-    this.googleSubject = subject;
-  }
+  @Column(nullable = false)
+  private String passwordHash;
 
   public String getName() {
     return name;
