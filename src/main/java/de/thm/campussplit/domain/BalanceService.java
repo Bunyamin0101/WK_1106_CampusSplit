@@ -18,9 +18,14 @@ public class BalanceService {
     }
   }
 
-  public record Settlement(String from, String to, BigDecimal amount) {}
+  public record Settlement(String from, String to, BigDecimal amount, Long fromId, Long toId) {}
 
   public List<Balance> calculate(List<Membership> members, List<Expense> expenses) {
+    return calculate(members, expenses, List.of());
+  }
+
+  public List<Balance> calculate(
+      List<Membership> members, List<Expense> expenses, List<Repayment> payments) {
     Map<Long, BigDecimal> amounts = new LinkedHashMap<>();
     members.forEach(m -> amounts.put(m.getUser().getId(), new BigDecimal("0.00")));
     for (var e : expenses) {
@@ -28,6 +33,11 @@ public class BalanceService {
       e.getShares()
           .forEach(
               s -> amounts.compute(s.getUser().getId(), (id, v) -> v.subtract(s.getShareAmount())));
+    }
+    for (var payment : payments) {
+      if (payment.isCancelled()) continue;
+      amounts.compute(payment.getSender().getId(), (id, v) -> v.add(payment.getAmount()));
+      amounts.compute(payment.getRecipient().getId(), (id, v) -> v.subtract(payment.getAmount()));
     }
     return members.stream()
         .map(
@@ -50,7 +60,7 @@ public class BalanceService {
       var d = debtors.get(i);
       var c = creditors.get(j);
       var value = remaining.get(d.userId()).min(remaining.get(c.userId()));
-      result.add(new Settlement(d.name(), c.name(), value));
+      result.add(new Settlement(d.name(), c.name(), value, d.userId(), c.userId()));
       remaining.compute(d.userId(), (k, v) -> v.subtract(value));
       remaining.compute(c.userId(), (k, v) -> v.subtract(value));
       if (remaining.get(d.userId()).signum() == 0) i++;
