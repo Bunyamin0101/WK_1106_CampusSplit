@@ -9,9 +9,10 @@
 <body>
 <header th:fragment="nav">
 <a class="brand" th:href="@{/}">
-<span class="mark">C/S</span> CampusSplit</a>
+<span class="brand-symbol"><img th:src="@{/css/campussplit-logo.png}" alt=""></span><span>Campus<span class="brand-green">Split</span></span></a>
 <nav>
 <a th:href="@{/dashboard}">Meine Gruppen</a>
+<a th:if="${currentEmail != null}" th:href="@{/profile}">Profil</a>
 <form th:if="${currentEmail != null}" th:action="@{/logout}" method="post">
 <button class="quiet">Abmelden</button>
 </form>
