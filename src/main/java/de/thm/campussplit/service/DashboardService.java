@@ -23,34 +23,46 @@ public class DashboardService {
   public List<CurrencyTotals> overview(String actor) {
     var user = groups.currentUser(actor);
     var today = LocalDate.now(java.time.ZoneId.of("Europe/Berlin"));
-    var totals = new TreeMap<String, BigDecimal[]>();
+    var totals = new TreeMap<String, CurrencyTotals>();
+    var monthStart = today.withDayOfMonth(1);
     for (var membership : groups.myGroups(actor)) {
       var group = membership.getGroup();
       var summary = expenses.summary(group.getId(), actor, null, null);
-      var row =
-          totals.computeIfAbsent(
-              group.getCurrency(),
-              k ->
-                  new BigDecimal[] {
-                    new BigDecimal("0.00"), new BigDecimal("0.00"), new BigDecimal("0.00")
-                  });
+      var previous = totals.getOrDefault(group.getCurrency(), emptyTotals(group.getCurrency()));
       var balance =
           summary.balances().stream()
               .filter(b -> b.userId().equals(user.getId()))
               .findFirst()
               .orElseThrow()
               .amount();
-      if (balance.signum() > 0) row[0] = row[0].add(balance);
-      else row[1] = row[1].add(balance.abs());
-      for (var expense : summary.expenses())
-        if (!expense.getExpenseDate().isBefore(today.withDayOfMonth(1))
-            && !expense.getExpenseDate().isAfter(today))
-          for (var share : expense.getShares())
-            if (share.getUser().getId().equals(user.getId()))
-              row[2] = row[2].add(share.getShareAmount());
+      var receivable = previous.receivable();
+      var payable = previous.payable();
+      var monthlyExpenses = previous.monthlyExpenses();
+      if (balance.signum() > 0) {
+        receivable = receivable.add(balance);
+      } else {
+        payable = payable.add(balance.abs());
+      }
+      for (var expense : summary.expenses()) {
+        if (expense.getExpenseDate().isBefore(monthStart)
+            || expense.getExpenseDate().isAfter(today)) {
+          continue;
+        }
+        for (var share : expense.getShares()) {
+          if (share.getUser().getId().equals(user.getId())) {
+            monthlyExpenses = monthlyExpenses.add(share.getShareAmount());
+          }
+        }
+      }
+      totals.put(
+          group.getCurrency(),
+          new CurrencyTotals(group.getCurrency(), receivable, payable, monthlyExpenses));
     }
-    return totals.entrySet().stream()
-        .map(e -> new CurrencyTotals(e.getKey(), e.getValue()[0], e.getValue()[1], e.getValue()[2]))
-        .toList();
+    return List.copyOf(totals.values());
+  }
+
+  private CurrencyTotals emptyTotals(String currency) {
+    var zero = new BigDecimal("0.00");
+    return new CurrencyTotals(currency, zero, zero, zero);
   }
 }
