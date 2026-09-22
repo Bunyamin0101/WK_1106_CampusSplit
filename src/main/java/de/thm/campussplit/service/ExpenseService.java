@@ -13,6 +13,8 @@ import org.springframework.transaction.annotation.*;
 @Transactional(readOnly = true)
 public class ExpenseService {
   @jakarta.persistence.PersistenceContext private jakarta.persistence.EntityManager entityManager;
+  private final ExpenseHistoryService history;
+  private final RepaymentRepository repayments;
   private final GroupService groups;
   private final ExpenseRepository expenses;
   private final CategoryRepository categories;
@@ -26,7 +28,11 @@ public class ExpenseService {
       CategoryRepository categories,
       CurrencyRatePort rates,
       SplitService splits,
-      BalanceService balances) {
+      BalanceService balances,
+      RepaymentRepository repayments,
+      ExpenseHistoryService history) {
+    this.history = history;
+    this.repayments = repayments;
     this.groups = groups;
     this.expenses = expenses;
     this.categories = categories;
@@ -41,6 +47,8 @@ public class ExpenseService {
       List<Expense> expenses,
       List<BalanceService.Balance> balances,
       List<BalanceService.Settlement> settlements,
+      List<Repayment> repayments,
+      Long actorId,
       boolean admin) {}
 
   @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
@@ -57,13 +65,22 @@ public class ExpenseService {
                         && (to == null || !e.getExpenseDate().isAfter(to)))
             .toList();
     rows.forEach(e -> e.getShares().size());
-    var calculated = balances.calculate(members, rows);
+    var payments =
+        repayments.findByGroupIdOrderByPaymentDateDescIdDesc(groupId).stream()
+            .filter(
+                p ->
+                    (from == null || !p.getPaymentDate().isBefore(from))
+                        && (to == null || !p.getPaymentDate().isAfter(to)))
+            .toList();
+    var calculated = balances.calculate(members, rows, payments);
     return new GroupSummary(
         membership.getGroup(),
         members,
         rows,
         calculated,
         balances.settlements(calculated),
+        payments,
+        membership.getUser().getId(),
         membership.getRole() == Role.ADMIN);
   }
 
@@ -98,6 +115,7 @@ public class ExpenseService {
   public void save(Long groupId, Long id, ExpenseCommand form, String actor) {
     var membership = groups.requireMember(groupId, actor);
     var group = membership.getGroup();
+    entityManager.lock(group, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
     var memberList = groups.members(groupId, actor);
     var byId = new HashMap<Long, User>();
     memberList.forEach(m -> byId.put(m.getUser().getId(), m.getUser()));
@@ -120,6 +138,7 @@ public class ExpenseService {
     // change.
     if (id != null)
       entityManager.lock(e, jakarta.persistence.LockModeType.OPTIMISTIC_FORCE_INCREMENT);
+    var before = id == null ? Map.<String, String>of() : history.snapshot(e);
     boolean sameConversion =
         id != null
             && Objects.equals(e.getOriginalCurrency(), form.getCurrency())
@@ -181,14 +200,17 @@ public class ExpenseService {
           share.setShareAmount(value);
         });
     expenses.saveAndFlush(e);
+    history.changed(e, membership.getUser(), before);
   }
 
   @Transactional
   public void delete(Long groupId, Long id, Long version, String actor) {
-    groups.requireMember(groupId, actor);
+    var membership = groups.requireMember(groupId, actor);
+    entityManager.lock(membership.getGroup(), jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
     var e = find(groupId, id);
     if (!Objects.equals(e.getVersion(), version))
       throw new BusinessException("Die Ausgabe wurde inzwischen geändert. Bitte Seite neu laden.");
+    history.record(e, membership.getUser(), "Ausgabe gelöscht: " + e.getDescription());
     expenses.delete(e);
     expenses.flush();
   }
