@@ -72,6 +72,35 @@ public class ExportService {
     var settlements = new StringBuilder();
     row(settlements, "from", "to", "amount");
     summary.settlements().forEach(s -> row(settlements, s.from(), s.to(), s.amount()));
+    var payments = new StringBuilder();
+    row(
+        payments,
+        "date",
+        "from",
+        "to",
+        "amount",
+        "currency",
+        "recorded_by",
+        "status",
+        "cancelled_at",
+        "cancelled_by",
+        "cancellation_reason");
+    summary
+        .repayments()
+        .forEach(
+            p ->
+                row(
+                    payments,
+                    p.getPaymentDate(),
+                    p.getSender().getName(),
+                    p.getRecipient().getName(),
+                    p.getAmount(),
+                    summary.group().getCurrency(),
+                    p.getRecordedBy().getName(),
+                    p.isCancelled() ? "CANCELLED" : "RECORDED",
+                    p.getCancelledAt(),
+                    p.getCancelledBy() == null ? "" : p.getCancelledBy().getName(),
+                    p.getCancellationReason()));
     var metadata = new StringBuilder();
     row(metadata, "group", "currency", "exported_at", "from", "to");
     row(
@@ -87,6 +116,7 @@ public class ExportService {
       write(zip, "salden.csv", balances.toString());
       write(zip, "ausgleich.csv", settlements.toString());
       write(zip, "gruppe.csv", metadata.toString());
+      write(zip, "rueckzahlungen.csv", payments.toString());
     }
     return bytes.toByteArray();
   }
@@ -147,6 +177,29 @@ public class ExportService {
                 10);
           writer.space();
         }
+        writer.heading("Erfasste Rückzahlungen");
+        for (var p : summary.repayments())
+          writer.line(
+              p.getPaymentDate()
+                  + " | "
+                  + p.getSender().getName()
+                  + " -> "
+                  + p.getRecipient().getName()
+                  + ": "
+                  + p.getAmount()
+                  + " "
+                  + summary.group().getCurrency()
+                  + " | Bestätigt von "
+                  + p.getRecordedBy().getName()
+                  + (p.isCancelled()
+                      ? " | STORNIERT: "
+                          + p.getCancelledAt()
+                          + " | "
+                          + p.getCancelledBy().getName()
+                          + " | "
+                          + p.getCancellationReason()
+                      : ""),
+              11);
         writer.heading("Salden");
         for (var b : summary.balances())
           writer.line(
