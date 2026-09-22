@@ -12,18 +12,81 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 @RequestMapping("/groups/{groupId}")
 public class GroupController {
+  private final ExpenseHistoryService history;
+  private final RepaymentService repayments;
+  private final ReceiptService receipts;
   private final GroupService groups;
   private final ExpenseService expenses;
 
-  public GroupController(GroupService groups, ExpenseService expenses) {
+  public GroupController(
+      GroupService groups,
+      ExpenseService expenses,
+      RepaymentService repayments,
+      ReceiptService receipts,
+      ExpenseHistoryService history) {
+    this.history = history;
+    this.repayments = repayments;
+    this.receipts = receipts;
     this.groups = groups;
     this.expenses = expenses;
   }
 
+  public record Activity(
+      String kind,
+      java.time.Instant time,
+      de.thm.campussplit.domain.ExpenseChange change,
+      de.thm.campussplit.domain.Repayment payment) {}
+
   @GetMapping
-  String show(@PathVariable Long groupId, Principal principal, Model model) {
-    model.addAttribute("summary", expenses.summary(groupId, principal.getName(), null, null));
+  String show(
+      @PathVariable Long groupId,
+      @RequestParam(defaultValue = "all") String activity,
+      Principal principal,
+      Model model) {
+    var summary = expenses.summary(groupId, principal.getName(), null, null);
+    model.addAttribute("summary", summary);
+    model.addAttribute("receipts", receipts.list(groupId, principal.getName()));
+    if (!java.util.Set.of("all", "expenses", "receipts", "payments").contains(activity))
+      activity = "all";
+    var rows = new java.util.ArrayList<Activity>();
+    for (var change : history.list(groupId, principal.getName()))
+      rows.add(
+          new Activity(
+              change.getDetails().startsWith("Beleg ") ? "receipts" : "expenses",
+              change.getCreatedAt(),
+              change,
+              null));
+    for (var payment : summary.repayments())
+      rows.add(
+          new Activity(
+              "payments",
+              payment.isCancelled() ? payment.getCancelledAt() : payment.getCreatedAt(),
+              null,
+              payment));
+    rows.sort(java.util.Comparator.comparing(Activity::time).reversed());
+    final String selected = activity;
+    model.addAttribute("activityFilter", selected);
+    model.addAttribute(
+        "activities",
+        rows.stream()
+            .filter(row -> selected.equals("all") || row.kind().equals(selected))
+            .toList());
     return "group";
+  }
+
+  @PostMapping("/archive")
+  String archive(
+      @PathVariable Long groupId,
+      @RequestParam boolean archived,
+      Principal principal,
+      RedirectAttributes flash) {
+    groups.setArchived(groupId, archived, principal.getName());
+    flash.addFlashAttribute(
+        "message",
+        archived
+            ? "Gruppe archiviert. Sie bleibt im Archiv einsehbar."
+            : "Gruppe wiederhergestellt.");
+    return "redirect:/groups/" + groupId;
   }
 
   @PostMapping("/members")
@@ -42,6 +105,41 @@ public class GroupController {
       } catch (BusinessException ex) {
         flash.addFlashAttribute("message", ex.getMessage());
       }
+    return "redirect:/groups/" + groupId;
+  }
+
+  @PostMapping("/repayments")
+  String repay(
+      @PathVariable Long groupId,
+      @RequestParam Long senderId,
+      @RequestParam Long recipientId,
+      @RequestParam java.math.BigDecimal amount,
+      @RequestParam String requestId,
+      Principal principal,
+      RedirectAttributes flash) {
+    try {
+      repayments.record(groupId, senderId, recipientId, amount, principal.getName(), requestId);
+      flash.addFlashAttribute(
+          "message", "Rückzahlung erfasst. Die offenen Salden wurden aktualisiert.");
+    } catch (BusinessException ex) {
+      flash.addFlashAttribute("message", ex.getMessage());
+    }
+    return "redirect:/groups/" + groupId;
+  }
+
+  @PostMapping("/repayments/{paymentId}/cancel")
+  String cancelPayment(
+      @PathVariable Long groupId,
+      @PathVariable Long paymentId,
+      @RequestParam String reason,
+      Principal principal,
+      RedirectAttributes flash) {
+    try {
+      repayments.cancel(groupId, paymentId, reason, principal.getName());
+      flash.addFlashAttribute("message", "Rückzahlung storniert. Die Salden wurden neu berechnet.");
+    } catch (BusinessException ex) {
+      flash.addFlashAttribute("message", ex.getMessage());
+    }
     return "redirect:/groups/" + groupId;
   }
 

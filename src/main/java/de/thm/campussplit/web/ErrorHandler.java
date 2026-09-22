@@ -9,6 +9,13 @@ import org.springframework.web.bind.annotation.*;
 
 @ControllerAdvice
 public class ErrorHandler {
+  @ExceptionHandler(org.springframework.web.multipart.MaxUploadSizeExceededException.class)
+  @ResponseStatus(HttpStatus.PAYLOAD_TOO_LARGE)
+  String uploadSize(Model model) {
+    model.addAttribute("message", "Die Datei ist zu groß. Bitte einen Beleg bis 10 MB auswählen.");
+    return "error";
+  }
+
   @ExceptionHandler(BusinessException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   String business(BusinessException ex, Model model) {

@@ -11,10 +11,15 @@ import org.springframework.web.bind.annotation.*;
 
 @Controller
 public class PageController {
+  @org.springframework.beans.factory.annotation.Value("${campussplit.google.enabled:false}")
+  private boolean googleEnabled;
+
+  private final DashboardService dashboard;
   private final AccountService accounts;
   private final GroupService groups;
 
-  public PageController(AccountService accounts, GroupService groups) {
+  public PageController(AccountService accounts, GroupService groups, DashboardService dashboard) {
+    this.dashboard = dashboard;
     this.accounts = accounts;
     this.groups = groups;
   }
@@ -25,7 +30,8 @@ public class PageController {
   }
 
   @GetMapping("/login")
-  String login() {
+  String login(Model model) {
+    model.addAttribute("googleEnabled", googleEnabled);
     return "login";
   }
 
@@ -53,6 +59,7 @@ public class PageController {
 
   @GetMapping({"/dashboard", "/groups"})
   String dashboard(Model model, Principal principal) {
+    model.addAttribute("overview", dashboard.overview(principal.getName()));
     model.addAttribute("memberships", groups.myGroups(principal.getName()));
     model.addAttribute("user", groups.currentUser(principal.getName()));
     return "dashboard";
