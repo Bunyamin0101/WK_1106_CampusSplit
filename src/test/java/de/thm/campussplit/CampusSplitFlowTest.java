@@ -72,7 +72,7 @@ class CampusSplitFlowTest {
   void realRegistrationLoginLogoutAndTemplates() throws Exception {
     mvc.perform(get("/"))
         .andExpect(status().isOk())
-        .andExpect(content().string(org.hamcrest.Matchers.containsString("Fair aufteilen")));
+        .andExpect(content().string(org.hamcrest.Matchers.containsString("Gemeinsame Kosten einfach aufteilen")));
     mvc.perform(get("/dashboard")).andExpect(status().is3xxRedirection());
     mvc.perform(get("/register")).andExpect(status().isOk());
     var newEmail = "new-" + UUID.randomUUID() + "@example.org";
