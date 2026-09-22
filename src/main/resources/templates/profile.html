@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Profil')}">
+</head>
+<body>
+<header th:replace="~{fragments :: nav}">
+</header>
+<main>
+<section class="narrow">
+<h1>Profil und Kontoeinstellungen</h1>
+<p class="notice" th:if="${message}" th:text="${message}" role="status">
+</p>
+<p class="notice" th:if="${param.linked}">Google wurde erfolgreich mit deinem Konto verknüpft.</p>
+<section>
+<h2>Dein Profil</h2>
+<p th:text="${profile.email}">
+</p>
+<form method="post" th:action="@{/profile}">
+<label>Anzeigename<input name="name" th:value="${profile.name}" required maxlength="100">
+</label>
+<button>Speichern</button>
+</form>
+</section>
+<section>
+<h2>Google-Anmeldung</h2>
+<p th:if="${profile.googleSubject != null}">Google ist mit deinem Konto verknüpft.</p>
+<p th:if="${profile.passwordHash != null}">Deine Anmeldung mit E-Mail und Passwort bleibt verfügbar.</p>
+<div th:if="${profile.googleSubject == null}">
+<p th:unless="${googleEnabled}">Google-Anmeldung ist derzeit nicht aktiviert.</p>
+<form th:if="${googleEnabled}" method="post" th:action="@{/profile/google}">
+<p>Bestätige dein CampusSplit-Passwort und wähle anschließend dein Google-Konto. Deine Gruppen, Ausgaben und Anmelde-E-Mail bleiben erhalten.</p>
+<label>Aktuelles CampusSplit-Passwort<input name="password" type="password" autocomplete="current-password" required>
+</label>
+<button>Mit Google verknüpfen</button>
+</form>
+</div>
+</section>
+</section>
+</main>
+<footer th:replace="~{fragments :: footer}">
+</footer>
+</body>
+</html>
