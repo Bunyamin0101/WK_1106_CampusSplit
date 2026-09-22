@@ -1,175 +1,360 @@
 <!doctype html>
 <html lang="de" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments :: head('Gruppe')}">
-</head>
-<body>
-<header th:replace="~{fragments :: nav}">
-</header>
-<main>
-<a th:href="@{/dashboard}">← Meine Gruppen</a>
-<div class="heading">
-<div>
-<span class="eyebrow" th:text="'GRUPPENWÄHRUNG · ' + ${summary.group.currency}">
-</span>
-<h1 th:text="${summary.group.name}">
-</h1>
-<p th:text="${summary.group.description}">
-</p>
-</div>
-<a class="button" th:href="@{/groups/{id}/expenses/new(id=${summary.group.id})}">+ Ausgabe erfassen</a>
-</div>
-<p class="notice" th:if="${message}" th:text="${message}" role="status">
-</p>
-<aside class="notice" th:if="${summary.group.archived}">Diese Gruppe ist archiviert. Alle Ausgaben und Abrechnungen bleiben verfügbar; Korrekturen sind weiterhin möglich.</aside>
-<form th:if="${summary.admin}" method="post" th:action="@{/groups/{id}/archive(id=${summary.group.id})}">
-<input type="hidden" name="archived" th:value="${!summary.group.archived}">
-<button class="secondary" th:text="${summary.group.archived ? 'Gruppe wiederherstellen' : 'Gruppe archivieren'}"></button>
-<small>Archivierte Gruppen werden für alle Mitglieder im eingeklappten Archiv angezeigt.</small>
-</form>
-<section class="columns">
-<article>
-<h2>Salden</h2>
-<p>Dein Überblick über offene Beträge in dieser Gruppe.</p>
-<div class="balance" th:each="b : ${summary.balances}">
-<span th:text="${b.name}">
-</span>
-<span class="balance-label" th:text="${b.amount.signum() > 0 ? 'bekommt zurück' : (b.amount.signum() < 0 ? 'schuldet noch' : 'ausgeglichen')}"></span>
-<strong th:class="${b.amount.signum() &lt; 0 ? 'negative' : 'positive'}" th:text="${#numbers.formatDecimal(b.amount.abs(),1,'POINT',2,'COMMA')} + ' ' + ${summary.group.currency}">
-</strong>
-</div>
-</article>
-<article>
-<h2>Wer zahlt wem?</h2>
-<p th:if="${#lists.isEmpty(summary.settlements)}">Alle Salden sind ausgeglichen.</p>
-<div class="balance" th:each="s : ${summary.settlements}">
-<span th:text="${s.from} + ' → ' + ${s.to}">
-</span>
-<strong th:text="${#numbers.formatDecimal(s.amount,1,'POINT',2,'COMMA')} + ' ' + ${summary.group.currency}">
-</strong>
-<form th:if="${summary.admin or summary.actorId == s.fromId or summary.actorId == s.toId}" th:action="@{/groups/{id}/repayments(id=${summary.group.id})}" method="post">
-<input type="hidden" name="senderId" th:value="${s.fromId}">
-<input type="hidden" name="recipientId" th:value="${s.toId}">
-<input type="hidden" name="requestId" th:value="${T(java.util.UUID).randomUUID().toString()}">
-<label>Zurückgezahlter Betrag<input type="number" name="amount" min="0.01" step="0.01" th:max="${s.amount}" th:value="${s.amount}" required></label>
-<button class="secondary">Zahlung erfassen</button>
-</form>
-</div>
-<small>Hier dokumentierst du eine bereits erfolgte Rückzahlung. CampusSplit überweist kein Geld.</small>
-</article>
-</section>
-<section><h2>Ausgaben</h2>
-<p class="empty" th:if="${#lists.isEmpty(summary.expenses)}">Noch keine Ausgaben. Erfasse euren ersten gemeinsamen Einkauf.</p>
-<article class="expense" th:each="e : ${summary.expenses}">
-<div class="heading">
-<div>
-<span class="muted" th:text="${#temporals.format(e.expenseDate, 'dd.MM.yyyy')}">
-</span>
-<h3 th:text="${e.description}">
-</h3>
-<p>
-<span th:text="${e.paidBy.name}">
-</span> hat bezahlt <span th:if="${e.category != null}" th:text="' · ' + ${e.category.name}">
-</span>
-</p>
-</div>
-<strong class="amount" th:text="${#numbers.formatDecimal(e.settlementAmount,1,'POINT',2,'COMMA')} + ' ' + ${summary.group.currency}">
-</strong>
-</div>
-<p th:if="${e.exchangeRate != null}">
-<span th:text="${#numbers.formatDecimal(e.originalAmount,1,'POINT',2,'COMMA')} + ' ' + ${e.originalCurrency}">
-</span> · Kurs <span th:text="${e.exchangeRate}">
-</span> vom <span th:text="${e.rateDate}">
-</span>
-</p>
-<div class="shares">
-<span class="pill" th:each="s : ${e.shares}" th:text="${s.user.name} + ': ' + ${#numbers.formatDecimal(s.shareAmount,1,'POINT',2,'COMMA')} + ' ' + ${summary.group.currency}">
-</span>
-</div>
-<h4>Belege</h4>
-<div th:each="r : ${receipts}" th:if="${r.expenseId == e.id}" class="actions">
-<a th:href="@{/groups/{g}/expenses/{e}/receipts/{r}(g=${summary.group.id},e=${e.id},r=${r.id})}" th:text="${r.filename}"></a>
-<form method="post" th:action="@{/groups/{g}/expenses/{e}/receipts/{r}/delete(g=${summary.group.id},e=${e.id},r=${r.id})}"><button class="quiet danger">Beleg entfernen</button></form>
-</div>
-<details class="receipt-upload"><summary>Beleg hinzufügen</summary>
-<form method="post" enctype="multipart/form-data" th:action="@{/groups/{g}/expenses/{e}/receipts(g=${summary.group.id},e=${e.id})}">
-<label>Foto oder PDF anhängen (max. 10 MB; 5 Belege pro Ausgabe)<input type="file" name="file" accept="image/jpeg,image/png,application/pdf" required></label>
-<button class="secondary">Beleg speichern</button>
-</form>
-</details>
-<div class="actions">
-<a th:href="@{/groups/{g}/expenses/{e}/edit(g=${summary.group.id},e=${e.id})}">Bearbeiten</a>
-<form th:action="@{/groups/{g}/expenses/{e}/delete(g=${summary.group.id},e=${e.id})}" method="post">
-<input type="hidden" name="version" th:value="${e.version}">
-<button class="quiet danger">Ausgabe löschen</button>
-</form>
-</div>
-</article>
-</section>
-<details id="activities" class="activity-panel" th:open="${param.activity != null}">
-<summary class="activity-toggle">Aktivitäten <span>Änderungen und Zahlungen</span></summary>
-<nav class="activity-filters" aria-label="Aktivitäten filtern">
-<a th:href="@{/groups/{id}(id=${summary.group.id},activity='all')} + '#activities'" th:class="${activityFilter == 'all' ? 'button' : 'button secondary'}" th:attr="aria-current=${activityFilter == 'all' ? 'page' : null}">Alle</a>
-<a th:href="@{/groups/{id}(id=${summary.group.id},activity='expenses')} + '#activities'" th:class="${activityFilter == 'expenses' ? 'button' : 'button secondary'}" th:attr="aria-current=${activityFilter == 'expenses' ? 'page' : null}">Ausgaben</a>
-<a th:href="@{/groups/{id}(id=${summary.group.id},activity='receipts')} + '#activities'" th:class="${activityFilter == 'receipts' ? 'button' : 'button secondary'}" th:attr="aria-current=${activityFilter == 'receipts' ? 'page' : null}">Belege</a>
-<a th:href="@{/groups/{id}(id=${summary.group.id},activity='payments')} + '#activities'" th:class="${activityFilter == 'payments' ? 'button' : 'button secondary'}" th:attr="aria-current=${activityFilter == 'payments' ? 'page' : null}">Zahlungen</a>
-</nav>
-<p class="muted">Neueste zuerst · Details durch Anklicken öffnen. Frühere, nicht protokollierte Änderungen sind nicht enthalten.</p>
-<p th:if="${#lists.isEmpty(activities)}">Noch keine Aktivitäten in dieser Ansicht.</p>
-<article th:each="entry : ${activities}">
-<small th:text="${#temporals.format(entry.time.atZone(T(java.time.ZoneId).of('Europe/Berlin')), 'dd.MM.yyyy · HH:mm')}"></small>
-<details th:if="${entry.change != null}" th:with="change=${entry.change},matches=${summary.expenses.?[id == #vars.change.expenseId]}">
-<summary><span class="pill" th:text="${entry.kind == 'receipts' ? 'Beleg' : 'Ausgabe'}"></span> <strong th:text="${change.actorName}"></strong> · <span th:text="${#lists.isEmpty(matches) ? 'Gelöschte Ausgabe' : matches[0].description}"></span></summary>
-<p style="white-space: pre-wrap" th:text="${change.details}"></p>
-</details>
-<div th:if="${entry.payment != null}" th:with="p=${entry.payment}">
-<strong th:text="${p.sender.name} + ' → ' + ${p.recipient.name} + ': ' + ${#numbers.formatDecimal(p.amount,1,'POINT',2,'COMMA')} + ' ' + ${summary.group.currency}"></strong>
-<span class="pill" th:text="${p.cancelled ? 'Storniert' : 'Erfasst'}"></span>
-<p th:if="${p.cancelled}" th:text="'Storniert von ' + ${p.cancelledBy.name} + ' · Grund: ' + ${p.cancellationReason}"></p>
-<details th:if="${!p.cancelled and (summary.admin or summary.actorId == p.sender.id or summary.actorId == p.recipient.id)}"><summary>Rückzahlung stornieren</summary>
-<form method="post" th:action="@{/groups/{g}/repayments/{p}/cancel(g=${summary.group.id},p=${p.id})}">
-<label>Grund<input name="reason" maxlength="250" required placeholder="Zum Beispiel versehentlich bestätigt"></label><button class="secondary">Stornierung bestätigen</button>
-</form></details>
-<p th:text="${#temporals.format(p.paymentDate, 'dd.MM.yyyy')} + ' · Erfasst von ' + ${p.recordedBy.name}"></p>
-</div>
-</article>
-</details>
-<section class="columns">
-<article>
-<h2>Mitglieder</h2>
-<div class="balance" th:each="m : ${summary.members}">
-<span th:text="${m.user.name}">
-</span>
-<small th:text="${m.role.name() == 'ADMIN' ? 'Administrator' : 'Mitglied'}">
-</small>
-</div>
-<form th:if="${summary.admin}" th:action="@{/groups/{id}/members(id=${summary.group.id})}" method="post">
-<label>Mitglied per E-Mail hinzufügen<input type="email" name="email" placeholder="E-Mail des CampusSplit-Kontos" required maxlength="254">
-</label>
-<button class="secondary">Hinzufügen</button>
-</form>
-</article>
-<article>
-<h2>Abrechnung herunterladen</h2>
-<p>Als PDF zum Lesen oder als CSV für eine Tabellenkalkulation. Ohne Zeitraum erhältst du die gesamte Abrechnung.</p>
-<form th:action="@{/groups/{id}/export(id=${summary.group.id})}" method="get">
-<div class="columns">
-<label>Von (optional)<input type="date" name="from">
-</label>
-<label>Bis (optional)<input type="date" name="to">
-</label>
-</div>
-<label>Format<select name="format">
-<option value="pdf">PDF</option>
-<option value="csv">CSV-Dateien als ZIP</option>
-</select>
-</label>
-<button class="secondary">Herunterladen</button>
-</form>
-<small>Bei Zeitraumwahl beziehen sich auch Salden und Vorschläge auf Ausgaben und Rückzahlungen im gewählten Zeitraum.</small>
-</article>
-</section>
-</main>
-<footer th:replace="~{fragments :: footer}">
-</footer>
-</body>
+  <head th:replace="~{fragments :: head('Gruppe')}"> </head>
+  <body>
+    <header th:replace="~{fragments :: nav}"></header>
+    <main>
+      <a th:href="@{/dashboard}">← Meine Gruppen</a>
+      <div class="heading">
+        <div>
+          <span
+            class="eyebrow"
+            th:text="'GRUPPENWÄHRUNG · ' + ${summary.group.currency}"
+          >
+          </span>
+          <h1 th:text="${summary.group.name}"></h1>
+          <p th:text="${summary.group.description}"></p>
+        </div>
+        <a
+          class="button"
+          th:href="@{/groups/{id}/expenses/new(id=${summary.group.id})}"
+          >+ Ausgabe erfassen</a
+        >
+      </div>
+      <p
+        class="notice"
+        th:if="${message}"
+        th:text="${message}"
+        role="status"
+      ></p>
+      <aside class="notice" th:if="${summary.group.archived}">
+        Diese Gruppe ist archiviert. Alle Ausgaben und Abrechnungen bleiben
+        verfügbar; Korrekturen sind weiterhin möglich.
+      </aside>
+      <form
+        th:if="${summary.admin}"
+        method="post"
+        th:action="@{/groups/{id}/archive(id=${summary.group.id})}"
+      >
+        <input
+          type="hidden"
+          name="archived"
+          th:value="${!summary.group.archived}"
+        />
+        <button
+          class="secondary"
+          th:text="${summary.group.archived ? 'Gruppe wiederherstellen' : 'Gruppe archivieren'}"
+        ></button>
+        <small
+          >Archivierte Gruppen werden für alle Mitglieder im eingeklappten
+          Archiv angezeigt.</small
+        >
+      </form>
+      <section class="columns">
+        <article>
+          <h2>Salden</h2>
+          <p>Dein Überblick über offene Beträge in dieser Gruppe.</p>
+          <div class="balance" th:each="b : ${summary.balances}">
+            <span th:text="${b.name}"> </span>
+            <span
+              class="balance-label"
+              th:text="${b.amount.signum() > 0 ? 'bekommt zurück' : (b.amount.signum() < 0 ? 'schuldet noch' : 'ausgeglichen')}"
+            ></span>
+            <strong
+              th:class="${b.amount.signum() &lt; 0 ? 'negative' : 'positive'}"
+              th:text="${#numbers.formatDecimal(b.amount.abs(),1,'POINT',2,'COMMA')} + ' ' + ${summary.group.currency}"
+            >
+            </strong>
+          </div>
+        </article>
+        <article>
+          <h2>Wer zahlt wem?</h2>
+          <p th:if="${#lists.isEmpty(summary.settlements)}">
+            Alle Salden sind ausgeglichen.
+          </p>
+          <div class="balance" th:each="s : ${summary.settlements}">
+            <span th:text="${s.from} + ' → ' + ${s.to}"> </span>
+            <strong
+              th:text="${#numbers.formatDecimal(s.amount,1,'POINT',2,'COMMA')} + ' ' + ${summary.group.currency}"
+            >
+            </strong>
+            <form
+              th:if="${summary.admin or summary.actorId == s.fromId or summary.actorId == s.toId}"
+              th:action="@{/groups/{id}/repayments(id=${summary.group.id})}"
+              method="post"
+            >
+              <input type="hidden" name="senderId" th:value="${s.fromId}" />
+              <input type="hidden" name="recipientId" th:value="${s.toId}" />
+              <input
+                type="hidden"
+                name="requestId"
+                th:value="${T(java.util.UUID).randomUUID().toString()}"
+              />
+              <label
+                >Zurückgezahlter Betrag<input
+                  type="number"
+                  name="amount"
+                  min="0.01"
+                  step="0.01"
+                  th:max="${s.amount}"
+                  th:value="${s.amount}"
+                  required
+              /></label>
+              <button class="secondary">Zahlung erfassen</button>
+            </form>
+          </div>
+          <small
+            >Hier dokumentierst du eine bereits erfolgte Rückzahlung.
+            CampusSplit überweist kein Geld.</small
+          >
+        </article>
+      </section>
+      <section>
+        <h2>Ausgaben</h2>
+        <p class="empty" th:if="${#lists.isEmpty(summary.expenses)}">
+          Noch keine Ausgaben. Erfasse euren ersten gemeinsamen Einkauf.
+        </p>
+        <article class="expense" th:each="e : ${summary.expenses}">
+          <div class="heading">
+            <div>
+              <span
+                class="muted"
+                th:text="${#temporals.format(e.expenseDate, 'dd.MM.yyyy')}"
+              >
+              </span>
+              <h3 th:text="${e.description}"></h3>
+              <p>
+                <span th:text="${e.paidBy.name}"> </span> hat bezahlt
+                <span
+                  th:if="${e.category != null}"
+                  th:text="' · ' + ${e.category.name}"
+                >
+                </span>
+              </p>
+            </div>
+            <strong
+              class="amount"
+              th:text="${#numbers.formatDecimal(e.settlementAmount,1,'POINT',2,'COMMA')} + ' ' + ${summary.group.currency}"
+            >
+            </strong>
+          </div>
+          <p th:if="${e.exchangeRate != null}">
+            <span
+              th:text="${#numbers.formatDecimal(e.originalAmount,1,'POINT',2,'COMMA')} + ' ' + ${e.originalCurrency}"
+            >
+            </span>
+            · Kurs <span th:text="${e.exchangeRate}"> </span> vom
+            <span th:text="${e.rateDate}"> </span>
+          </p>
+          <div class="shares">
+            <span
+              class="pill"
+              th:each="s : ${e.shares}"
+              th:text="${s.user.name} + ': ' + ${#numbers.formatDecimal(s.shareAmount,1,'POINT',2,'COMMA')} + ' ' + ${summary.group.currency}"
+            >
+            </span>
+          </div>
+          <h4>Belege</h4>
+          <div
+            th:each="r : ${receipts}"
+            th:if="${r.expenseId == e.id}"
+            class="actions"
+          >
+            <a
+              th:href="@{/groups/{g}/expenses/{e}/receipts/{r}(g=${summary.group.id},e=${e.id},r=${r.id})}"
+              th:text="${r.filename}"
+            ></a>
+            <form
+              method="post"
+              th:action="@{/groups/{g}/expenses/{e}/receipts/{r}/delete(g=${summary.group.id},e=${e.id},r=${r.id})}"
+            >
+              <button class="quiet danger">Beleg entfernen</button>
+            </form>
+          </div>
+          <details class="receipt-upload">
+            <summary>Beleg hinzufügen</summary>
+            <form
+              method="post"
+              enctype="multipart/form-data"
+              th:action="@{/groups/{g}/expenses/{e}/receipts(g=${summary.group.id},e=${e.id})}"
+            >
+              <label
+                >Foto oder PDF anhängen (max. 10 MB; 5 Belege pro Ausgabe)<input
+                  type="file"
+                  name="file"
+                  accept="image/jpeg,image/png,application/pdf"
+                  required
+              /></label>
+              <button class="secondary">Beleg speichern</button>
+            </form>
+          </details>
+          <div class="actions">
+            <a
+              th:href="@{/groups/{g}/expenses/{e}/edit(g=${summary.group.id},e=${e.id})}"
+              >Bearbeiten</a
+            >
+            <form
+              th:action="@{/groups/{g}/expenses/{e}/delete(g=${summary.group.id},e=${e.id})}"
+              method="post"
+            >
+              <input type="hidden" name="version" th:value="${e.version}" />
+              <button class="quiet danger">Ausgabe löschen</button>
+            </form>
+          </div>
+        </article>
+      </section>
+      <details
+        id="activities"
+        class="activity-panel"
+        th:open="${param.activity != null}"
+      >
+        <summary class="activity-toggle">
+          Aktivitäten <span>Änderungen und Zahlungen</span>
+        </summary>
+        <nav class="activity-filters" aria-label="Aktivitäten filtern">
+          <a
+            th:href="@{/groups/{id}(id=${summary.group.id},activity='all')} + '#activities'"
+            th:class="${activityFilter == 'all' ? 'button' : 'button secondary'}"
+            th:attr="aria-current=${activityFilter == 'all' ? 'page' : null}"
+            >Alle</a
+          >
+          <a
+            th:href="@{/groups/{id}(id=${summary.group.id},activity='expenses')} + '#activities'"
+            th:class="${activityFilter == 'expenses' ? 'button' : 'button secondary'}"
+            th:attr="aria-current=${activityFilter == 'expenses' ? 'page' : null}"
+            >Ausgaben</a
+          >
+          <a
+            th:href="@{/groups/{id}(id=${summary.group.id},activity='receipts')} + '#activities'"
+            th:class="${activityFilter == 'receipts' ? 'button' : 'button secondary'}"
+            th:attr="aria-current=${activityFilter == 'receipts' ? 'page' : null}"
+            >Belege</a
+          >
+          <a
+            th:href="@{/groups/{id}(id=${summary.group.id},activity='payments')} + '#activities'"
+            th:class="${activityFilter == 'payments' ? 'button' : 'button secondary'}"
+            th:attr="aria-current=${activityFilter == 'payments' ? 'page' : null}"
+            >Zahlungen</a
+          >
+        </nav>
+        <p class="muted">
+          Neueste zuerst · Details durch Anklicken öffnen. Frühere, nicht
+          protokollierte Änderungen sind nicht enthalten.
+        </p>
+        <p th:if="${#lists.isEmpty(activities)}">
+          Noch keine Aktivitäten in dieser Ansicht.
+        </p>
+        <article th:each="entry : ${activities}">
+          <small
+            th:text="${#temporals.format(entry.time.atZone(T(java.time.ZoneId).of('Europe/Berlin')), 'dd.MM.yyyy · HH:mm')}"
+          ></small>
+          <details
+            th:if="${entry.change != null}"
+            th:with="change=${entry.change},matches=${summary.expenses.?[id == #vars.change.expenseId]}"
+          >
+            <summary>
+              <span
+                class="pill"
+                th:text="${entry.kind == 'receipts' ? 'Beleg' : 'Ausgabe'}"
+              ></span>
+              <strong th:text="${change.actorName}"></strong> ·
+              <span
+                th:text="${#lists.isEmpty(matches) ? 'Gelöschte Ausgabe' : matches[0].description}"
+              ></span>
+            </summary>
+            <p style="white-space: pre-wrap" th:text="${change.details}"></p>
+          </details>
+          <div th:if="${entry.payment != null}" th:with="p=${entry.payment}">
+            <strong
+              th:text="${p.sender.name} + ' → ' + ${p.recipient.name} + ': ' + ${#numbers.formatDecimal(p.amount,1,'POINT',2,'COMMA')} + ' ' + ${summary.group.currency}"
+            ></strong>
+            <span
+              class="pill"
+              th:text="${p.cancelled ? 'Storniert' : 'Erfasst'}"
+            ></span>
+            <p
+              th:if="${p.cancelled}"
+              th:text="'Storniert von ' + ${p.cancelledBy.name} + ' · Grund: ' + ${p.cancellationReason}"
+            ></p>
+            <details
+              th:if="${!p.cancelled and (summary.admin or summary.actorId == p.sender.id or summary.actorId == p.recipient.id)}"
+            >
+              <summary>Rückzahlung stornieren</summary>
+              <form
+                method="post"
+                th:action="@{/groups/{g}/repayments/{p}/cancel(g=${summary.group.id},p=${p.id})}"
+              >
+                <label
+                  >Grund<input
+                    name="reason"
+                    maxlength="250"
+                    required
+                    placeholder="Zum Beispiel versehentlich bestätigt" /></label
+                ><button class="secondary">Stornierung bestätigen</button>
+              </form>
+            </details>
+            <p
+              th:text="${#temporals.format(p.paymentDate, 'dd.MM.yyyy')} + ' · Erfasst von ' + ${p.recordedBy.name}"
+            ></p>
+          </div>
+        </article>
+      </details>
+      <section class="columns">
+        <article>
+          <h2>Mitglieder</h2>
+          <div class="balance" th:each="m : ${summary.members}">
+            <span th:text="${m.user.name}"> </span>
+            <small
+              th:text="${m.role.name() == 'ADMIN' ? 'Administrator' : 'Mitglied'}"
+            >
+            </small>
+          </div>
+          <form
+            th:if="${summary.admin}"
+            th:action="@{/groups/{id}/members(id=${summary.group.id})}"
+            method="post"
+          >
+            <label
+              >Mitglied per E-Mail hinzufügen<input
+                type="email"
+                name="email"
+                placeholder="E-Mail des CampusSplit-Kontos"
+                required
+                maxlength="254"
+              />
+            </label>
+            <button class="secondary">Hinzufügen</button>
+          </form>
+        </article>
+        <article>
+          <h2>Abrechnung herunterladen</h2>
+          <p>
+            Als PDF zum Lesen oder als CSV für eine Tabellenkalkulation. Ohne
+            Zeitraum erhältst du die gesamte Abrechnung.
+          </p>
+          <form
+            th:action="@{/groups/{id}/export(id=${summary.group.id})}"
+            method="get"
+          >
+            <div class="columns">
+              <label>Von (optional)<input type="date" name="from" /> </label>
+              <label>Bis (optional)<input type="date" name="to" /> </label>
+            </div>
+            <label
+              >Format<select name="format">
+                <option value="pdf">PDF</option>
+                <option value="csv">CSV-Dateien als ZIP</option>
+              </select>
+            </label>
+            <button class="secondary">Herunterladen</button>
+          </form>
+          <small
+            >Bei Zeitraumwahl beziehen sich auch Salden und Vorschläge auf
+            Ausgaben und Rückzahlungen im gewählten Zeitraum.</small
+          >
+        </article>
+      </section>
+    </main>
+    <footer th:replace="~{fragments :: footer}"></footer>
+  </body>
 </html>

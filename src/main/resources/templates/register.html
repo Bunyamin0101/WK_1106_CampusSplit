@@ -1,31 +1,47 @@
 <!doctype html>
 <html lang="de" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments :: head('Registrieren')}">
-</head>
-<body>
-<header th:replace="~{fragments :: nav}">
-</header>
-<main>
-<section class="narrow">
-<span class="eyebrow">DEIN START MIT CAMPUSSPLIT</span>
-<h1>Konto erstellen</h1>
-<form th:action="@{/register}" method="post" th:object="${form}">
-<div th:replace="~{fragments :: errors}">
-</div>
-<label>Name<input th:field="*{name}" maxlength="100" required autocomplete="name">
-</label>
-<label>E-Mail<input type="email" th:field="*{email}" maxlength="254" required autocomplete="email">
-</label>
-<label>Passwort<input type="password" name="password" minlength="10" maxlength="72" required autocomplete="new-password">
-</label>
-<small>Mindestens 10 Zeichen; maximal 72 UTF-8-Bytes.</small>
-<button>Konto erstellen</button>
-</form>
-<p>Schon dabei? <a th:href="@{/login}">Anmelden</a>
-</p>
-</section>
-</main>
-<footer th:replace="~{fragments :: footer}">
-</footer>
-</body>
+  <head th:replace="~{fragments :: head('Registrieren')}"> </head>
+  <body>
+    <header th:replace="~{fragments :: nav}"></header>
+    <main>
+      <section class="narrow">
+        <span class="eyebrow">DEIN START MIT CAMPUSSPLIT</span>
+        <h1>Konto erstellen</h1>
+        <form th:action="@{/register}" method="post" th:object="${form}">
+          <div th:replace="~{fragments :: errors}"></div>
+          <label
+            >Name<input
+              th:field="*{name}"
+              maxlength="100"
+              required
+              autocomplete="name"
+            />
+          </label>
+          <label
+            >E-Mail<input
+              type="email"
+              th:field="*{email}"
+              maxlength="254"
+              required
+              autocomplete="email"
+            />
+          </label>
+          <label
+            >Passwort<input
+              type="password"
+              name="password"
+              minlength="10"
+              maxlength="72"
+              required
+              autocomplete="new-password"
+            />
+          </label>
+          <small>Mindestens 10 Zeichen; maximal 72 UTF-8-Bytes.</small>
+          <button>Konto erstellen</button>
+        </form>
+        <p>Schon dabei? <a th:href="@{/login}">Anmelden</a></p>
+      </section>
+    </main>
+    <footer th:replace="~{fragments :: footer}"></footer>
+  </body>
 </html>

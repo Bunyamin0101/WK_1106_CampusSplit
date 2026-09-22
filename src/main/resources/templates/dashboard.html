@@ -1,60 +1,102 @@
 <!doctype html>
 <html lang="de" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments :: head('Meine Gruppen')}">
-</head>
-<body>
-<header th:replace="~{fragments :: nav}">
-</header>
-<main>
-<div class="heading">
-<div>
-<span class="eyebrow" th:text="'HALLO, ' + ${user.name}">
-</span>
-<h1>Meine Gruppen</h1>
-<p>Alles, was ihr gemeinsam teilt, an einem Ort.</p>
-</div>
-<a class="button" th:href="@{/groups/new}">+ Neue Gruppe</a>
-</div>
-<section class="dashboard-overview" aria-label="Deine finanzielle Übersicht">
-<p class="muted">Alle Gruppen einschließlich Archiv · Ausgaben diesen Monat: dein Kostenanteil · Keine Verrechnung zwischen Gruppen oder Währungen</p>
-<p th:if="${#lists.isEmpty(overview)}">Sobald du eine Gruppe hast, erscheinen hier deine Beträge nach Währung.</p>
-<div th:each="total : ${overview}">
-<h2 th:text="${total.currency}"></h2>
-<div class="metric-grid">
-<article><span>Du bekommst zurück</span><strong class="positive" th:text="${#numbers.formatDecimal(total.receivable,1,'POINT',2,'COMMA')} + ' ' + ${total.currency}"></strong></article>
-<article><span>Du schuldest</span><strong th:text="${#numbers.formatDecimal(total.payable,1,'POINT',2,'COMMA')} + ' ' + ${total.currency}"></strong></article>
-<article><span>Ausgaben diesen Monat</span><strong th:text="${#numbers.formatDecimal(total.monthlyExpenses,1,'POINT',2,'COMMA')} + ' ' + ${total.currency}"></strong><small>Dein Anteil bis heute</small></article>
-</div></div>
-</section>
-<section class="empty" th:if="${#lists.isEmpty(memberships.?[!group.archived])}">
-<h2>Keine aktiven Gruppen.</h2>
-<p>Erstelle eine Gruppe und füge registrierte Mitglieder hinzu.</p>
-<a th:href="@{/groups/new}">Gruppe erstellen →</a>
-</section>
-<section class="cards">
-<a class="group-card" th:each="m : ${memberships.?[!group.archived]}" th:href="@{/groups/{id}(id=${m.group.id})}">
-<span class="pill" th:text="${m.group.currency}">
-</span>
-<h2 th:text="${m.group.name}">
-</h2>
-<p th:text="${m.group.description}">
-</p>
-<span th:text="${m.role.name() == 'ADMIN' ? 'Administrator' : 'Mitglied'}">
-</span>
-<b>Öffnen ↗</b>
-</a>
-</section>
-<details class="archive" th:if="${!#lists.isEmpty(memberships.?[group.archived])}">
-<summary th:text="'Archivierte Gruppen (' + ${#lists.size(memberships.?[group.archived])} + ')'">Archivierte Gruppen</summary>
-<section class="cards">
-<a class="group-card" th:each="m : ${memberships.?[group.archived]}" th:href="@{/groups/{id}(id=${m.group.id})}">
-<span class="pill">Archiviert</span><h2 th:text="${m.group.name}"></h2>
-<p th:text="${m.group.description}"></p><b>Ansehen ↗</b>
-</a>
-</section>
-</details>
-</main>
-<footer th:replace="~{fragments :: footer}">
-</footer>
-</body>
+  <head th:replace="~{fragments :: head('Meine Gruppen')}"> </head>
+  <body>
+    <header th:replace="~{fragments :: nav}"></header>
+    <main>
+      <div class="heading">
+        <div>
+          <span class="eyebrow" th:text="'HALLO, ' + ${user.name}"> </span>
+          <h1>Meine Gruppen</h1>
+          <p>Alles, was ihr gemeinsam teilt, an einem Ort.</p>
+        </div>
+        <a class="button" th:href="@{/groups/new}">+ Neue Gruppe</a>
+      </div>
+      <section
+        class="dashboard-overview"
+        aria-label="Deine finanzielle Übersicht"
+      >
+        <p class="muted">
+          Alle Gruppen einschließlich Archiv · Ausgaben diesen Monat: dein
+          Kostenanteil · Keine Verrechnung zwischen Gruppen oder Währungen
+        </p>
+        <p th:if="${#lists.isEmpty(overview)}">
+          Sobald du eine Gruppe hast, erscheinen hier deine Beträge nach
+          Währung.
+        </p>
+        <div th:each="total : ${overview}">
+          <h2 th:text="${total.currency}"></h2>
+          <div class="metric-grid">
+            <article>
+              <span>Du bekommst zurück</span
+              ><strong
+                class="positive"
+                th:text="${#numbers.formatDecimal(total.receivable,1,'POINT',2,'COMMA')} + ' ' + ${total.currency}"
+              ></strong>
+            </article>
+            <article>
+              <span>Du schuldest</span
+              ><strong
+                th:text="${#numbers.formatDecimal(total.payable,1,'POINT',2,'COMMA')} + ' ' + ${total.currency}"
+              ></strong>
+            </article>
+            <article>
+              <span>Ausgaben diesen Monat</span
+              ><strong
+                th:text="${#numbers.formatDecimal(total.monthlyExpenses,1,'POINT',2,'COMMA')} + ' ' + ${total.currency}"
+              ></strong
+              ><small>Dein Anteil bis heute</small>
+            </article>
+          </div>
+        </div>
+      </section>
+      <section
+        class="empty"
+        th:if="${#lists.isEmpty(memberships.?[!group.archived])}"
+      >
+        <h2>Keine aktiven Gruppen.</h2>
+        <p>Erstelle eine Gruppe und füge registrierte Mitglieder hinzu.</p>
+        <a th:href="@{/groups/new}">Gruppe erstellen →</a>
+      </section>
+      <section class="cards">
+        <a
+          class="group-card"
+          th:each="m : ${memberships.?[!group.archived]}"
+          th:href="@{/groups/{id}(id=${m.group.id})}"
+        >
+          <span class="pill" th:text="${m.group.currency}"> </span>
+          <h2 th:text="${m.group.name}"></h2>
+          <p th:text="${m.group.description}"></p>
+          <span
+            th:text="${m.role.name() == 'ADMIN' ? 'Administrator' : 'Mitglied'}"
+          >
+          </span>
+          <b>Öffnen ↗</b>
+        </a>
+      </section>
+      <details
+        class="archive"
+        th:if="${!#lists.isEmpty(memberships.?[group.archived])}"
+      >
+        <summary
+          th:text="'Archivierte Gruppen (' + ${#lists.size(memberships.?[group.archived])} + ')'"
+        >
+          Archivierte Gruppen
+        </summary>
+        <section class="cards">
+          <a
+            class="group-card"
+            th:each="m : ${memberships.?[group.archived]}"
+            th:href="@{/groups/{id}(id=${m.group.id})}"
+          >
+            <span class="pill">Archiviert</span>
+            <h2 th:text="${m.group.name}"></h2>
+            <p th:text="${m.group.description}"></p>
+            <b>Ansehen ↗</b>
+          </a>
+        </section>
+      </details>
+    </main>
+    <footer th:replace="~{fragments :: footer}"></footer>
+  </body>
 </html>

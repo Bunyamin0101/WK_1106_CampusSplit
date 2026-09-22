@@ -1,35 +1,56 @@
 <!doctype html>
 <html lang="de" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments :: head('Anmelden')}">
-</head>
-<body>
-<header th:replace="~{fragments :: nav}">
-</header>
-<main>
-<section class="narrow">
-<span class="eyebrow">WILLKOMMEN ZURÜCK</span>
-<h1>Anmelden</h1>
-<p class="notice" th:if="${param.registered}">Dein Konto wurde erstellt. Du kannst dich jetzt anmelden.</p>
-<p class="notice" th:if="${param.logout}">Du bist abgemeldet.</p>
-<p class="notice error" th:if="${param.error}" role="alert">E-Mail oder Passwort ist nicht korrekt.</p>
-<p class="notice error" th:if="${param.googleConflict}" role="alert">Google konnte keinem neuen Konto zugeordnet werden. Falls du bereits ein CampusSplit-Konto hast, nutze bitte dessen bisherige Anmeldung. Konten werden nicht automatisch zusammengeführt.</p>
-<p class="notice error" th:if="${param.googleError}" role="alert">Die Google-Anmeldung wurde abgebrochen oder konnte nicht abgeschlossen werden. Bitte erneut versuchen.</p>
-<div th:if="${googleEnabled}" class="google-login">
-<a class="button secondary" th:href="@{/oauth2/authorization/google}">Mit Google anmelden</a>
-<p>Oder mit E-Mail und Passwort anmelden:</p>
-</div>
-<form th:action="@{/login}" method="post">
-<label>E-Mail<input type="email" name="email" required autocomplete="username">
-</label>
-<label>Passwort<input type="password" name="password" required autocomplete="current-password">
-</label>
-<button>Anmelden</button>
-</form>
-<p>Noch kein Konto? <a th:href="@{/register}">Jetzt registrieren</a>
-</p>
-</section>
-</main>
-<footer th:replace="~{fragments :: footer}">
-</footer>
-</body>
+  <head th:replace="~{fragments :: head('Anmelden')}"> </head>
+  <body>
+    <header th:replace="~{fragments :: nav}"></header>
+    <main>
+      <section class="narrow">
+        <span class="eyebrow">WILLKOMMEN ZURÜCK</span>
+        <h1>Anmelden</h1>
+        <p class="notice" th:if="${param.registered}">
+          Dein Konto wurde erstellt. Du kannst dich jetzt anmelden.
+        </p>
+        <p class="notice" th:if="${param.logout}">Du bist abgemeldet.</p>
+        <p class="notice error" th:if="${param.error}" role="alert">
+          E-Mail oder Passwort ist nicht korrekt.
+        </p>
+        <p class="notice error" th:if="${param.googleConflict}" role="alert">
+          Google konnte keinem neuen Konto zugeordnet werden. Falls du bereits
+          ein CampusSplit-Konto hast, nutze bitte dessen bisherige Anmeldung.
+          Konten werden nicht automatisch zusammengeführt.
+        </p>
+        <p class="notice error" th:if="${param.googleError}" role="alert">
+          Die Google-Anmeldung wurde abgebrochen oder konnte nicht abgeschlossen
+          werden. Bitte erneut versuchen.
+        </p>
+        <div th:if="${googleEnabled}" class="google-login">
+          <a class="button secondary" th:href="@{/oauth2/authorization/google}"
+            >Mit Google anmelden</a
+          >
+          <p>Oder mit E-Mail und Passwort anmelden:</p>
+        </div>
+        <form th:action="@{/login}" method="post">
+          <label
+            >E-Mail<input
+              type="email"
+              name="email"
+              required
+              autocomplete="username"
+            />
+          </label>
+          <label
+            >Passwort<input
+              type="password"
+              name="password"
+              required
+              autocomplete="current-password"
+            />
+          </label>
+          <button>Anmelden</button>
+        </form>
+        <p>Noch kein Konto? <a th:href="@{/register}">Jetzt registrieren</a></p>
+      </section>
+    </main>
+    <footer th:replace="~{fragments :: footer}"></footer>
+  </body>
 </html>

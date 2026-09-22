@@ -1,33 +1,45 @@
 <!doctype html>
 <html lang="de" xmlns:th="http://www.thymeleaf.org">
-<head th:fragment="head(title)">
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title th:text="${title} + ' · CampusSplit'">CampusSplit</title>
-<link rel="stylesheet" th:href="@{/css/app.css}">
-</head>
-<body>
-<header th:fragment="nav">
-<a class="brand" th:href="@{/}">
-<span class="brand-symbol"><img th:src="@{/css/campussplit-logo.png}" alt=""></span><span>Campus<span class="brand-green">Split</span></span></a>
-<nav>
-<a th:href="@{/dashboard}">Meine Gruppen</a>
-<a th:if="${currentEmail != null}" th:href="@{/profile}">Profil</a>
-<form th:if="${currentEmail != null}" th:action="@{/logout}" method="post">
-<button class="quiet">Abmelden</button>
-</form>
-<a th:if="${currentEmail == null}" th:href="@{/login}">Anmelden</a>
-</nav>
-</header>
-<footer th:fragment="footer">CampusSplit · Gemeinsame Ausgaben, fair verteilt.<br>
-<small>Zahlungen erfolgen außerhalb von CampusSplit.</small>
-</footer>
-<div th:fragment="errors" th:if="${#fields.hasAnyErrors()}" class="notice error" role="alert">
-<strong>Bitte prüfe deine Eingaben.</strong>
-<ul>
-<li th:each="error : ${#fields.allErrors()}" th:text="${error}">
-</li>
-</ul>
-</div>
-</body>
+  <head th:fragment="head(title)">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title th:text="${title} + ' · CampusSplit'">CampusSplit</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}" />
+  </head>
+  <body>
+    <header th:fragment="nav">
+      <a class="brand" th:href="@{/}">
+        <span class="brand-symbol"
+          ><img th:src="@{/css/campussplit-logo.png}" alt="" /></span
+        ><span>Campus<span class="brand-green">Split</span></span></a
+      >
+      <nav>
+        <a th:href="@{/dashboard}">Meine Gruppen</a>
+        <a th:if="${currentEmail != null}" th:href="@{/profile}">Profil</a>
+        <form
+          th:if="${currentEmail != null}"
+          th:action="@{/logout}"
+          method="post"
+        >
+          <button class="quiet">Abmelden</button>
+        </form>
+        <a th:if="${currentEmail == null}" th:href="@{/login}">Anmelden</a>
+      </nav>
+    </header>
+    <footer th:fragment="footer">
+      CampusSplit · Gemeinsame Ausgaben, fair verteilt.<br />
+      <small>Zahlungen erfolgen außerhalb von CampusSplit.</small>
+    </footer>
+    <div
+      th:fragment="errors"
+      th:if="${#fields.hasAnyErrors()}"
+      class="notice error"
+      role="alert"
+    >
+      <strong>Bitte prüfe deine Eingaben.</strong>
+      <ul>
+        <li th:each="error : ${#fields.allErrors()}" th:text="${error}"></li>
+      </ul>
+    </div>
+  </body>
 </html>

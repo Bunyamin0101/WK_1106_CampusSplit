@@ -1,34 +1,71 @@
 <!doctype html>
 <html lang="de" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments :: head('Startseite')}"></head>
-<body class="home-page">
-<header th:replace="~{fragments :: nav}"></header>
-<main class="home-main">
-<section class="home-intro">
-<p class="home-label" th:text="${currentEmail != null ? 'Willkommen zurück' : 'Willkommen bei CampusSplit'}">Willkommen bei CampusSplit</p>
-<h1>Gemeinsame Kosten einfach aufteilen</h1>
-<p class="home-description">Ob WG-Einkauf oder Wochenendtrip: Tragt ein, wer bezahlt hat. CampusSplit berechnet, wer noch wie viel zurückbekommt.</p>
-<div class="actions" th:if="${currentEmail != null}">
-<a class="button" th:href="@{/dashboard}">Zu meinen Gruppen</a>
-<a class="home-link" th:href="@{/groups/new}">Neue Gruppe anlegen</a>
-</div>
-<div class="actions" th:if="${currentEmail == null}">
-<a class="button" th:href="@{/register}">Konto erstellen</a>
-<a class="home-link" th:href="@{/login}">Ich habe bereits ein Konto</a>
-</div>
-<p class="home-help" th:if="${currentEmail != null}">Mach in einer bestehenden Gruppe weiter oder lege eine neue für eure nächste gemeinsame Ausgabe an.</p>
-<p class="home-help" th:if="${currentEmail == null}">Für den Start brauchst du nur einen Namen, deine E-Mail-Adresse und ein Passwort.</p>
-</section>
-<section class="home-guide" aria-labelledby="home-guide-title">
-<h2 id="home-guide-title">In drei Schritten zur Abrechnung</h2>
-<ol>
-<li><h3>Gruppe anlegen</h3><p>Zum Beispiel „Unsere WG“ oder „Berlin-Wochenende“. Fügt danach eure Mitbewohner oder Freunde hinzu.</p></li>
-<li><h3>Ausgaben eintragen</h3><p>Was wurde bezahlt, von wem und für wen? Ihr entscheidet, wer welchen Anteil übernimmt.</p></li>
-<li><h3>Offene Beträge klären</h3><p>Seht direkt, wer wem wie viel zurückzahlt. Bereits bezahlte Beträge könnt ihr als erledigt erfassen.</p></li>
-</ol>
-<p class="home-note">Ihr könnt Belege hinzufügen und eure Abrechnung herunterladen. Das Geld überweist ihr selbst – CampusSplit behält für euch den Überblick.</p>
-</section>
-</main>
-<footer th:replace="~{fragments :: footer}"></footer>
-</body>
+  <head th:replace="~{fragments :: head('Startseite')}"></head>
+  <body class="home-page">
+    <header th:replace="~{fragments :: nav}"></header>
+    <main class="home-main">
+      <section class="home-intro">
+        <p
+          class="home-label"
+          th:text="${currentEmail != null ? 'Willkommen zurück' : 'Willkommen bei CampusSplit'}"
+        >
+          Willkommen bei CampusSplit
+        </p>
+        <h1>Gemeinsame Kosten einfach aufteilen</h1>
+        <p class="home-description">
+          Ob WG-Einkauf oder Wochenendtrip: Tragt ein, wer bezahlt hat.
+          CampusSplit berechnet, wer noch wie viel zurückbekommt.
+        </p>
+        <div class="actions" th:if="${currentEmail != null}">
+          <a class="button" th:href="@{/dashboard}">Zu meinen Gruppen</a>
+          <a class="home-link" th:href="@{/groups/new}">Neue Gruppe anlegen</a>
+        </div>
+        <div class="actions" th:if="${currentEmail == null}">
+          <a class="button" th:href="@{/register}">Konto erstellen</a>
+          <a class="home-link" th:href="@{/login}"
+            >Ich habe bereits ein Konto</a
+          >
+        </div>
+        <p class="home-help" th:if="${currentEmail != null}">
+          Mach in einer bestehenden Gruppe weiter oder lege eine neue für eure
+          nächste gemeinsame Ausgabe an.
+        </p>
+        <p class="home-help" th:if="${currentEmail == null}">
+          Für den Start brauchst du nur einen Namen, deine E-Mail-Adresse und
+          ein Passwort.
+        </p>
+      </section>
+      <section class="home-guide" aria-labelledby="home-guide-title">
+        <h2 id="home-guide-title">In drei Schritten zur Abrechnung</h2>
+        <ol>
+          <li>
+            <h3>Gruppe anlegen</h3>
+            <p>
+              Zum Beispiel „Unsere WG“ oder „Berlin-Wochenende“. Fügt danach
+              eure Mitbewohner oder Freunde hinzu.
+            </p>
+          </li>
+          <li>
+            <h3>Ausgaben eintragen</h3>
+            <p>
+              Was wurde bezahlt, von wem und für wen? Ihr entscheidet, wer
+              welchen Anteil übernimmt.
+            </p>
+          </li>
+          <li>
+            <h3>Offene Beträge klären</h3>
+            <p>
+              Seht direkt, wer wem wie viel zurückzahlt. Bereits bezahlte
+              Beträge könnt ihr als erledigt erfassen.
+            </p>
+          </li>
+        </ol>
+        <p class="home-note">
+          Ihr könnt Belege hinzufügen und eure Abrechnung herunterladen. Das
+          Geld überweist ihr selbst – CampusSplit behält für euch den Überblick.
+        </p>
+      </section>
+    </main>
+    <footer th:replace="~{fragments :: footer}"></footer>
+  </body>
 </html>
