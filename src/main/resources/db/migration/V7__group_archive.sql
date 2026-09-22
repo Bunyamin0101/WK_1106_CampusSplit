@@ -1,0 +1,1 @@
+ALTER TABLE expense_group ADD COLUMN archived_at TIMESTAMP WITH TIME ZONE;
