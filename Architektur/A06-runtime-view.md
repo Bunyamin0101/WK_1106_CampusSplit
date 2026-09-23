@@ -18,7 +18,7 @@ CampusSplit wird als serverseitig gerenderte Spring-Boot-Webanwendung mit Thymel
 | [6.4](#64-fremdwährungsausgabe-erfassen) Fremdwährungsausgabe erfassen | UC-08, S1 | Externe API, Wechselkurs, Fehlerfall ohne unvollständige Speicherung. |
 | [6.5](#65-salden-und-ausgleichsvorschläge-anzeigen) Salden und Ausgleichsvorschläge anzeigen | UC-11 | Backendseitige Geldlogik, Debitor/Kreditor, deterministische Berechnung. |
 | [6.6](#66-pdf-oder-csv-export-erzeugen) PDF- oder CSV-Export erzeugen | UC-12 | Exportdaten, Exportsicherheit, Datei als Datenfluss. |
-| [6.7](#67-weitere-implementierte-abläufe) Weitere implementierte Abläufe | Erweiterter Funktionsumfang | Google-Anmeldung, Rückzahlungen, Belege, Historie und Archivierung. |
+| [6.7](#67-weitere-implementierte-abläufe) Weitere implementierte Abläufe | Erweiterter Funktionsumfang | Rückzahlungen, Belege, Änderungshistorie und Archivierung. |
 
 Alle fachlichen Aktionen werden durch Benutzerinteraktionen ausgelöst. Es gibt keine Batch-Verarbeitung, keine Queue und keine Hintergrundjobs.
 
@@ -122,9 +122,9 @@ Ein vorhandenes CampusSplit-Konto kann außerdem über das Profil mit Google ver
 sequenceDiagram
     actor Nutzer
     participant Browser
-    participant Controller as GroupController / MembershipController
+    participant Controller as GroupController
     participant GroupSvc as GroupService
-    participant MemberSvc as MembershipService
+    participant MemberSvc as GroupService
     participant Repo as Repositories
     participant DB as PostgreSQL
 
@@ -339,7 +339,7 @@ Wichtige Aspekte:
 
 | Aspekt | Bedeutung |
 |---|---|
-| Berechnung bei Anzeige | Salden werden aus aktuellen Ausgaben und Kostenanteilen berechnet. |
+| Berechnung bei Anzeige | Salden werden aus aktuellen Ausgaben, Kostenanteilen und erfassten Rückzahlungen berechnet. |
 | Keine echten Zahlungen | Ausgleichsvorschläge sind nur Empfehlungen. |
 | Debitor/Kreditor | Negativer Saldo = schuldet Geld; positiver Saldo = bekommt Geld. |
 | Summe 0,00 | Die Summe aller Gruppensalden muss 0,00 ergeben. |
@@ -369,8 +369,8 @@ sequenceDiagram
     actor Mitglied
     participant Browser
     participant Controller as ExportController
-    participant ExportSvc as ExportApplicationService
-    participant BalanceSvc as BalanceService / SettlementService
+    participant ExportSvc as ExportService
+    participant BalanceSvc as BalanceService
     participant Repo as Repositories
     participant Writer as PdfExportWriter / CsvExportWriter
     participant DB as PostgreSQL
