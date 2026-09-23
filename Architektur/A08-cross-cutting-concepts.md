@@ -427,5 +427,3 @@ Nicht Bestandteil der Querschnittskonzepte sind:
 - produktive Monitoring-Infrastruktur,
 - Zahlungs- oder Bank-Sicherheitskonzepte,
 - KI-Sicherheitskonzepte zur Laufzeit.
-
-Diese Themen sind für CampusSplit nicht notwendig oder gehören in spätere Implementierungsdetails.
