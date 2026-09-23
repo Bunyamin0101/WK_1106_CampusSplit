@@ -427,3 +427,5 @@ Nicht Bestandteil der Querschnittskonzepte sind:
 - produktive Monitoring-Infrastruktur,
 - Zahlungs- oder Bank-Sicherheitskonzepte,
 - KI-Sicherheitskonzepte zur Laufzeit.
+ 
+ 
