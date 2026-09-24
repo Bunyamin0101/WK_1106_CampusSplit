@@ -1,11 +1,11 @@
 <!doctype html>
 <html lang="de" xmlns:th="http://www.thymeleaf.org">
   <head th:replace="~{fragments :: head('Profil')}"> </head>
-  <body>
+  <body class="profile-page">
     <header th:replace="~{fragments :: nav}"></header>
-    <main>
-      <section class="narrow">
-        <h1>Profil und Kontoeinstellungen</h1>
+    <main class="profile-main">
+      <section class="profile-content">
+        <div class="profile-heading"><span class="eyebrow">Dein Konto</span><h1>Profil und Kontoeinstellungen</h1></div>
         <p
           class="notice"
           th:if="${message}"
@@ -15,22 +15,23 @@
         <p class="notice" th:if="${param.linked}">
           Google wurde erfolgreich mit deinem Konto verknüpft.
         </p>
-        <section>
-          <h2>Dein Profil</h2>
-          <p th:text="${profile.email}"></p>
+        <section class="profile-panel">
+          <h2>Persönliche Angaben</h2>
+          <div class="profile-email"><span>E-Mail-Adresse</span><p th:text="${profile.email}"></p></div>
           <form method="post" th:action="@{/profile}">
             <label
               >Anzeigename<input
                 name="name"
+                autocomplete="nickname"
                 th:value="${profile.name}"
                 required
                 maxlength="100"
               />
             </label>
-            <button>Speichern</button>
+            <button>Änderungen speichern</button>
           </form>
         </section>
-        <section>
+        <section class="profile-panel">
           <h2>Google-Anmeldung</h2>
           <p th:if="${profile.googleSubject != null}">
             Google ist mit deinem Konto verknüpft.
