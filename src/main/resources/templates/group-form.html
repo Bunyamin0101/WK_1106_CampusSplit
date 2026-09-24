@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="de" xmlns:th="http://www.thymeleaf.org">
   <head th:replace="~{fragments :: head('Neue Gruppe')}"> </head>
-  <body>
+  <body class="expenses-page group-form-page">
     <header th:replace="~{fragments :: nav}"></header>
     <main>
       <section class="narrow">
@@ -18,29 +18,20 @@
             />
           </label>
           <label
-            >Beschreibung<textarea
+            >Beschreibung (optional)<textarea
               th:field="*{description}"
               maxlength="500"
+              rows="3"
             ></textarea>
           </label>
           <label
-            >Gruppenwährung<input
-              th:field="*{currency}"
-              maxlength="3"
-              pattern="[A-Z]{3}"
-              required
-              list="currencies"
-            />
+            >Gruppenwährung<select th:field="*{currency}" required aria-describedby="currency-help">
+              <option value="EUR">Euro (EUR)</option>
+              <option value="USD">US-Dollar (USD)</option>
+            </select>
           </label>
-          <datalist id="currencies">
-            <option value="EUR"></option>
-            <option value="USD"></option>
-            <option value="GBP"></option>
-            <option value="CHF"></option>
-          </datalist>
-          <small
-            >ISO-Währungscode, z. B. EUR. Die Gruppenwährung bleibt nach
-            Erstellung fest.</small
+          <small id="currency-help"
+            >Zum Beispiel EUR für Euro oder USD für US-Dollar. Die Währung lässt sich später nicht ändern.</small
           >
           <button>Gruppe erstellen</button>
         </form>
