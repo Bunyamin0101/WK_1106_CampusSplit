@@ -1,11 +1,11 @@
 <!doctype html>
 <html lang="de" xmlns:th="http://www.thymeleaf.org">
   <head th:replace="~{fragments :: head('Anmelden')}"> </head>
-  <body>
+  <body class="auth-page">
     <header th:replace="~{fragments :: nav}"></header>
     <main>
       <section class="narrow">
-        <span class="eyebrow">WILLKOMMEN ZURÜCK</span>
+        <span class="eyebrow">Willkommen zurück</span>
         <h1>Anmelden</h1>
         <p class="notice" th:if="${param.registered}">
           Dein Konto wurde erstellt. Du kannst dich jetzt anmelden.
@@ -48,7 +48,7 @@
           </label>
           <button>Anmelden</button>
         </form>
-        <p>Noch kein Konto? <a th:href="@{/register}">Jetzt registrieren</a></p>
+        <p class="auth-switch">Noch kein Konto? <a th:href="@{/register}">Jetzt registrieren</a></p>
       </section>
     </main>
     <footer th:replace="~{fragments :: footer}"></footer>
