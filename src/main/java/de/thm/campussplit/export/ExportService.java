@@ -28,7 +28,8 @@ public class ExportService {
         .append("\r\n");
   }
 
-  public byte[] csv(GroupSummary summary, LocalDate from, LocalDate to) throws IOException {
+  public byte[] csv(GroupSummary summary, LocalDate from, LocalDate to, String scope)
+      throws IOException {
     var expenseRows = new StringBuilder();
     row(
         expenseRows,
@@ -102,21 +103,22 @@ public class ExportService {
                     p.getCancelledBy() == null ? "" : p.getCancelledBy().getName(),
                     p.getCancellationReason()));
     var metadata = new StringBuilder();
-    row(metadata, "group", "currency", "exported_at", "from", "to");
+    row(metadata, "group", "currency", "exported_at", "from", "to", "scope");
     row(
         metadata,
         summary.group().getName(),
         summary.group().getCurrency(),
         Instant.now(),
         from,
-        to);
+        to,
+        scope);
     var bytes = new ByteArrayOutputStream();
     try (var zip = new ZipOutputStream(bytes, StandardCharsets.UTF_8)) {
-      write(zip, "ausgaben.csv", expenseRows.toString());
-      write(zip, "salden.csv", balances.toString());
-      write(zip, "ausgleich.csv", settlements.toString());
+      if (!scope.equals("open")) write(zip, "ausgaben.csv", expenseRows.toString());
+      if (!scope.equals("expenses")) write(zip, "salden.csv", balances.toString());
+      if (!scope.equals("expenses")) write(zip, "ausgleich.csv", settlements.toString());
       write(zip, "gruppe.csv", metadata.toString());
-      write(zip, "rueckzahlungen.csv", payments.toString());
+      if (scope.equals("all")) write(zip, "rueckzahlungen.csv", payments.toString());
     }
     return bytes.toByteArray();
   }
@@ -127,102 +129,132 @@ public class ExportService {
     zip.closeEntry();
   }
 
-  public byte[] pdf(GroupSummary summary, LocalDate from, LocalDate to) throws IOException {
+  public byte[] pdf(GroupSummary summary, LocalDate from, LocalDate to, String scope)
+      throws IOException {
     try (var document = new PDDocument();
         var out = new ByteArrayOutputStream();
         var fontStream = getClass().getResourceAsStream("/fonts/NotoSans-Regular.ttf")) {
       var font = PDType0Font.load(document, Objects.requireNonNull(fontStream));
       try (var writer = new PdfWriter(document, font)) {
-        writer.line("CampusSplit - Gruppenabrechnung", 20);
+        writer.line("Gruppenabrechnung", 22);
         writer.line("Gruppe: " + summary.group().getName(), 14);
         writer.line(
-            "Export: " + LocalDate.now() + " | Währung: " + summary.group().getCurrency(), 10);
+            "Export: " + LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("dd.MM.yyyy")) + " | Währung: " + summary.group().getCurrency(), 10);
         writer.line(
             "Zeitraum: " + (from == null ? "Beginn" : from) + " bis " + (to == null ? "heute" : to),
             10);
+        writer.line(
+            "Inhalt: "
+                + switch (scope) {
+                  case "open" -> "Offene Beträge";
+                  case "expenses" -> "Nur Ausgaben";
+                  default -> "Gesamte Abrechnung";
+                },
+            10);
         writer.heading("Mitglieder");
         for (var m : summary.members()) writer.line(m.getUser().getName(), 11);
-        writer.heading("Ausgaben und Kostenanteile");
-        if (summary.expenses().isEmpty()) writer.line("Keine Ausgaben im gewählten Zeitraum.", 11);
-        for (var e : summary.expenses()) {
-          // Keep the description and first detail rows together at a page break.
-          writer.reserve(140);
-          writer.line(e.getExpenseDate() + " | " + e.getDescription(), 12);
-          writer.line(
-              "Zahler: "
-                  + e.getPaidBy().getName()
-                  + " | Kategorie: "
-                  + (e.getCategory() == null ? "-" : e.getCategory().getName()),
-              10);
-          writer.line(
-              "Original: "
-                  + e.getOriginalAmount()
-                  + " "
-                  + e.getOriginalCurrency()
-                  + " | Abrechnung: "
-                  + e.getSettlementAmount()
-                  + " "
-                  + summary.group().getCurrency(),
-              11);
-          if (e.getExchangeRate() != null)
-            writer.line("Kurs: " + e.getExchangeRate() + " vom " + e.getRateDate(), 10);
-          for (var s : e.getShares())
+        if (!scope.equals("open")) {
+          writer.heading("Ausgaben und Kostenanteile");
+          if (summary.expenses().isEmpty())
+            writer.line("Keine Ausgaben im gewählten Zeitraum.", 11);
+          for (var e : summary.expenses()) {
+            // Keep the description and first detail rows together at a page break.
+            writer.reserve(140);
+            writer.line(e.getExpenseDate().format(java.time.format.DateTimeFormatter.ofPattern("dd.MM.yyyy")) + " | " + e.getDescription(), 12);
             writer.line(
-                "  "
-                    + s.getUser().getName()
-                    + ": "
-                    + s.getShareAmount()
+                "Zahler: "
+                    + e.getPaidBy().getName()
+                    + " | Kategorie: "
+                    + (e.getCategory() == null ? "-" : e.getCategory().getName()),
+                10);
+            writer.line(
+                "Original: "
+                    + money(e.getOriginalAmount())
+                    + " "
+                    + e.getOriginalCurrency()
+                    + " | Abrechnung: "
+                    + money(e.getSettlementAmount())
                     + " "
                     + summary.group().getCurrency(),
-                10);
-          writer.space();
+                11);
+            if (e.getExchangeRate() != null)
+              writer.line("Kurs: " + e.getExchangeRate() + " vom " + e.getRateDate(), 10);
+            for (var s : e.getShares())
+              writer.line(
+                  "  "
+                      + s.getUser().getName()
+                      + ": "
+                      + money(s.getShareAmount())
+                      + " "
+                      + summary.group().getCurrency(),
+                  10);
+            writer.space();
+          }
         }
-        writer.heading("Erfasste Rückzahlungen");
-        for (var p : summary.repayments())
-          writer.line(
-              p.getPaymentDate()
-                  + " | "
-                  + p.getSender().getName()
-                  + " -> "
-                  + p.getRecipient().getName()
-                  + ": "
-                  + p.getAmount()
-                  + " "
-                  + summary.group().getCurrency()
-                  + " | Bestätigt von "
-                  + p.getRecordedBy().getName()
-                  + (p.isCancelled()
-                      ? " | STORNIERT: "
-                          + p.getCancelledAt()
-                          + " | "
-                          + p.getCancelledBy().getName()
-                          + " | "
-                          + p.getCancellationReason()
-                      : ""),
-              11);
-        writer.heading("Salden");
-        for (var b : summary.balances())
-          writer.line(
-              b.name()
-                  + ": "
-                  + b.amount().abs()
-                  + " "
-                  + summary.group().getCurrency()
-                  + " - "
-                  + b.label(),
-              11);
-        writer.heading("Ausgleichsvorschläge (Debitor -> Kreditor)");
-        if (summary.settlements().isEmpty()) writer.line("Alle Salden sind ausgeglichen.", 11);
-        for (var s : summary.settlements())
-          writer.line(
-              s.from() + " -> " + s.to() + ": " + s.amount() + " " + summary.group().getCurrency(),
-              11);
+        if (scope.equals("all")) {
+          writer.heading("Erfasste Rückzahlungen");
+          if (summary.repayments().isEmpty()) writer.line("Noch keine Rückzahlungen erfasst.", 11);
+          for (var p : summary.repayments())
+            writer.line(
+                p.getPaymentDate()
+                    + " | "
+                    + p.getSender().getName()
+                    + " -> "
+                    + p.getRecipient().getName()
+                    + ": "
+                    + money(p.getAmount())
+                    + " "
+                    + summary.group().getCurrency()
+                    + " | Bestätigt von "
+                    + p.getRecordedBy().getName()
+                    + (p.isCancelled()
+                        ? " | STORNIERT: "
+                            + p.getCancelledAt()
+                            + " | "
+                            + p.getCancelledBy().getName()
+                            + " | "
+                            + p.getCancellationReason()
+                        : ""),
+                11);
+        }
+        if (!scope.equals("expenses")) {
+          writer.heading("Salden");
+          for (var b : summary.balances())
+            writer.line(
+                b.name()
+                    + ": "
+                    + money(b.amount().abs())
+                    + " "
+                    + summary.group().getCurrency()
+                    + " - "
+                    + b.label(),
+                11);
+          writer.heading("Ausgleichsvorschläge - Wer zahlt wem?");
+          if (summary.settlements().isEmpty()) writer.line("Alle Salden sind ausgeglichen.", 11);
+          for (var s : summary.settlements())
+            writer.line(
+                s.from()
+                    + " -> "
+                    + s.to()
+                    + ": "
+                    + money(s.amount())
+                    + " "
+                    + summary.group().getCurrency(),
+                11);
+        }
         writer.space();
         writer.line("Zahlungen finden außerhalb von CampusSplit statt.", 10);
       }
       document.save(out);
       return out.toByteArray();
     }
+  }
+
+  private static String money(java.math.BigDecimal amount) {
+    var format = java.text.NumberFormat.getNumberInstance(java.util.Locale.GERMANY);
+    format.setMinimumFractionDigits(2);
+    format.setMaximumFractionDigits(2);
+    return format.format(amount);
   }
 
   private static class PdfWriter implements AutoCloseable {
@@ -242,7 +274,21 @@ public class ExportService {
       var page = new PDPage(PDRectangle.A4);
       doc.addPage(page);
       stream = new PDPageContentStream(doc, page);
-      y = 790;
+      stream.setNonStrokingColor(new java.awt.Color(8, 125, 64));
+      stream.addRect(0, 778, page.getMediaBox().getWidth(), 64);
+      stream.fill();
+      stream.beginText();
+      stream.setNonStrokingColor(java.awt.Color.WHITE);
+      stream.setFont(font, 19);
+      stream.newLineAtOffset(48, 800);
+      stream.showText("CampusSplit");
+      stream.endText();
+      stream.setStrokingColor(new java.awt.Color(220, 229, 223));
+      stream.moveTo(48, 46);
+      stream.lineTo(547, 46);
+      stream.stroke();
+      stream.setNonStrokingColor(new java.awt.Color(95, 111, 103));
+      y = 748;
       stream.beginText();
       stream.setFont(font, 9);
       stream.newLineAtOffset(48, 28);
@@ -253,7 +299,11 @@ public class ExportService {
     void heading(String s) throws IOException {
       reserve(65);
       space();
-      line(s, 14);
+      stream.setNonStrokingColor(new java.awt.Color(237, 246, 240));
+      stream.addRect(42, y - 9, 511, 28);
+      stream.fill();
+      line(s, 13);
+      y -= 8;
     }
 
     void reserve(int points) throws IOException {
@@ -296,6 +346,8 @@ public class ExportService {
 
     void draw(String text, int size) throws IOException {
       if (y < size + 55) newPage();
+      stream.setNonStrokingColor(size >= 12
+          ? new java.awt.Color(16, 43, 83) : new java.awt.Color(66, 83, 75));
       stream.beginText();
       stream.setFont(font, size);
       stream.newLineAtOffset(48, y);
