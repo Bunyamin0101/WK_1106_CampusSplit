@@ -23,9 +23,12 @@ public class ExportController {
   ResponseEntity<byte[]> export(
       @PathVariable Long groupId,
       @RequestParam String format,
+      @RequestParam(defaultValue = "all") String scope,
       @RequestParam(required = false) LocalDate from,
       @RequestParam(required = false) LocalDate to,
       Principal principal) {
+    if (!java.util.Set.of("all", "open", "expenses").contains(scope))
+      throw new BusinessException("Bitte einen gültigen Exportinhalt wählen.");
     var summary = expenses.summary(groupId, principal.getName(), from, to);
     if (!format.equals("pdf") && !format.equals("csv"))
       throw new BusinessException("Bitte PDF oder CSV wählen.");
@@ -37,7 +40,8 @@ public class ExportController {
               HttpHeaders.CONTENT_DISPOSITION,
               "attachment; filename=campussplit-" + groupId + (pdf ? ".pdf" : ".zip"))
           .cacheControl(CacheControl.noStore())
-          .body(pdf ? exports.pdf(summary, from, to) : exports.csv(summary, from, to));
+          .body(
+              pdf ? exports.pdf(summary, from, to, scope) : exports.csv(summary, from, to, scope));
     } catch (IOException ex) {
       throw new BusinessException(
           "Der Export konnte nicht erstellt werden. Bitte erneut versuchen.");
