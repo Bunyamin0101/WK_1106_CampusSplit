@@ -43,10 +43,8 @@ public class GroupService {
   }
 
   public static void validateCurrency(String code) {
-    try {
-      Currency.getInstance(code);
-    } catch (IllegalArgumentException | NullPointerException ex) {
-      throw new BusinessException("Bitte einen gültigen Währungscode eingeben, zum Beispiel EUR.");
+    if (!"EUR".equals(code) && !"USD".equals(code)) {
+      throw new BusinessException("Bitte Euro (EUR) oder US-Dollar (USD) wählen.");
     }
   }
 
@@ -78,6 +76,33 @@ public class GroupService {
     em.lock(group, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
     if (group.isArchived() != archived)
       group.setArchivedAt(archived ? java.time.Instant.now() : null);
+  }
+
+  @Transactional
+  public void delete(Long groupId, String confirmation, String actor) {
+    var membership = requireMember(groupId, actor);
+    if (membership.getRole() != Role.ADMIN) {
+      throw new AccessDeniedException("Nur Gruppenadministratoren dürfen Gruppen löschen.");
+    }
+    var group = membership.getGroup();
+    em.lock(group, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
+    if (confirmation == null || !group.getName().equals(confirmation.strip())) {
+      throw new BusinessException("Bitte den Gruppennamen zur Bestätigung genau eingeben.");
+    }
+    // Abhängige Datensätze zuerst entfernen; alle Schritte gehören zu einer Transaktion.
+    for (var sql :
+        List.of(
+            "DELETE FROM receipt WHERE expense_id IN (SELECT id FROM expense WHERE group_id = :id)",
+            "DELETE FROM expense_share WHERE expense_id IN (SELECT id FROM expense WHERE group_id ="
+                + " :id)",
+            "DELETE FROM expense_change WHERE group_id = :id",
+            "DELETE FROM repayment WHERE group_id = :id",
+            "DELETE FROM expense WHERE group_id = :id",
+            "DELETE FROM membership WHERE group_id = :id",
+            "DELETE FROM expense_group WHERE id = :id")) {
+      em.createNativeQuery(sql).setParameter("id", groupId).executeUpdate();
+    }
+    em.clear();
   }
 
   @Transactional
