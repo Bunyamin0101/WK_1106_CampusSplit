@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="de" xmlns:th="http://www.thymeleaf.org">
   <head th:replace="~{fragments :: head('Ausgabe erfassen')}"> </head>
-  <body>
+  <body class="expenses-page expense-form-page">
     <header th:replace="~{fragments :: nav}"></header>
     <main>
       <section class="form-wide">
@@ -33,12 +33,10 @@
               />
             </label>
             <label
-              >Originalwährung<input
-                th:field="*{currency}"
-                maxlength="3"
-                pattern="[A-Z]{3}"
-                required
-              />
+              >Originalwährung<select th:field="*{currency}" required>
+                <option value="EUR">Euro (EUR)</option>
+                <option value="USD">US-Dollar (USD)</option>
+              </select>
             </label>
           </div>
           <div class="columns">
