@@ -15,10 +15,16 @@ public class PageController {
   private boolean googleEnabled;
 
   private final DashboardService dashboard;
+  private final EuroOverviewService euroOverview;
   private final AccountService accounts;
   private final GroupService groups;
 
-  public PageController(AccountService accounts, GroupService groups, DashboardService dashboard) {
+  public PageController(
+      AccountService accounts,
+      GroupService groups,
+      DashboardService dashboard,
+      EuroOverviewService euroOverview) {
+    this.euroOverview = euroOverview;
     this.dashboard = dashboard;
     this.accounts = accounts;
     this.groups = groups;
@@ -59,7 +65,9 @@ public class PageController {
 
   @GetMapping({"/dashboard", "/groups"})
   String dashboard(Model model, Principal principal) {
-    model.addAttribute("overview", dashboard.overview(principal.getName()));
+    var overview = dashboard.overview(principal.getName());
+    model.addAttribute("overview", overview);
+    model.addAttribute("euroOverview", euroOverview.calculate(overview));
     model.addAttribute("memberships", groups.myGroups(principal.getName()));
     model.addAttribute("user", groups.currentUser(principal.getName()));
     return "dashboard";
