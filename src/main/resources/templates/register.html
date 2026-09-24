@@ -1,11 +1,11 @@
 <!doctype html>
 <html lang="de" xmlns:th="http://www.thymeleaf.org">
   <head th:replace="~{fragments :: head('Registrieren')}"> </head>
-  <body>
+  <body class="auth-page">
     <header th:replace="~{fragments :: nav}"></header>
     <main>
       <section class="narrow">
-        <span class="eyebrow">DEIN START MIT CAMPUSSPLIT</span>
+        <span class="eyebrow">Dein CampusSplit-Konto</span>
         <h1>Konto erstellen</h1>
         <form th:action="@{/register}" method="post" th:object="${form}">
           <div th:replace="~{fragments :: errors}"></div>
@@ -39,7 +39,7 @@
           <small>Mindestens 10 Zeichen; maximal 72 UTF-8-Bytes.</small>
           <button>Konto erstellen</button>
         </form>
-        <p>Schon dabei? <a th:href="@{/login}">Anmelden</a></p>
+        <p class="auth-switch">Schon dabei? <a th:href="@{/login}">Anmelden</a></p>
       </section>
     </main>
     <footer th:replace="~{fragments :: footer}"></footer>
