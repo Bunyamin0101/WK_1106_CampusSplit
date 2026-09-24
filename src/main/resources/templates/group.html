@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="de" xmlns:th="http://www.thymeleaf.org">
   <head th:replace="~{fragments :: head('Gruppe')}"> </head>
-  <body>
+  <body class="expenses-page">
     <header th:replace="~{fragments :: nav}"></header>
     <main>
       <a th:href="@{/dashboard}">← Meine Gruppen</a>
@@ -45,15 +45,10 @@
           class="secondary"
           th:text="${summary.group.archived ? 'Gruppe wiederherstellen' : 'Gruppe archivieren'}"
         ></button>
-        <small
-          >Archivierte Gruppen werden für alle Mitglieder im eingeklappten
-          Archiv angezeigt.</small
-        >
       </form>
       <section class="columns">
         <article>
           <h2>Salden</h2>
-          <p>Dein Überblick über offene Beträge in dieser Gruppe.</p>
           <div class="balance" th:each="b : ${summary.balances}">
             <span th:text="${b.name}"> </span>
             <span
@@ -103,14 +98,10 @@
               <button class="secondary">Zahlung erfassen</button>
             </form>
           </div>
-          <small
-            >Hier dokumentierst du eine bereits erfolgte Rückzahlung.
-            CampusSplit überweist kein Geld.</small
-          >
         </article>
       </section>
-      <section>
-        <h2>Ausgaben</h2>
+      <section class="expense-list" aria-labelledby="expenses-title">
+        <h2 id="expenses-title">Ausgaben</h2>
         <p class="empty" th:if="${#lists.isEmpty(summary.expenses)}">
           Noch keine Ausgaben. Erfasse euren ersten gemeinsamen Einkauf.
         </p>
@@ -146,6 +137,8 @@
             · Kurs <span th:text="${e.exchangeRate}"> </span> vom
             <span th:text="${e.rateDate}"> </span>
           </p>
+          <details class="expense-details">
+            <summary>Kostenanteile und Belege</summary>
           <div class="shares">
             <span
               class="pill"
@@ -188,7 +181,8 @@
               <button class="secondary">Beleg speichern</button>
             </form>
           </details>
-          <div class="actions">
+          </details>
+          <div class="actions expense-actions">
             <a
               th:href="@{/groups/{g}/expenses/{e}/edit(g=${summary.group.id},e=${e.id})}"
               >Bearbeiten</a
@@ -209,7 +203,7 @@
         th:open="${param.activity != null}"
       >
         <summary class="activity-toggle">
-          Aktivitäten <span>Änderungen und Zahlungen</span>
+          Aktivitäten
         </summary>
         <nav class="activity-filters" aria-label="Aktivitäten filtern">
           <a
@@ -328,18 +322,15 @@
         </article>
         <article>
           <h2>Abrechnung herunterladen</h2>
-          <p>
-            Als PDF zum Lesen oder als CSV für eine Tabellenkalkulation. Ohne
-            Zeitraum erhältst du die gesamte Abrechnung.
-          </p>
           <form
             th:action="@{/groups/{id}/export(id=${summary.group.id})}"
             method="get"
           >
-            <div class="columns">
-              <label>Von (optional)<input type="date" name="from" /> </label>
-              <label>Bis (optional)<input type="date" name="to" /> </label>
-            </div>
+            <select name="scope" aria-label="Exportinhalt">
+                <option value="all">Gesamte Abrechnung</option>
+                <option value="open">Offene Beträge</option>
+                <option value="expenses">Nur Ausgaben</option>
+            </select>
             <label
               >Format<select name="format">
                 <option value="pdf">PDF</option>
@@ -348,12 +339,40 @@
             </label>
             <button class="secondary">Herunterladen</button>
           </form>
-          <small
-            >Bei Zeitraumwahl beziehen sich auch Salden und Vorschläge auf
-            Ausgaben und Rückzahlungen im gewählten Zeitraum.</small
-          >
+
         </article>
       </section>
+      <details id="delete-group" class="group-delete" th:if="${summary.admin}">
+        <summary>Gruppe löschen</summary>
+        <h2>Diese Gruppe endgültig löschen?</h2>
+        <p>
+          Die Gruppe wird für alle Mitglieder gelöscht – einschließlich
+          Ausgaben, Kostenanteilen, Belegen, Rückzahlungen und Aktivitäten. Das
+          kann nicht rückgängig gemacht werden. Benutzerkonten bleiben erhalten.
+        </p>
+        <p>
+          Wenn du die Gruppe nur aus der Übersicht entfernen möchtest,
+          archiviere sie stattdessen.
+        </p>
+        <form
+          method="post"
+          th:action="@{/groups/{id}/delete(id=${summary.group.id})}"
+        >
+          <label for="delete-confirmation"
+            >Gib zur Bestätigung den Gruppennamen ein:
+            <strong th:text="${summary.group.name}"></strong
+          ></label>
+          <input
+            id="delete-confirmation"
+            name="confirmation"
+            required
+            autocomplete="off"
+            maxlength="100"
+          />
+          <button class="danger" type="submit">Gruppe endgültig löschen</button>
+          <a th:href="@{/dashboard}">Abbrechen</a>
+        </form>
+      </details>
     </main>
     <footer th:replace="~{fragments :: footer}"></footer>
   </body>
