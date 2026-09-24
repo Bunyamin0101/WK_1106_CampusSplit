@@ -74,6 +74,22 @@ public class GroupController {
     return "group";
   }
 
+  @PostMapping("/delete")
+  String deleteGroup(
+      @PathVariable Long groupId,
+      @RequestParam String confirmation,
+      Principal principal,
+      RedirectAttributes flash) {
+    try {
+      groups.delete(groupId, confirmation, principal.getName());
+      flash.addFlashAttribute("message", "Die Gruppe wurde gelöscht.");
+      return "redirect:/dashboard";
+    } catch (BusinessException ex) {
+      flash.addFlashAttribute("message", ex.getMessage());
+      return "redirect:/groups/" + groupId + "#delete-group";
+    }
+  }
+
   @PostMapping("/archive")
   String archive(
       @PathVariable Long groupId,
