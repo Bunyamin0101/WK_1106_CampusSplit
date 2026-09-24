@@ -58,7 +58,7 @@ public class SecurityConfig {
                                 && Boolean.TRUE.equals(session.getAttribute("googleLinkSuccess"));
                         if (session != null) session.removeAttribute("googleLinkSuccess");
                         response.sendRedirect(
-                            request.getContextPath() + (linked ? "/profile?linked" : "/dashboard"));
+                            request.getContextPath() + (linked ? "/profile?linked" : "/"));
                       })
                   .failureHandler(
                       (request, response, exception) -> {
@@ -84,7 +84,7 @@ public class SecurityConfig {
                 login
                     .loginPage("/login")
                     .usernameParameter("email")
-                    .defaultSuccessUrl("/dashboard", true)
+                    .defaultSuccessUrl("/", true)
                     .permitAll())
         .logout(logout -> logout.logoutSuccessUrl("/login?logout"))
         .build();
