@@ -28,7 +28,7 @@ public class GroupForm {
   }
 
   @NotBlank
-  @Pattern(regexp = "[A-Z]{3}")
+  @Pattern(regexp = "EUR|USD", message = "Bitte EUR oder USD wählen.")
   private String currency = "EUR";
 
   public String getCurrency() {
