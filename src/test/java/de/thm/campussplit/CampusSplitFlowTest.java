@@ -57,6 +57,80 @@ class CampusSplitFlowTest {
     groups.addMember(group.getId(), ben.getEmail(), email);
   }
 
+  @Autowired org.springframework.jdbc.core.JdbcTemplate jdbc;
+  @Autowired RepaymentService repayments;
+
+  @Test
+  void deletingGroupRequiresAdminNameAndCsrf() throws Exception {
+    mvc.perform(
+            post("/groups/" + group.getId() + "/delete")
+                .with(user(ben.getEmail()))
+                .with(csrf())
+                .param("confirmation", group.getName()))
+        .andExpect(status().isForbidden());
+    mvc.perform(
+            post("/groups/" + group.getId() + "/delete")
+                .with(user(email))
+                .param("confirmation", group.getName()))
+        .andExpect(status().isForbidden());
+    mvc.perform(
+            post("/groups/" + group.getId() + "/delete")
+                .with(user(email))
+                .with(csrf())
+                .param("confirmation", "falsch"))
+        .andExpect(redirectedUrl("/groups/" + group.getId() + "#delete-group"));
+    assertThat(groups.myGroups(email)).anyMatch(m -> m.getGroup().getId().equals(group.getId()));
+  }
+
+  @Test
+  void deletingGroupRemovesChildrenButPreservesUsersAndOtherGroups() throws Exception {
+    var other = groups.create("Andere Gruppe", "", "EUR", email);
+    expenses.save(group.getId(), null, form(), email);
+    var expenseId =
+        expenses.summary(group.getId(), email, null, null).expenses().getFirst().getId();
+    jdbc.update(
+        "INSERT INTO"
+            + " receipt(created_at,updated_at,expense_id,uploaded_by_id,filename,media_type,data)"
+            + " VALUES(CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,?,?,?,?,?)",
+        expenseId,
+        anna.getId(),
+        "test.pdf",
+        "application/pdf",
+        new byte[] {1, 2, 3});
+    repayments.record(
+        group.getId(),
+        ben.getId(),
+        anna.getId(),
+        new BigDecimal("1.00"),
+        email,
+        UUID.randomUUID().toString());
+    mvc.perform(
+            post("/groups/" + group.getId() + "/delete")
+                .with(user(email))
+                .with(csrf())
+                .param("confirmation", group.getName()))
+        .andExpect(redirectedUrl("/dashboard"));
+    for (var table :
+        List.of("expense_group", "membership", "expense", "repayment", "expense_change")) {
+      var key = table.equals("expense_group") ? "id" : "group_id";
+      assertThat(
+              jdbc.queryForObject(
+                  "SELECT COUNT(*) FROM " + table + " WHERE " + key + " = ?",
+                  Long.class,
+                  group.getId()))
+          .isZero();
+    }
+    for (var table : List.of("receipt", "expense_share")) {
+      assertThat(
+              jdbc.queryForObject(
+                  "SELECT COUNT(*) FROM " + table + " WHERE expense_id = ?", Long.class, expenseId))
+          .isZero();
+    }
+    assertThat(users.findById(anna.getId())).isPresent();
+    assertThat(users.findById(ben.getId())).isPresent();
+    assertThat(groups.myGroups(email)).anyMatch(m -> m.getGroup().getId().equals(other.getId()));
+  }
+
   private ExpenseCommand form() {
     var f = new ExpenseCommand();
     f.setDescription("Einkauf");
@@ -75,7 +149,8 @@ class CampusSplitFlowTest {
         .andExpect(
             content()
                 .string(
-                    org.hamcrest.Matchers.containsString("Gemeinsame Kosten einfach aufteilen")));
+                    org.hamcrest.Matchers.containsString(
+                        "<h1>Gemeinsame Kosten <span>einfach aufteilen</span></h1>")));
     mvc.perform(get("/dashboard")).andExpect(status().is3xxRedirection());
     mvc.perform(get("/register")).andExpect(status().isOk());
     var newEmail = "new-" + UUID.randomUUID() + "@example.org";
@@ -96,7 +171,7 @@ class CampusSplitFlowTest {
                     .with(csrf())
                     .param("email", newEmail)
                     .param("password", "sicheresPasswort123"))
-            .andExpect(redirectedUrl("/dashboard"))
+            .andExpect(redirectedUrl("/"))
             .andReturn();
     var session = (MockHttpSession) login.getRequest().getSession(false);
     mvc.perform(get("/dashboard").session(session)).andExpect(status().isOk());
@@ -236,6 +311,36 @@ class CampusSplitFlowTest {
   }
 
   @Test
+  void exportSelectionControlsPdfSectionsAndCsvFiles() throws Exception {
+    expenses.save(group.getId(), null, form(), email);
+    for (String scope : List.of("open", "expenses")) {
+      var pdf = mvc.perform(get("/groups/" + group.getId() + "/export")
+          .param("format", "pdf").param("scope", scope).with(user(email)))
+          .andExpect(status().isOk()).andReturn().getResponse().getContentAsByteArray();
+      try (var doc = Loader.loadPDF(pdf)) {
+        var text = new PDFTextStripper().getText(doc);
+        assertThat(text).doesNotContain("Erfasste Rückzahlungen");
+        if (scope.equals("open")) {
+          assertThat(text).contains("Salden", "Ausgleichsvorschläge").doesNotContain("Ausgaben und Kostenanteile");
+        } else {
+          assertThat(text).contains("Ausgaben und Kostenanteile").doesNotContain("Salden", "Ausgleichsvorschläge");
+        }
+      }
+      var zip = mvc.perform(get("/groups/" + group.getId() + "/export")
+          .param("format", "csv").param("scope", scope).with(user(email)))
+          .andExpect(status().isOk()).andReturn().getResponse().getContentAsByteArray();
+      var names = new java.util.HashSet<String>();
+      try (var input = new ZipInputStream(new ByteArrayInputStream(zip))) {
+        for (var entry = input.getNextEntry(); entry != null; entry = input.getNextEntry()) names.add(entry.getName());
+      }
+      if (scope.equals("open")) assertThat(names).containsExactlyInAnyOrder("gruppe.csv", "salden.csv", "ausgleich.csv");
+      else assertThat(names).containsExactlyInAnyOrder("gruppe.csv", "ausgaben.csv");
+    }
+    mvc.perform(get("/groups/" + group.getId() + "/export").param("format", "pdf")
+        .param("scope", "unknown").with(user(email))).andExpect(status().isBadRequest());
+  }
+
+  @Test
   void exportsContainSharesBalancesAndNoSecrets() throws Exception {
     var f = form();
     f.setDescription("=HYPERLINK(\"bad\")");
@@ -253,7 +358,7 @@ class CampusSplitFlowTest {
     try (var doc = Loader.loadPDF(pdf)) {
       var text = new PDFTextStripper().getText(doc);
       assertThat(text)
-          .contains("Änna", "Salden", "5.00", "Kostenanteile")
+          .contains("Änna", "Salden", "5,00", "Kostenanteile")
           .doesNotContain(email, "sicheresPasswort", "$2a$");
       Files.createDirectories(Path.of("target/export-check"));
       Files.write(Path.of("target/export-check/sample.pdf"), pdf);
