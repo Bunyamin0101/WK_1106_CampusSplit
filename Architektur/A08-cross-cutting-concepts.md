@@ -211,11 +211,11 @@ Empfohlene technische Umsetzung:
 
 ```text
 Money
-├── amountInCents: long
+├── amount: BigDecimal
 └── currency: CurrencyCode
 ```
 
-Alternativ kann `BigDecimal` verwendet werden, wenn dies in der zentralen Architekturentscheidung verbindlich festgelegt und konsequent mit fester Skalierung und Rundungsregeln umgesetzt wird. Für Wechselkurse ist eine präzise Dezimaldarstellung erforderlich.
+Geldbeträge werden im Backend durchgehend als `BigDecimal` mit fixer Skalierung (2 Nachkommastellen) verarbeitet.
 
 ### Verantwortliche Services
 
