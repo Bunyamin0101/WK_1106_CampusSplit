@@ -14,7 +14,7 @@
         ><span>Campus<span class="brand-green">Split</span></span></a
       >
       <nav>
-        <a th:href="@{/dashboard}">Meine Gruppen</a>
+        <a th:if="${currentEmail != null}" th:href="@{/dashboard}">Meine Gruppen</a>
         <a th:if="${currentEmail != null}" th:href="@{/profile}">Profil</a>
         <form
           th:if="${currentEmail != null}"
