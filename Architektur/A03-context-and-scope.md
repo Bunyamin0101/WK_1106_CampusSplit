@@ -61,27 +61,27 @@ CampusSplit besitzt keine Anbindung an Banken oder Zahlungsanbieter und führt k
 
 ## 3.2 Technischer Kontext
 
-Technisch greifen Benutzer über einen Webbrowser auf CampusSplit zu. Die serverseitige Anwendung wird mit Spring Boot umgesetzt und verwendet PostgreSQL zur internen Persistenz. Der Frankfurter Wechselkursdienst ist das externe technische Nachbarsystem.
-
-Die konkrete Umsetzung der Weboberfläche ist noch nicht endgültig entschieden. Deshalb wird an dieser Stelle weder ein separates React-Frontend noch eine REST-Schnittstelle zwischen Frontend und Backend vorausgesetzt.
+Technisch greifen Benutzer über einen Webbrowser auf CampusSplit zu. Die serverseitige Webanwendung wird als monolithisches Deployable mit Spring Boot und Thymeleaf umgesetzt. Zur dauerhaften Datenhaltung dient PostgreSQL. Als externe technische Nachbarsysteme sind der Frankfurter Wechselkursdienst für aktuelle Wechselkurse sowie Google OAuth2 für die Benutzerauthentifizierung und den Login angebunden.
 
 ```mermaid
 flowchart LR
     USER[Benutzer]
     BROWSER[Webbrowser]
 
-    subgraph CS[CampusSplit]
-        APP[Spring-Boot-Anwendung]
+    subgraph CS[CampusSplit Monolith]
+        APP[Spring-Boot-Anwendung mit Thymeleaf]
         DB[(PostgreSQL)]
     end
 
     FX[Frankfurter Wechselkursdienst]
+    AUTH[Google OAuth2 Provider]
 
     USER -->|bedient| BROWSER
-    BROWSER <-->|HTTP / HTTPS| APP
+    BROWSER <-->|HTTPS / HTML & Forms| APP
     APP <-->|JPA / JDBC| DB
     APP <-->|HTTPS / JSON| FX
-    APP -->|PDF / CSV| BROWSER
+    APP <-->|HTTPS / OAuth2| AUTH
+    APP -->|PDF / CSV Download| BROWSER
 ```
 
 PostgreSQL liegt innerhalb der Systemgrenze von CampusSplit. Der Browser befindet sich außerhalb der Systemgrenze und dient als technische Umgebung für die Nutzung der Anwendung.
@@ -171,11 +171,11 @@ Die interne Kommunikation mit PostgreSQL wird im technischen Kontext beschrieben
 
 ## 3.5 Webschnittstelle
 
-Wie Browser und serverseitige Anwendung technisch miteinander kommunizieren, hängt von der noch offenen Entscheidung zur Oberflächentechnologie ab.
+Die Kommunikation zwischen Webbrowser und serverseitiger Anwendung erfolgt über klassische HTTP/HTTPS-Requests und Formular-Übermittlungen (Form Submits).
 
-Bei einer Umsetzung mit Spring Boot und Thymeleaf werden Ansichten serverseitig erzeugt und über HTTP bereitgestellt. Bei einem getrennten React-/TypeScript-Frontend wäre dagegen eine Schnittstelle über HTTP und JSON erforderlich.
+Da die Anwendung als monolithisches Deployable mit Spring Boot und Thymeleaf umgesetzt wird, erzeugt der Server die HTML-Ansichten (Views) dynamisch bei jeder Anfrage und stellt diese direkt an den Browser bereit.
 
-Die endgültige Entscheidung wird in einem Architecture Decision Record dokumentiert. Bis dahin werden keine konkreten REST-Endpunkte als verbindlicher Bestandteil der Architektur festgelegt.
+Sämtliche Benutzerinteraktionen – wie das Erfassen von Ausgaben, das Verwalten von Gruppen oder das Herunterladen von Exportdateien – werden über Spring-MVC-Controller und serverseitig geschützte Formularverarbeitungen abgewickelt.
 
 ---
 
