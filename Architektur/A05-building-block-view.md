@@ -52,14 +52,14 @@ flowchart LR
 
 | Nr. | Baustein | Geplante Code-Artefakte | Verantwortung |
 |---|---|---|---|
-| [5.1.1](#511-blackbox-thymeleaf-views--frontend) | Thymeleaf Views / Frontend | `src/main/resources/templates/`, `static/` | Dialoge als HTML-Templates rendern, Formulardaten erfassen, Ergebnisse darstellen. |
-| [5.1.2](#512-blackbox-spring-boot-controller) | Spring Boot Controller | `.../controller/`, `.../dto/` | HTTP-Anfragen entgegennehmen, Formular-Inputs validieren, View-Namen liefern, Model befüllen. |
-| [5.1.3](#513-blackbox-application-services) | Application Services | `.../service/` | Use-Case-nahe Abläufe koordinieren. |
-| [5.1.4](#514-blackbox-domain-model-und-money-logic) | Domain Model und Money Logic | `.../domain/`, `.../money/`, `.../balance/` | Fachliche Regeln, Kostenaufteilung, Salden, Ausgleichsvorschläge. |
-| [5.1.5](#515-blackbox-persistence) | Persistence | `.../entity/`, `.../repository/`, `backend/src/main/resources/db/` | Dauerhafte Speicherung über PostgreSQL. |
-| [5.1.6](#516-blackbox-export-module) | Export Module | `.../export/` | PDF- und CSV-Export erzeugen. |
-| [5.1.7](#517-blackbox-currency-integration) | Currency Integration | `.../currency/` | Frankfurter API anbinden und Wechselkurse kapseln. |
-| [5.1.8](#518-blackbox-google-oauth2-integration) | Google OAuth2 Integration | `config/`, `service/GoogleAccountService.java` | Authentifizierung und Login-Abwicklung über Google OAuth2 bereitstellen. |
+| [5.1.1](#511-blackbox-thymeleaf-views--frontend) | Thymeleaf Views / Frontend | `src/main/resources/templates/` | Dialoge als HTML-Templates rendern, Formulardaten erfassen, Ergebnisse darstellen. |
+| [5.1.2](#512-blackbox-spring-boot-controller) | Spring Boot Controller | `src/main/java/de/thm/campussplit/web/` | HTTP-Anfragen entgegennehmen, Formular-Inputs validieren, View-Namen liefern, Model befüllen. |
+| [5.1.3](#513-blackbox-application-services) | Application Services | `src/main/java/de/thm/campussplit/service/` | Use-Case-nahe Abläufe koordinieren. |
+| [5.1.4](#514-blackbox-domain-model-und-money-logic) | Domain Model und Money Logic | `src/main/java/de/thm/campussplit/domain/` | Fachliche Regeln, Kostenaufteilung, Salden, Ausgleichsvorschläge. |
+| [5.1.5](#515-blackbox-persistence) | Persistence | `src/main/java/de/thm/campussplit/persistence/`, `src/main/resources/db/` | Dauerhafte Speicherung über PostgreSQL. |
+| [5.1.6](#516-blackbox-export-module) | Export Module | `src/main/java/de/thm/campussplit/export/` | PDF- und CSV-Export erzeugen. |
+| [5.1.7](#517-blackbox-currency-integration) | Currency Integration | `src/main/java/de/thm/campussplit/integration/` | Frankfurter API anbinden und Wechselkurse kapseln. |
+| [5.1.8](#518-blackbox-google-oauth2-integration) | Google OAuth2 Integration | `src/main/java/de/thm/campussplit/config/`, `../service/GoogleAccountService.java` | Authentifizierung und Login-Abwicklung über Google OAuth2 bereitstellen. |
 
 ### Lokale Beziehungen
 
@@ -85,7 +85,7 @@ flowchart LR
 | Benötigte Schnittstellen | Spring Boot Controller / Spring Model; keine direkten Datenbank- oder Drittanbieterzugriffe aus dem Browser heraus. |
 | Qualität | Responsive Bedienung, verständliche Fehlermeldungen, serverseitig geschützte rendering-Abläufe. |
 | Abhängigkeiten | Moderner Webbrowser, HTML5, CSS3, Thymeleaf Layout Dialect.    |
-| Geplante Code-Artefakte | `src/main/resources/templates/pages/`, `templates/fragments/`, `templates/layouts/`, `static/css/`. |
+| Geplante Code-Artefakte | `src/main/resources/templates`, `static/css/`. |
 | Erfüllte Anforderungen | B1-Dialoge, N1-Bedienbarkeit, N2-Fehlerdarstellung. |
 | Variabilität | Neue Dialoge können als neue Thymeleaf-Templates/Fragmente ergänzt werden. |
 | Tests | View-Integrationstests mit @WebMvcTest oder Spring Security Test tooling; manuelle UI-Tests. |
@@ -103,7 +103,7 @@ flowchart LR
 | Benötigte Schnittstellen | Application Services, Validierung via BindingResult, Spring Security Kontext. |
 | Qualität | Verständliche Fehlermeldungen direkt im HTML-Formular, verlässlicher Zugriffsschutz auf Routen. |
 | Abhängigkeiten | Spring Web MVC, Spring Validation, Spring Security OAuth2 Client. |
-| Geplante Code-Artefakte | `controller/`, `dto/form/`, `exception/`. |
+| Geplante Code-Artefakte | `src/main/java/de/thm/campussplit/web/`. |
 | Erfüllte Anforderungen | F2-Use-Cases, B1-Aktionen, N2-Validierung und Fehlerbehandlung. |
 | Variabilität | Neue Use Cases erhalten eigene Controller-Klassen oder Methoden. |
 | Tests | Controller-Tests mit MockMvc und simuliertem OAuth2-User. |
@@ -121,7 +121,7 @@ flowchart LR
 | Benötigte Schnittstellen | Domainlogik, Repositories, Export Module, Currency Integration. |
 | Qualität | Transaktional, nachvollziehbar, testbar. |
 | Abhängigkeiten | Spring Services (@Service), @Transactional, Repositories. |
-| Geplante Code-Artefakte | `GroupService`, `MembershipService`, `ExpenseService`, `BalanceApplicationService`, `ExportApplicationService`. |
+| Geplante Code-Artefakte | `src/main/java/de/thm/campussplit/service/`. |
 | Erfüllte Anforderungen | UC-04 bis UC-12, F3-Anwendungsfunktionen. |
 | Variabilität | Neue fachliche Abläufe können als weitere Services ergänzt werden. |
 | Tests | Service-Tests mit Testdaten für Gruppen, Ausgaben und Salden. |
@@ -139,7 +139,7 @@ flowchart LR
 | Benötigte Schnittstellen | Keine externen Systeme; arbeitet mit fachlichen Eingaben. |
 | Qualität | Centgenau, deterministisch, unabhängig von UI und Datenbank testbar. |
 | Abhängigkeiten | Java `BigDecimal` oder centbasierte Integer-Darstellung (`MoneyAmountDT`); keine Gleitkommazahlen. |
-| Geplante Code-Artefakte | `Money`, `ExchangeRate`, `SplitService`, `BalanceService`, `SettlementService`. |
+| Geplante Code-Artefakte | `src/main/java/de/thm/campussplit/domain/`. |
 | Erfüllte Anforderungen | F3, D1, D2, N2-Geldbetragsverarbeitung. |
 | Variabilität | Weitere Aufteilungsarten können ergänzt werden, ohne UI und Persistenz komplett umzubauen. |
 | Tests | Unit-Tests für Rundung, Equal Split, Custom Split, Salden und Ausgleichsvorschläge. |
@@ -157,7 +157,7 @@ flowchart LR
 | Benötigte Schnittstellen | PostgreSQL-Datenbank. |
 | Qualität | Konsistente Datenhaltung, keine unvollständigen fachlichen Zustände. |
 | Abhängigkeiten | Spring Data JPA, PostgreSQL, Datenbankverbindung. |
-| Geplante Code-Artefakte | `entity`, `repository`, Migrations-/Schema-Dateien. |
+| Geplante Code-Artefakte | `src/main/java/de/thm/campussplit/persistence/`. |
 | Erfüllte Anforderungen | D1-Datenmodell, S3-Inbetriebnahme, N1-Datenkonsistenz. |
 | Variabilität | Schemaänderungen erfolgen kontrolliert über Migrationen. |
 | Tests | Repository-Tests und Integrationstests gegen Testdatenbank. |
@@ -175,7 +175,7 @@ flowchart LR
 | Benötigte Schnittstellen | Exportdaten aus Application Services und Domainlogik. |
 | Qualität | Keine sensiblen Daten im Export, Beträge korrekt formatiert, Export entspricht aktueller Saldenberechnung. |
 | Abhängigkeiten | Bibliothek für PDF-Erzeugung und CSV-Ausgabe. |
-| Geplante Code-Artefakte | `ExportService`, `PdfExportWriter`, `CsvExportWriter`, `ExportData`. |
+| Geplante Code-Artefakte | `src/main/java/de/thm/campussplit/export/`. |
 | Erfüllte Anforderungen | B3, UC-12, N2-Exportsicherheit. |
 | Variabilität | Weitere Exportformate können später ergänzt werden. |
 | Tests | Exportdaten-Tests, CSV-Strukturtests, ggf. PDF-Smoke-Test. |
@@ -193,7 +193,7 @@ flowchart LR
 | Benötigte Schnittstellen | HTTPS-Zugriff auf Frankfurter API. |
 | Qualität | Keine personenbezogenen Daten nach außen, keine erfundenen Kurse, kontrollierte Fehlerbehandlung. |
 | Abhängigkeiten | HTTP-Client des Backends, Erreichbarkeit des Wechselkursdienstes. |
-| Geplante Code-Artefakte | `CurrencyRateClient`, `FrankfurterCurrencyRateClient`, `ExchangeRateResponse`. |
+| Geplante Code-Artefakte | `src/main/java/de/thm/campussplit/integration/`. |
 | Erfüllte Anforderungen | S1, D2 ExchangeRateDT, N2 Fehlerbehandlung. |
 | Variabilität | Wechselkursanbieter kann später durch anderen Adapter ersetzt werden. |
 | Tests | Adaptertests mit Mock-HTTP-Server oder Testdouble. |
@@ -211,7 +211,7 @@ flowchart LR
 | Benötigte Schnittstellen | Google OAuth2 Identity Provider via HTTPS. |
 | Qualität | Sichere Abwicklung des OAuth2-Flows, Session-Management über Spring Security. |
 | Abhängigkeiten | `spring-boot-starter-oauth2-client`, Google Cloud Console Client credentials. |
-| Implementierte Code-Artefakte | `config/SecurityConfig`, `config/GoogleLoginConfig`, `config/GoogleOidcUserService`, `config/CampusOidcUser`, `config/GoogleLinkIntent`, `config/LinkAuthorizationResolver` sowie `service/GoogleAccountService` (jeweils unter `src/main/java/de/thm/campussplit/`). |
+| Implementierte Code-Artefakte | `src/main/java/de/thm/campussplit/config/`. |
 | Erfüllte Anforderungen | Externe API/Auth, N2-Authentifizierung. |
 | Variabilität | Weitere OAuth2-Provider könnten später ergänzt werden. |
 | Tests | Security-Tests für geschützte Routen mit Mock-OAuth2-User. |
