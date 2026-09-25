@@ -21,19 +21,19 @@ Die Anwendung berechnet automatisch offene Salden und unterstützt den Export vo
 | Julia Andrea Muntean | WI B.Sc. | Implementation Lead    | GitHub: `JuliaMuntean`     |
 | Monica Tsamo Kenfack | WI B.Sc. | QA/Test Lead           | GitHub: `momosan009`       |
 
-## Technologien (voraussichtlich)
+## Technologien
 
-- **Sprache(n):** z.B. Java 21, TypeScript 5
-- **Frameworks:** z.B. Spring Boot, React, Vue
-- **Persistenz:** z.B. PostgreSQL, SQLite
-- **Build/Tooling:** z.B. Maven, Gradle, Vite
-- **Sonstiges:** z.B. Docker, Auth-Provider, externe APIs
+- **Sprache(n):** Java 21, HTML5, CSS3
+- **Frameworks:** Spring Boot, Spring Web MVC, Spring Data JPA, Spring Security (Google OAuth2), Thymeleaf
+- **Persistenz:** PostgreSQL
+- **Build/Tooling:** Maven, Git
+- **Sonstiges:** Frankfurter Wechselkurs-API (Wechselkursdienst), PDF/CSV Export-Bibliotheken, Markdown & Mermaid (für Dokumentation)
 
 ## Repository
 
 https://github.com/Bunyamin0101/WK_1106_CampusSplit/tree/main
 
-## Eingesetzte KI-Werkzeuge (vorläufige Planung)
+## Eingesetzte KI-Werkzeuge
 
 - GitHub Copilot zur Unterstützung bei der Code-Vervollständigung
 - ChatGPT zur Unterstützung bei Refactoring, Dokumentation und Architekturideen
