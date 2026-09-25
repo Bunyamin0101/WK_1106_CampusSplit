@@ -1849,6 +1849,9 @@ body.home-page {
 .expenses-page .balance { padding: 12px 0; font-size: 14px; gap: 8px; }
 .expenses-page input, .expenses-page select { font-family: inherit; font-size: 14px; border-radius: 6px; border-color: #cbd9d0; }
 .expenses-page .expense-list { margin: 30px 0; }
+.expenses-page .expense-list > summary { cursor: pointer; font-size: 18px; font-weight: 650; color: var(--ink); padding: 8px 0; line-height: 1.5; }
+.expenses-page .expense-list[open] > summary { margin-bottom: 16px; }
+.expenses-page .expense-count { font-size: 14px; font-weight: 400; color: #63716a; }
 .expenses-page .expense { margin-bottom: 12px; padding: 20px 24px; }
 .expenses-page .expense .heading { margin: 0 0 12px; align-items: center; gap: 20px; }
 .expenses-page .expense h3 { font-size: 18px; margin: 4px 0; letter-spacing: 0; overflow-wrap: anywhere; }

@@ -85,8 +85,10 @@
           </div>
         </article>
       </section>
-      <section class="expense-list" aria-labelledby="expenses-title">
-        <h2 id="expenses-title">Ausgaben</h2>
+      <details class="expense-list" id="expenses">
+        <summary class="activity-toggle">
+          Ausgaben <span class="expense-count" th:text="'(' + ${#lists.size(summary.expenses)} + ')'"></span>
+        </summary>
         <p class="empty" th:if="${#lists.isEmpty(summary.expenses)}">
           Noch keine Ausgaben. Erfasse euren ersten gemeinsamen Einkauf.
         </p>
@@ -181,7 +183,7 @@
             </form>
           </div>
         </article>
-      </section>
+      </details>
       <details
         id="activities"
         class="activity-panel"
