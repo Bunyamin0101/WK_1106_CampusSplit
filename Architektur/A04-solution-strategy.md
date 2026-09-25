@@ -2,7 +2,7 @@
 
 Dieses Kapitel fasst die grundlegenden Architekturentscheidungen für CampusSplit zusammen. Die technischen Randbedingungen stehen in [A02 — Architecture Constraints](A02-architecture-constraints.md). Die konkrete Zerlegung in Bausteine folgt in [A05 — Building Block View](A05-building-block-view.md), die wichtigsten Laufzeitszenarien in [A06 — Runtime View](A06-runtime-view.md).
 
-CampusSplit wird als browserbasierte Webanwendung mit getrenntem Frontend und Backend umgesetzt. Das Frontend kommuniziert über eine eigene REST-API mit dem Backend. Das Backend kapselt die fachliche Logik, Persistenz, Wechselkursanbindung und Exporterzeugung.
+CampusSplit wird als browserbasierte Webanwendung als integriertes Deployable mit Spring Boot und Thymeleaf umgesetzt. Die Benutzeroberfläche wird serverseitig über Thymeleaf-Views gerendert und interagiert direkt über Spring-MVC-Controller mit dem Backend. Das Backend kapselt die fachliche Logik, Persistenz, Wechselkursanbindung und Exporterzeugung.
 
 ---
 
@@ -11,7 +11,7 @@ CampusSplit wird als browserbasierte Webanwendung mit getrenntem Frontend und Ba
 | Bereich | Entscheidung | Begründung |
 |---|---|---|
 | Frontend | Spring Boot mit Thymeleaf | Ein Deployable, ein Routing-System, geringerer Aufwand, für den Projektumfang ausreichend. |
-| Backend | Java 21 mit Spring Boot | Passt zur Projektvorgabe Java, bietet REST, Validierung, Security und Datenbankzugriff. |
+| Backend | Java 21 mit Spring Boot | Passt zur Projektvorgabe Java, bietet Web-Controller, Validierung, Security und Datenbankzugriff. |
 | Schnittstelle Frontend/Backend | Spring-Boot-Deployable mit Thymeleaf-Views | Ein Deployable, keine separate API-Schicht nötig, einfacher zu betreiben. |
 | Persistenz | PostgreSQL | Relationale Daten passen gut zu User, Group, Membership, Expense und ExpenseShare. |
 | Datenzugriff | Spring Data JPA | Standardisierte Repository-Struktur und Abbildung der fachlichen Entitäten. |
