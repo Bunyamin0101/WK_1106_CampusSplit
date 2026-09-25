@@ -18,7 +18,7 @@ CampusSplit ist eine Webanwendung mit Frontend, Backend und relationaler Datenba
 | Backend | serverseitige Fachlogik und Spring MVC Web-Controller |
 | Frontend | serverseitig gerenderte HTML-Views (Thymeleaf) im Browser |
 | Datenbank | relationale Datenbank, z. B. PostgreSQL |
-| Externe Pflichtdienste | Frankfurter Wechselkursdienst, Google OAuth2 (keine Bank-, Zahlungs- oder OCR-Dienste) |
+| Externe Dienste | Frankfurter für Fremdwährungen und die EUR-Übersicht bei USD-Gruppen; Google OAuth2/OIDC nur bei aktivierter Google-Anmeldung. |
 | Batch-Prozesse | nicht erforderlich |
 
 ---
@@ -105,7 +105,7 @@ Nach der Erstinbetriebnahme wird ein kurzer Funktionstest durchgeführt.
 |---------|---------------------|
 | Anwendung im Browser öffnen | Startseite oder Anmeldeseite wird angezeigt. |
 | Benutzer registrieren | Benutzerkonto wird gespeichert. |
-| Benutzer anmelden | Dashboard wird angezeigt. |
+| Benutzer anmelden | Startseite wird angezeigt; „Meine Gruppen“ öffnet das Dashboard. |
 | Gruppe erstellen | Gruppe wird gespeichert und geöffnet. |
 | Mitglied hinzufügen | Mitgliedschaft wird gespeichert, sofern Benutzer ADMIN ist. |
 | Ausgabe erfassen | Ausgabe und Kostenanteile werden gespeichert. |
