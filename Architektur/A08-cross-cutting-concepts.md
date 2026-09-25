@@ -1,8 +1,8 @@
 # 8 Querschnittskonzepte
 
-Dieses Kapitel beschreibt Architekturkonzepte, die mehrere Bausteine gleichzeitig betreffen. Die fachlichen Strategien stehen in [`N2 — Querschnittskonzepte`](../Spezifikation/N2_Querschnittskonzepte.md). Dieses Kapitel übersetzt diese Strategien in eine geplante technische Realisierung für CampusSplit.
+Dieses Kapitel beschreibt Architekturkonzepte, die mehrere Bausteine gleichzeitig betreffen. Die fachlichen Strategien stehen in [`N2 — Querschnittskonzepte`](../Spezifikation/N2_Querschnittskonzepte.md). Dieses Kapitel beschreibt ihre technische Umsetzung im aktuellen CampusSplit-Stand.
 
-Da die Implementierung noch nicht vollständig vorliegt, beschreibt dieses Kapitel Zielstruktur, Verantwortlichkeiten und Regeln, die beim Programmieren einzuhalten sind. Konkrete Klassennamen sind als Architekturvorschlag zu verstehen und sollen bei der Umsetzung möglichst beibehalten werden.
+Die aufgeführten Klassen und Abläufe beziehen sich auf die vorhandene Implementierung.
 
 CampusSplit wird als serverseitig gerenderte Spring-Boot-Webanwendung mit Thymeleaf umgesetzt. Thymeleaf ist für die Darstellung zuständig; verbindliche Fachlogik verbleibt in Services und Domain-Komponenten.
 
@@ -47,12 +47,12 @@ flowchart LR
 
 | Fachliche Entität | Technische Realisierung | Bemerkung |
 |---|---|---|
-| User | `UserEntity` / Tabelle `users` | Enthält E-Mail, Anzeigename und Passwort-Hash. |
-| Group | `GroupEntity` / Tabelle `groups` | Enthält Name, Beschreibung, Gruppenwährung und Owner. |
-| Membership | `MembershipEntity` / Tabelle `memberships` | Löst die n:m-Beziehung zwischen User und Group auf. |
-| Expense | `ExpenseEntity` / Tabelle `expenses` | Enthält Zahler, Ersteller, Originalbetrag, Abrechnungsbetrag und Datum. |
-| ExpenseShare | `ExpenseShareEntity` / Tabelle `expense_shares` | Enthält Kostenanteil je beteiligtem Mitglied. |
-| Category | `CategoryEntity` / Tabelle `categories` | Optionale Klassifikation von Ausgaben. |
+| User | `User` / Tabelle `app_user` | Enthält E-Mail, Anzeigename und Passwort-Hash. |
+| Group | `Group` / Tabelle `expense_group` | Enthält Name, Beschreibung, Gruppenwährung und Owner. |
+| Membership | `Membership` / Tabelle `membership` | Löst die n:m-Beziehung zwischen User und Group auf. |
+| Expense | `Expense` / Tabelle `expense` | Enthält Zahler, Ersteller, Originalbetrag, Abrechnungsbetrag und Datum. |
+| ExpenseShare | `ExpenseShare` / Tabelle `expense_share` | Enthält Kostenanteil je beteiligtem Mitglied. |
+| Category | `Category` / Tabelle `category` | Optionale Klassifikation von Ausgaben. |
 | Repayment | `Repayment` / Persistenz über `RepaymentRepository` | Dokumentiert Rückzahlungen zwischen Gruppenmitgliedern; Stornierung bleibt nachvollziehbar. |
 | Receipt | `Receipt` / Persistenz über `ReceiptRepository` | Beleg, der einer Ausgabe zugeordnet ist. |
 | ExpenseChange | `ExpenseChange` / Persistenz über `ExpenseChangeRepository` | Fachliche Änderungshistorie für Ausgaben und Belegvorgänge. |
@@ -91,8 +91,8 @@ sequenceDiagram
     Security->>DB: Benutzer und Passwort-Hash prüfen
     DB-->>Security: Benutzer gefunden
     Security->>Security: serverseitige Session erzeugen
-    Security-->>Browser: Redirect /dashboard + HTTP-only Session-Cookie
-    Browser->>Security: GET /dashboard
+    Security-->>Browser: Redirect / + HTTP-only Session-Cookie
+    Browser->>Security: GET /
     Security->>View: Model + Template
     View-->>Browser: HTML
 ```
@@ -134,7 +134,6 @@ Zusätzliche Regeln:
 | AUTH-10 | Eine Google-Kontoverknüpfung erfordert eine erneute lokale Bestätigung und einen kurzlebigen Verknüpfungsvorgang. |
 | AUTH-11 | Account-Konflikte werden geschlossen behandelt; Konten werden nicht stillschweigend zusammengeführt. |
 
-
 ## 8.4 Autorisierung und Gruppenrechte
 
 Autorisierung wird nicht der Benutzeroberfläche überlassen. Thymeleaf darf Buttons abhängig von Rechten ausblenden, aber das Backend entscheidet verbindlich, ob eine Aktion erlaubt ist.
@@ -151,17 +150,17 @@ Autorisierung wird nicht der Benutzeroberfläche überlassen. Thymeleaf darf But
 | Rückzahlung erfassen/stornieren | Ist der aktuelle Benutzer berechtigtes Gruppenmitglied und sind Sender/Empfänger gültig? |
 | Gruppe archivieren/wiederherstellen | Besitzt der aktuelle Benutzer die erforderliche Gruppenberechtigung? |
 
-Empfohlener Service:
+Die Zugriffsprüfung erfolgt in `GroupService`:
 
 ```text
-MembershipGuard
-├── requireMember(userId, groupId)
-└── requireAdmin(userId, groupId)
+GroupService
+├── requireMember(groupId, email)
+└── Rollenprüfung in addMember, setArchived und delete
 ```
 
 ### Architekturregel
 
-Jeder gruppenbezogene Controller ruft vor der eigentlichen Fachlogik eine Membership-Prüfung auf. Dadurch wird verhindert, dass ein Benutzer über direkt aufgerufene URLs oder manipulierte Formularanfragen auf fremde Gruppendaten zugreift.
+Die zuständigen Services prüfen die Gruppenmitgliedschaft bzw. Administratorrolle vor der geschützten Aktion. Dadurch wird verhindert, dass ein Benutzer über direkt aufgerufene URLs oder manipulierte Formularanfragen auf fremde Gruppendaten zugreift.
 
 ---
 
@@ -207,7 +206,7 @@ Geldlogik ist der kritischste Teil von CampusSplit. Deshalb liegt sie zentral im
 | MONEY-05 | Salden innerhalb einer Gruppe müssen in Summe 0,00 ergeben. |
 | MONEY-06 | Rundungsdifferenzen werden deterministisch verteilt. |
 
-Empfohlene technische Umsetzung:
+Technische Darstellung (keine eigene Klasse `Money`):
 
 ```text
 Money
@@ -215,7 +214,7 @@ Money
 └── currency: CurrencyCode
 ```
 
-Geldbeträge werden im Backend durchgehend als `BigDecimal` mit fixer Skalierung (2 Nachkommastellen) verarbeitet.
+Geldbeträge werden als `BigDecimal` mit zwei Nachkommastellen gespeichert. `SplitService` rechnet für die gleichmäßige Verteilung vorübergehend in ganzen Centbeträgen; die Ergebnisse sind wieder `BigDecimal`.
 
 ### Verantwortliche Services
 
@@ -223,7 +222,7 @@ Geldbeträge werden im Backend durchgehend als `BigDecimal` mit fixer Skalierung
 |---|---|
 | `SplitService` | Berechnet Kostenanteile einer Ausgabe. |
 | `BalanceService` | Berechnet Salden je Gruppenmitglied. |
-| `SettlementService` | Berechnet Ausgleichsvorschläge zwischen Debitoren und Kreditoren. |
+| `BalanceService.settlements(...)` | Berechnet Ausgleichsvorschläge zwischen Debitoren und Kreditoren. |
 
 ---
 
@@ -246,21 +245,20 @@ sequenceDiagram
 
 | Regel | Umsetzung |
 |---|---|
-| FX-01 | API-Aufruf nur, wenn Originalwährung und Gruppenwährung verschieden sind. |
+| FX-01 | Bei Ausgaben wird nur bei abweichender Währung ein Kurs abgerufen. Zusätzlich benötigt `EuroOverviewService` einen Kurs für USD-Gruppen in der EUR-Gesamtübersicht. |
 | FX-02 | Es werden nur Währungscodes und Datum übertragen, keine personenbezogenen Daten. |
 | FX-03 | Ohne gültigen Kurs wird keine Fremdwährungsausgabe gespeichert. |
 | FX-04 | Originalbetrag, Originalwährung, Kurs und Abrechnungsbetrag bleiben nachvollziehbar. |
 | FX-05 | Die eigentliche Umrechnung und Rundung erfolgt in CampusSplit. |
 
-Empfohlener Adapter:
+Implementierte Schnittstelle:
 
 ```text
-CurrencyRateClient
+CurrencyRatePort
 └── getRate(fromCurrency, toCurrency, date): ExchangeRate
 ```
 
 ---
-
 
 ## 8.8 Rückzahlungen, Belege, Historie und Archivierung
 
@@ -271,6 +269,14 @@ Diese Funktionen sind im aktuellen Projektstand als zusätzliche fachliche Baust
 `Repayment` dokumentiert einen bereits erfolgten Ausgleich zwischen Sender und Empfänger. Der Betrag wird in der Gruppenwährung gespeichert. Eine Rückzahlung kann mit Begründung storniert werden; sie wird nicht einfach gelöscht. Eine `requestId` dient dazu, doppelte Erfassung desselben Vorgangs zu vermeiden.
 
 Wichtig: CampusSplit führt keine Banktransaktion aus. Es dokumentiert die Rückzahlung und berücksichtigt sie bei den offenen Salden.
+
+### Einzelne Ausgaben und Teilzahlungen
+
+Unter „Zurückgezahlter Betrag“ lässt sich „Einzelne Ausgabe begleichen (optional)“ aufklappen. Jede zuordenbare Ausgabe zeigt Beschreibung, Datum, offenen Betrag und ein eigenes Betragsfeld. „Zahlung erfassen“ speichert den eingegebenen positiven Betrag; Teilzahlungen sind möglich. Es wird kein Geld überwiesen.
+
+Zur Auswahl stehen Ausgaben, die der Empfänger des aktuellen Ausgleichsvorschlags bezahlt hat und an denen der Sender beteiligt ist. Bereits zugeordnete, nicht stornierte Zahlungen werden vom jeweiligen Anteil abgezogen. Frühere Rückzahlungen zwischen diesen Personen ohne Ausgabenzuordnung werden für diese Auswahl auf die ältesten Ausgaben angerechnet (Datum, danach Kennung). Jeder angebotene Betrag ist zusätzlich durch den aktuellen Ausgleichsvorschlag begrenzt. Bei verrechneten Gruppenschulden muss deshalb nicht jede Ausgabe einzeln auswählbar sein.
+
+Das Backend berechnet die Grenze beim Speichern erneut und verhindert Überzahlungen, ungültige Zuordnungen und doppelte Anfragen. Gruppenadministratoren sowie Sender oder Empfänger dürfen erfassen. Eine Stornierung mit Begründung hebt die Wirkung auf Saldo und offene Anteile auf. Die Zuordnung erscheint in Aktivitäten, PDF und CSV.
 
 ### Belege
 
@@ -283,7 +289,6 @@ Wichtig: CampusSplit führt keine Banktransaktion aus. Es dokumentiert die Rück
 ### Gruppenarchivierung
 
 Archivierte Gruppen bleiben gespeichert und einsehbar. Archivierung ist deshalb ein Statuswechsel und kein physisches Löschen. Eine archivierte Gruppe kann wiederhergestellt werden.
-
 
 ## 8.9 Fehlerbehandlung
 
@@ -335,14 +340,14 @@ PDF- und CSV-Export sind ausgehende Datenflüsse. Deshalb gelten besondere Regel
 | EXP-04 | Export erzeugt keine fachliche Zustandsänderung. |
 | EXP-05 | PDF ist für menschliches Lesen gedacht, CSV für tabellarische Weiterverarbeitung. |
 
-Empfohlene technische Trennung:
+Implementierter Exportablauf:
 
 ```text
 ExportController
+├── ExpenseService.summary(...) → GroupSummary
 └── ExportService
-    ├── ExportDataAssembler
-    ├── PdfExportWriter
-    └── CsvExportWriter
+    ├── pdf(...) → PDFBox
+    └── csv(...) → CSV-Dateien als ZIP
 ```
 
 ---
@@ -363,19 +368,18 @@ Thymeleaf dient ausschließlich der Darstellung. Verbindliche Fachlogik wie Kost
 | CSS | Zuständig für Layout und responsive Darstellung. |
 | JavaScript | Nur ergänzend für Bedienkomfort; keine verbindliche Fachlogik. |
 
-Empfohlene Struktur:
+Vorhandene Struktur:
 
 ```text
 src/main/resources/
 ├── templates/
-│   ├── auth/
-│   ├── groups/
-│   ├── expenses/
-│   ├── balances/
-│   └── fragments/
-└── static/
-    ├── css/
-    └── js/
+│   ├── index.html
+│   ├── login.html und register.html
+│   ├── dashboard.html und group.html
+│   ├── group-form.html und expense-form.html
+│   ├── profile.html
+│   └── fragments.html
+└── static/css/
 ```
 
 ### Navigationsprinzip
@@ -390,7 +394,7 @@ Tests konzentrieren sich zuerst auf die fachlich riskanten Stellen.
 
 | Testart | Fokus |
 |---|---|
-| Unit-Tests | SplitService, BalanceService, SettlementService, Money-Rundung. |
+| Unit-Tests | SplitService und BalanceService einschließlich Ausgleichsvorschlägen und Geldrundung. |
 | Service-Tests | Gruppenrechte, Ausgabenerfassung, Fremdwährungslogik und Fehlerfälle. |
 | Repository-/Integrationstests | JPA-Zugriffe, Transaktionen und PostgreSQL-nahe Persistenz. |
 | MVC-Tests | Controller, Formularbindung, Validierungsfehler, Views und Redirects mit MockMvc. |

@@ -57,8 +57,8 @@ sequenceDiagram
     Repo->>DB: SELECT User
     DB-->>Repo: User
     Auth->>Auth: serverseitige Session erzeugen
-    Auth-->>Browser: Redirect /dashboard + HTTP-only Session-Cookie
-    Browser->>Auth: GET /dashboard
+    Auth-->>Browser: Redirect / + HTTP-only Session-Cookie
+    Browser->>Auth: GET /
     Auth->>View: Model + Template
     View-->>Browser: HTML
 ```
@@ -71,7 +71,7 @@ Wichtige Aspekte:
 | Passwortschutz | Klartextpasswörter werden nie gespeichert; nur Hashwerte liegen in der Datenbank. |
 | Generische Loginfehler | Bei falschen Zugangsdaten wird nicht verraten, ob E-Mail oder Passwort falsch war. |
 | Serverseitige Sitzung | Nach erfolgreicher Anmeldung verwaltet Spring Security die Session; der Browser erhält ein HTTP-only Session-Cookie. |
-| Startpunkt | Nach erfolgreicher Anmeldung ist das Dashboard der Einstieg in die Anwendung. |
+| Startpunkt | Nach erfolgreicher Anmeldung öffnet sich die Startseite `/`; über „Meine Gruppen“ gelangt der Benutzer zum Dashboard. |
 
 Fehlerfälle:
 
@@ -110,11 +110,10 @@ sequenceDiagram
     DB-->>Account: CampusSplit-Benutzer
     Account-->>Security: lokaler Benutzer
     Security->>Security: serverseitige Session erzeugen
-    Security-->>Browser: Redirect /dashboard
+    Security-->>Browser: Redirect /
 ```
 
 Ein vorhandenes CampusSplit-Konto kann außerdem über das Profil mit Google verknüpft werden. Die Verknüpfung wird nur nach erneuter Bestätigung des lokalen Passworts gestartet. Bei Konflikten oder einem fehlgeschlagenen Google-Login wird keine fremde Identität stillschweigend einem Konto zugeordnet.
-
 
 ## 6.2 Gruppe erstellen und Mitglied hinzufügen
 
@@ -242,7 +241,7 @@ sequenceDiagram
     participant Browser
     participant Controller as ExpenseController
     participant ExpenseSvc as ExpenseService
-    participant FX as CurrencyRateClient
+    participant FX as CurrencyRatePort
     participant Frank as Frankfurter API
     participant Split as SplitService
     participant Repo as Repositories
@@ -287,7 +286,7 @@ sequenceDiagram
     participant Browser
     participant Controller as ExpenseController
     participant ExpenseSvc as ExpenseService
-    participant FX as CurrencyRateClient
+    participant FX as CurrencyRatePort
     participant Frank as Frankfurter API
     participant DB as PostgreSQL
 
@@ -314,7 +313,7 @@ sequenceDiagram
     participant Controller as BalanceController
     participant BalanceSvc as BalanceApplicationService
     participant Repo as Repositories
-    participant Domain as BalanceService / SettlementService
+    participant Domain as BalanceService
     participant DB as PostgreSQL
 
     Mitglied->>Browser: Saldenübersicht öffnen
@@ -432,8 +431,9 @@ sequenceDiagram
 
     Mitglied->>Browser: Rückzahlung erfassen
     Browser->>Controller: POST /groups/{groupId}/repayments
-    Controller->>Service: record(groupId, sender, recipient, amount, actor, requestId)
-    Service->>Service: Membership und Betrag prüfen
+    Controller->>Service: record(groupId, sender, recipient, amount, actor, requestId, expenseId optional)
+    Service->>Service: Berechtigung prüfen und Gruppe sperren
+    Service->>Service: Anfragekennung, Betrag und optionale Ausgabenzuordnung prüfen
     Service->>Repo: Rückzahlung speichern
     Repo->>DB: INSERT Repayment
     DB-->>Repo: gespeichert
@@ -477,7 +477,6 @@ Beim Download setzt der Controller einen passenden Content-Type sowie `Content-D
 Ein Gruppenadministrator kann eine Gruppe archivieren und später wiederherstellen. Archivieren ist kein Löschen: Die Gruppe und ihre fachlichen Daten bleiben erhalten und können im Archiv weiterhin eingesehen werden.
 
 Der Ablauf verwendet eine schreibende `POST`-Anfrage und anschließend einen Redirect auf die Gruppenseite.
-
 
 ## 6.8 Gemeinsame Laufzeitregeln
 

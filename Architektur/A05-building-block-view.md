@@ -46,11 +46,11 @@ flowchart LR
 | Designentscheidung | Ein Deployable (Spring Boot mit Thymeleaf); Fachlogik liegt im Backend; keine separate REST-API-Schicht notwendig; externe Dienste sind isoliert angebunden.    |
 | Verworfene Alternativen | Geldlogik im Frontend, Bank-/Payment-Integration, monolithische Vermischung von UI und Fachlogik. |
 | Referenzen | [A04](A04-solution-strategy.md), [A06](A06-runtime-view.md), [D1](../Spezifikation/D1_Datenmodell.md), [D2](../Spezifikation/D2_Datentypenverzeichnis.md), [F3](../Spezifikation/F3-anwendungsfunktionen.md), [N2](../Spezifikation/N2_Querschnittskonzepte.md). |
-| Offene Punkte | Konkrete Framework-Konfiguration, Security-Mechanismus und Bibliotheken werden bei der Implementierung finalisiert. |
+| Umsetzung | Spring Boot, Thymeleaf, Spring Security, JPA, Flyway und Apache PDFBox gemäß `pom.xml`. |
 
 ### Enthaltene Bausteine
 
-| Nr. | Baustein | Geplante Code-Artefakte | Verantwortung |
+| Nr. | Baustein | Implementierte Code-Artefakte | Verantwortung |
 |---|---|---|---|
 | [5.1.1](#511-blackbox-thymeleaf-views--frontend) | Thymeleaf Views / Frontend | `src/main/resources/templates/` | Dialoge als HTML-Templates rendern, Formulardaten erfassen, Ergebnisse darstellen. |
 | [5.1.2](#512-blackbox-spring-boot-controller) | Spring Boot Controller | `src/main/java/de/thm/campussplit/web/` | HTTP-Anfragen entgegennehmen, Formular-Inputs validieren, View-Namen liefern, Model befüllen. |
@@ -71,7 +71,7 @@ flowchart LR
 | Application Services → Domain Model | Services verwenden Fachlogik für Kostenanteile, Salden und Ausgleichsvorschläge. |
 | Application Services → Persistence | Services laden und speichern Entitäten über Spring Data JPA Repositories. |
 | Application Services → Export Module | Export wird auf Benutzeranforderung im Backend erzeugt und als Stream/Download bereitgestellt. |
-| Application Services → Currency Integration | Wechselkurs wird nur bei Fremdwährungsausgaben benötigt. |
+| Application Services → Currency Integration | Wechselkurse werden bei Fremdwährungsausgaben und für die EUR-Gesamtübersicht bei USD-Gruppen benötigt. |
 | Currency Integration → Frankfurter API | Ausgehender HTTPS/JSON-Aufruf ohne personenbezogene Daten. |
 
 ---
@@ -84,12 +84,12 @@ flowchart LR
 | Bereitgestellte Schnittstelle | Grafische Benutzeroberfläche (HTML/CSS) für Gast, Nutzer, Gruppenmitglied und Administrator im Browser. |
 | Benötigte Schnittstellen | Spring Boot Controller / Spring Model; keine direkten Datenbank- oder Drittanbieterzugriffe aus dem Browser heraus. |
 | Qualität | Responsive Bedienung, verständliche Fehlermeldungen, serverseitig geschützte rendering-Abläufe. |
-| Abhängigkeiten | Moderner Webbrowser, HTML5, CSS3, Thymeleaf Layout Dialect.    |
-| Geplante Code-Artefakte | `src/main/resources/templates`, `static/css/`. |
+| Abhängigkeiten | Moderner Webbrowser, HTML5, CSS3, Thymeleaf-Fragmente.    |
+| Implementierte Code-Artefakte | `src/main/resources/templates`, `static/css/`. |
 | Erfüllte Anforderungen | B1-Dialoge, N1-Bedienbarkeit, N2-Fehlerdarstellung. |
 | Variabilität | Neue Dialoge können als neue Thymeleaf-Templates/Fragmente ergänzt werden. |
 | Tests | View-Integrationstests mit @WebMvcTest oder Spring Security Test tooling; manuelle UI-Tests. |
-| Offene Punkte | Konkretes CSS-Framework (z. B. Tailwind oder Bootstrap) final auswählen. |
+| Gestaltung | Eigenes Stylesheet `static/css/app.css`; kein zusätzliches CSS-Framework. |
 | Verfeinert in | [5.2.1](#521-whitebox-thymeleaf-views--frontend). |
 
 ---
@@ -103,11 +103,11 @@ flowchart LR
 | Benötigte Schnittstellen | Application Services, Validierung via BindingResult, Spring Security Kontext. |
 | Qualität | Verständliche Fehlermeldungen direkt im HTML-Formular, verlässlicher Zugriffsschutz auf Routen. |
 | Abhängigkeiten | Spring Web MVC, Spring Validation, Spring Security OAuth2 Client. |
-| Geplante Code-Artefakte | `src/main/java/de/thm/campussplit/web/`. |
+| Implementierte Code-Artefakte | `src/main/java/de/thm/campussplit/web/`. |
 | Erfüllte Anforderungen | F2-Use-Cases, B1-Aktionen, N2-Validierung und Fehlerbehandlung. |
 | Variabilität | Neue Use Cases erhalten eigene Controller-Klassen oder Methoden. |
 | Tests | Controller-Tests mit MockMvc und simuliertem OAuth2-User. |
-| Offene Punkte | Rollenmodell für Administrator-Sonderfunktionen mit OAuth2 abgleichen. |
+| Rollenmodell | `ADMIN` und `MEMBER` aus lokaler Gruppenmitgliedschaft, unabhängig vom Anmeldeweg. |
 | Verfeinert in | [5.2.2](#522-whitebox-backend). |
 
 ---
@@ -121,11 +121,11 @@ flowchart LR
 | Benötigte Schnittstellen | Domainlogik, Repositories, Export Module, Currency Integration. |
 | Qualität | Transaktional, nachvollziehbar, testbar. |
 | Abhängigkeiten | Spring Services (@Service), @Transactional, Repositories. |
-| Geplante Code-Artefakte | `src/main/java/de/thm/campussplit/service/`. |
+| Implementierte Code-Artefakte | `src/main/java/de/thm/campussplit/service/`. |
 | Erfüllte Anforderungen | UC-04 bis UC-12, F3-Anwendungsfunktionen. |
 | Variabilität | Neue fachliche Abläufe können als weitere Services ergänzt werden. |
 | Tests | Service-Tests mit Testdaten für Gruppen, Ausgaben und Salden. |
-| Offene Punkte | Granularität einzelner Services während Implementierung prüfen. |
+| Umsetzung | Fachliche Services in `service/`, Rechenlogik in `domain/`. |
 | Verfeinert in | [5.2.2](#522-whitebox-backend). |
 
 ---
@@ -138,12 +138,12 @@ flowchart LR
 | Bereitgestellte Schnittstelle | Rechenfunktionen und fachliche Modelle für Split, Balance und Settlement. |
 | Benötigte Schnittstellen | Keine externen Systeme; arbeitet mit fachlichen Eingaben. |
 | Qualität | Centgenau, deterministisch, unabhängig von UI und Datenbank testbar. |
-| Abhängigkeiten | Java `BigDecimal` oder centbasierte Integer-Darstellung (`MoneyAmountDT`); keine Gleitkommazahlen. |
-| Geplante Code-Artefakte | `src/main/java/de/thm/campussplit/domain/`. |
+| Abhängigkeiten | Java `BigDecimal` für Geldbeträge; keine Gleitkommazahlen. |
+| Implementierte Code-Artefakte | `src/main/java/de/thm/campussplit/domain/`. |
 | Erfüllte Anforderungen | F3, D1, D2, N2-Geldbetragsverarbeitung. |
 | Variabilität | Weitere Aufteilungsarten können ergänzt werden, ohne UI und Persistenz komplett umzubauen. |
 | Tests | Unit-Tests für Rundung, Equal Split, Custom Split, Salden und Ausgleichsvorschläge. |
-| Offene Punkte | Exakte technische Umsetzung von `MoneyAmountDT` festlegen. |
+| Umsetzung | Geldbeträge als `BigDecimal` mit zwei Nachkommastellen; Währung separat. |
 | Verfeinert in | [5.2.3](#523-whitebox-domain-model-und-money-logic). |
 
 ---
@@ -157,11 +157,11 @@ flowchart LR
 | Benötigte Schnittstellen | PostgreSQL-Datenbank. |
 | Qualität | Konsistente Datenhaltung, keine unvollständigen fachlichen Zustände. |
 | Abhängigkeiten | Spring Data JPA, PostgreSQL, Datenbankverbindung. |
-| Geplante Code-Artefakte | `src/main/java/de/thm/campussplit/persistence/`. |
+| Implementierte Code-Artefakte | `src/main/java/de/thm/campussplit/persistence/`. |
 | Erfüllte Anforderungen | D1-Datenmodell, S3-Inbetriebnahme, N1-Datenkonsistenz. |
 | Variabilität | Schemaänderungen erfolgen kontrolliert über Migrationen. |
 | Tests | Repository-Tests und Integrationstests gegen Testdatenbank. |
-| Offene Punkte |Flyway-Migrationsskripte für initiale Entitäten erstellen. |
+| Migrationen | Flyway-Skripte V1 bis V8 in `src/main/resources/db/migration/`; Hibernate validiert das Schema. |
 | Verfeinert in | Nicht weiter verfeinert; Datenmodell ist in D1/D2 fachlich beschrieben. |
 
 ---
@@ -175,11 +175,11 @@ flowchart LR
 | Benötigte Schnittstellen | Exportdaten aus Application Services und Domainlogik. |
 | Qualität | Keine sensiblen Daten im Export, Beträge korrekt formatiert, Export entspricht aktueller Saldenberechnung. |
 | Abhängigkeiten | Bibliothek für PDF-Erzeugung und CSV-Ausgabe. |
-| Geplante Code-Artefakte | `src/main/java/de/thm/campussplit/export/`. |
+| Implementierte Code-Artefakte | `src/main/java/de/thm/campussplit/export/`. |
 | Erfüllte Anforderungen | B3, UC-12, N2-Exportsicherheit. |
 | Variabilität | Weitere Exportformate können später ergänzt werden. |
 | Tests | Exportdaten-Tests, CSV-Strukturtests, ggf. PDF-Smoke-Test. |
-| Offene Punkte | Konkrete PDF-Bibliothek final auswählen. |
+| PDF-Bibliothek | Apache PDFBox 3.0.6; CSV-Dateien werden als ZIP geliefert. |
 | Verfeinert in | [5.2.4](#524-whitebox-export-und-integration). |
 
 ---
@@ -193,11 +193,11 @@ flowchart LR
 | Benötigte Schnittstellen | HTTPS-Zugriff auf Frankfurter API. |
 | Qualität | Keine personenbezogenen Daten nach außen, keine erfundenen Kurse, kontrollierte Fehlerbehandlung. |
 | Abhängigkeiten | HTTP-Client des Backends, Erreichbarkeit des Wechselkursdienstes. |
-| Geplante Code-Artefakte | `src/main/java/de/thm/campussplit/integration/`. |
+| Implementierte Code-Artefakte | `src/main/java/de/thm/campussplit/integration/`. |
 | Erfüllte Anforderungen | S1, D2 ExchangeRateDT, N2 Fehlerbehandlung. |
 | Variabilität | Wechselkursanbieter kann später durch anderen Adapter ersetzt werden. |
 | Tests | Adaptertests mit Mock-HTTP-Server oder Testdouble. |
-| Offene Punkte | Timeout- und Cache-Strategie final festlegen. |
+| Netzwerkverhalten | Verbindungs-Timeout 3 Sekunden, Lese-Timeout 5 Sekunden; kein eigener Wechselkurs-Cache. |
 | Verfeinert in | [5.3.1](#531-whitebox-currency-integration). |
 
 ---
@@ -243,34 +243,21 @@ Level 2 öffnet die wichtigsten Level-1-Bausteine. Die Verfeinerung endet dort, 
 ## 5.2.1 Whitebox Thymeleaf Views / Frontend
 
 ```mermaid
-flowchart TD
-    LAYOUTS[Layout Templates]
-    PAGES[Page Templates]
-    FRAGMENTS[UI Fragments]
-    FORMS[Form Binding Models]
-    ASSETS[Static Assets CSS/JS]
-
-    LAYOUTS --> PAGES
-    PAGES --> FRAGMENTS
-    PAGES --> FORMS
-    PAGES --> ASSETS
+flowchart LR
+    PAGES[HTML-Templates] --> FRAGMENTS[fragments.html]
+    PAGES --> FORMS[Formularmodelle]
+    PAGES --> ASSETS[static/css]
+    PAGES -->|GET und POST| CONTROLLER[web Controller]
 ```
 
 | Baustein | Verantwortung |
 |---|---|
-| `layouts/` | Basis-HTML-Gerüst mit Navigation, Header, Footer und Flash-Message-Bereich. |
-| `pages/` | Ansichten für Dashboard, Gruppendetails, Ausgaben-Formulare, Saldenübersicht und Exporteinstiege. |
-| `fragments/` | Wiederverwendbare UI-Komponenten (z. B. Formular-Input-Fehler, Tabellenzeilen, Saldenkarten). |
-| Form Binding Models | Objekte zur Bindung von HTML-Formulareingaben an Spring-Controller (`@ModelAttribute`) |
-| Static Assets | CSS-Styling und minimale JavaScript-Hilfsfunktionen zur Unterstützung der Bedienbarkeit. |
+| `src/main/resources/templates/` | Seiten wie `index.html`, `dashboard.html`, `group.html` und Anmeldeformulare. |
+| `templates/fragments.html` | Gemeinsamer Kopfbereich, Navigation und Footer; Einbindung über Thymeleaf-Fragmente. |
+| Formularmodelle | Klassen wie `GroupForm`, `RegistrationForm` und `ExpenseCommand` zur Bindung und Validierung. |
+| `static/css/` | Stylesheet und vorhandene Bilddateien. |
 
-Lokale Beziehungen:
-
-| Beziehung | Vertrag |
-|---|---|
-| Pages → Layouts | Seiten nutzen `thymeleaf-layout-dialect` zur Einbettung. |
-| Pages → Fragments | Seiten binden Fragmente für konsistente UI-Elemente ein. |
-| Pages → Controller | Formulare senden Daten per POST an Controller-Aktionen. |
+Es gibt keine separaten Verzeichnisse `layouts/` oder `pages/` und keine Abhängigkeit auf einen Layout-Dialect.
 
 ---
 
@@ -326,29 +313,26 @@ flowchart LR
     MONEY[MoneyAmountDT]
     SPLIT[SplitService]
     BALANCE[BalanceService]
-    SETTLEMENT[SettlementService]
     RATE[ExchangeRate]
 
     SPLIT --> MONEY
     BALANCE --> MONEY
-    SETTLEMENT --> MONEY
     RATE --> MONEY
-    BALANCE --> SETTLEMENT
 ```
 
 | Baustein | Schnittstelle | Verantwortung |
 |---|---|---|
 | `MoneyAmountDT` | Betrag + Währung | Fachliche Darstellung eines Geldbetrags. |
 | `ExchangeRate` | fromCurrency, toCurrency, rate, date | Wechselkurswert für Fremdwährungsausgaben. |
-| `SplitService` | `calculateShares(...)` | Berechnet Kostenanteile für `EQUAL` und `CUSTOM_AMOUNT`. |
-| `BalanceService` | `calculateBalances(groupId)` | Berechnet Salden pro Gruppenmitglied. |
-| `SettlementService` | `calculateSettlements(balances)` | Erzeugt Ausgleichsvorschläge zwischen Debitoren und Kreditoren. |
+| `SplitService` | `calculate(total, participants, method, custom)` | Berechnet Kostenanteile für `EQUAL` und `CUSTOM_AMOUNT`. |
+| `BalanceService` | `calculate(members, expenses, payments)` | Berechnet Salden pro Gruppenmitglied. |
+| `BalanceService` | `settlements(balances)` | Erzeugt Ausgleichsvorschläge zwischen Debitoren und Kreditoren. |
 
 Wichtige Regeln:
 
 | Regel | Umsetzung |
 |---|---|
-| Keine Gleitkommazahlen für Geld | `BigDecimal` oder centbasierte Integer-Darstellung(`MoneyAmountDT`). |
+| Keine Gleitkommazahlen für Geld | `BigDecimal`; nur für die gleichmäßige Aufteilung vorübergehend ganze Centbeträge. |
 | EQUAL Split muss exakt aufgehen | Rundungsreste werden deterministisch verteilt. |
 | CUSTOM_AMOUNT muss Summe treffen | Speichern nur, wenn Summe exakt dem Abrechnungsbetrag entspricht. |
 | Salden müssen auf 0 summieren | Unit-Test für jede zentrale Berechnungsvariante. |
@@ -359,26 +343,26 @@ Wichtige Regeln:
 ## 5.2.4 Whitebox Export und Integration
 
 ```mermaid
-flowchart TD
-    EXPORTSERVICE[ExportApplicationService]
-    EXPORTDATA[ExportDataAssembler]
-    PDF[PdfExportWriter]
-    CSV[CsvExportWriter]
-    CURRENCY[CurrencyRateClient]
-
-    EXPORTSERVICE --> EXPORTDATA
-    EXPORTSERVICE --> PDF
-    EXPORTSERVICE --> CSV
-    CURRENCY --> FRANK[Frankfurter API]
+flowchart LR
+    CTRL[ExportController] --> SUMMARY[ExpenseService.summary]
+    CTRL --> EXPORT[ExportService]
+    SUMMARY --> DATA[GroupSummary]
+    DATA --> EXPORT
+    EXPORT --> PDF[PDFBox · PDF]
+    EXPORT --> CSV[CSV-Dateien im ZIP]
+    RATE[CurrencyRatePort] --> CLIENT[FrankfurterCurrencyRateClient]
+    CLIENT --> API[Frankfurter API]
 ```
 
 | Baustein | Verantwortung |
 |---|---|
-| `ExportApplicationService` | Koordiniert Exporterzeugung für PDF oder CSV. |
-| `ExportDataAssembler` | Stellt Gruppendaten, Ausgaben, Anteile, Salden und Vorschläge zusammen. |
-| `PdfExportWriter` | Erzeugt lesbare PDF-Datei für den HTTP-Response-Download. |
-| `CsvExportWriter` | Erzeugt tabellarische CSV-Datei für den HTTP-Response-Download |
-| `CurrencyRateClient` | Liefert Wechselkursdaten für Fremdwährungsausgaben. |
+| `web/ExportController` | Prüft Format und Inhalt und liefert die Dateiantwort. |
+| `service/ExpenseService.GroupSummary` | Enthält Gruppe, Mitglieder, Ausgaben, Salden, Vorschläge und Rückzahlungen. |
+| `export/ExportService` | Erzeugt PDF sowie CSV-ZIP, einschließlich optionaler Ausgabenzuordnung einer Rückzahlung. |
+| `integration/CurrencyRatePort` | Definiert `getRate(from, to, date)` und den Record `ExchangeRate`. |
+| `integration/FrankfurterCurrencyRateClient` | Ruft Kurse ab, prüft die Antwort und übersetzt Fehler in `BusinessException`. |
+
+Es gibt keine separaten Klassen `ExportApplicationService`, `ExportDataAssembler`, `PdfExportWriter` oder `CsvExportWriter`.
 
 ---
 
@@ -411,6 +395,6 @@ flowchart LR
 |---|---|---|
 | CurrencyRatePort | Interface | Fachliche Schnittstelle: `getRate(from, to, date)`. |
 | FrankfurterCurrencyRateClient | Adapter | Kennt URL-Struktur, Requestparameter und Antwortformat der Frankfurter API. |
-| HTTP Client | Spring RestClient oder WebClient | Führt synchronen HTTPS-Aufruf aus. |
+| HTTP Client | Spring RestClient mit JDK HttpClient | Führt synchronen HTTPS-Aufruf aus. |
 | Response Mapper | Mapping-Komponente | Wandelt JSON-Antwort in `ExchangeRate` um. |
 | Error Mapper | Fehlerkomponente | Wandelt technische Fehler in fachlich verständliche Fehler um. |
