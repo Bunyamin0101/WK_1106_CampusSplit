@@ -15,10 +15,10 @@ CampusSplit ist eine Webanwendung mit Frontend, Backend und relationaler Datenba
 | Projekttyp | Greenfield-Projekt |
 | Vorgängersystem | nicht vorhanden |
 | Betrieb | Webanwendung im Browser |
-| Backend | serverseitige Fachlogik und REST-API |
-| Frontend | Benutzeroberfläche im Browser |
+| Backend | serverseitige Fachlogik und Spring MVC Web-Controller |
+| Frontend | serverseitig gerenderte HTML-Views (Thymeleaf) im Browser |
 | Datenbank | relationale Datenbank, z. B. PostgreSQL |
-| Externe Pflichtdienste | keine Bank-, Zahlungs-, OCR- oder E-Mail-Dienste |
+| Externe Pflichtdienste | Frankfurter Wechselkursdienst, Google OAuth2 (keine Bank-, Zahlungs- oder OCR-Dienste) |
 | Batch-Prozesse | nicht erforderlich |
 
 ---
@@ -30,12 +30,11 @@ Vor der Inbetriebnahme müssen folgende Voraussetzungen erfüllt sein.
 | Bereich | Voraussetzung | Zweck |
 |--------|---------------|------|
 | Browser | aktueller Webbrowser | Nutzung der Dialoge aus B1 |
-| Frontend-Laufzeit | bereitgestelltes Frontend | Anzeige der Anwendung |
-| Backend-Laufzeit | lauffähiges Backend | Verarbeitung von Use Cases und Fachlogik |
-| REST-Kommunikation | Frontend kann Backend erreichen | Austausch von Eingaben und Ergebnissen |
-| Datenbank | erreichbare relationale Datenbank | Speicherung von Benutzern, Gruppen und Ausgaben |
-| Konfiguration | gültige Umgebungswerte | Verbindung zu Datenbank und Frontend |
-| Sicherheit | Geheimnisse außerhalb des Quellcodes | Schutz von Passwörtern und Zugangsdaten |
+| Anwendungs-Laufzeit | lauffähige Spring Boot Anwendung (Java 21) | Serverseitiges Rendering der Views, Verarbeitung von Use Cases und Fachlogik |
+| HTTP-Kommunikation | Browser kann Anwendung über HTTP/HTTPS erreichen | Aufruf von Seiten und Übermittlung von Formulardaten |
+| Datenbank | erreichbare relationale Datenbank (PostgreSQL) | Speicherung von Benutzern, Gruppen und Ausgaben |
+| Konfiguration | gültige Umgebungswerte (z. B. OAuth2 Secrets, DB-Credentials) | Verbindung zu Datenbank und externen Diensten |
+| Sicherheit | Geheimnisse außerhalb des Quellcodes | Schutz von Passwörtern und OAuth2 Zugangsdaten |
 | Exportfähigkeit | PDF-/CSV-Erzeugung möglich | Bereitstellung von Ausgabenübersichten |
 
 ---
