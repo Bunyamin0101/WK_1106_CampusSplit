@@ -33,17 +33,17 @@ public class ExportService {
     var expenseRows = new StringBuilder();
     row(
         expenseRows,
-        "expense_date",
-        "description",
-        "category",
-        "payer",
-        "original_amount",
-        "original_currency",
-        "exchange_rate",
-        "settlement_amount",
-        "settlement_currency",
-        "participant",
-        "share");
+        "Datum",
+        "Beschreibung",
+        "Kategorie",
+        "Bezahlt von",
+        "Originalbetrag",
+        "Originalwährung",
+        "Wechselkurs",
+        "Ausgabenbetrag (nicht je Person summieren)",
+        "Gruppenwährung",
+        "Beteiligte Person",
+        "Kostenanteil");
     for (var e : summary.expenses())
       for (var s : e.getShares())
         row(
@@ -60,7 +60,7 @@ public class ExportService {
             s.getUser().getName(),
             s.getShareAmount());
     var balances = new StringBuilder();
-    row(balances, "member", "balance", "status");
+    row(balances, "Person", "Saldo", "Status");
     // Numeric cells are trusted BigDecimals, so negative balances stay machine-readable numbers.
     for (var b : summary.balances())
       balances
@@ -68,24 +68,24 @@ public class ExportService {
           .append(',')
           .append(b.amount().toPlainString())
           .append(',')
-          .append(cell(b.status()))
+          .append(cell(b.label()))
           .append("\r\n");
     var settlements = new StringBuilder();
-    row(settlements, "from", "to", "amount");
+    row(settlements, "Von", "An", "Betrag");
     summary.settlements().forEach(s -> row(settlements, s.from(), s.to(), s.amount()));
     var payments = new StringBuilder();
     row(
         payments,
-        "date",
-        "from",
-        "to",
-        "amount",
-        "currency",
-        "recorded_by",
-        "status",
-        "cancelled_at",
-        "cancelled_by",
-        "cancellation_reason");
+        "Datum",
+        "Von",
+        "An",
+        "Betrag",
+        "Währung",
+        "Erfasst von",
+        "Status",
+        "Storniert am",
+        "Storniert von",
+        "Stornogrund");
     summary
         .repayments()
         .forEach(
@@ -98,12 +98,12 @@ public class ExportService {
                     p.getAmount(),
                     summary.group().getCurrency(),
                     p.getRecordedBy().getName(),
-                    p.isCancelled() ? "CANCELLED" : "RECORDED",
+                    p.isCancelled() ? "Storniert" : "Erfasst",
                     p.getCancelledAt(),
                     p.getCancelledBy() == null ? "" : p.getCancelledBy().getName(),
                     p.getCancellationReason()));
     var metadata = new StringBuilder();
-    row(metadata, "group", "currency", "exported_at", "from", "to", "scope");
+    row(metadata, "Gruppe", "Währung", "Exportiert am", "Zeitraum von", "Zeitraum bis", "Inhalt");
     row(
         metadata,
         summary.group().getName(),
@@ -111,7 +111,7 @@ public class ExportService {
         Instant.now(),
         from,
         to,
-        scope);
+        scopeLabel(scope));
     var bytes = new ByteArrayOutputStream();
     try (var zip = new ZipOutputStream(bytes, StandardCharsets.UTF_8)) {
       if (!scope.equals("open")) write(zip, "ausgaben.csv", expenseRows.toString());
