@@ -20,7 +20,7 @@ Dieses Glossar definiert Begriffe, die in der Architekturdokumentation von Campu
 | **Spring Security** | Sicherheitsframework im Backend für Authentifizierung, Sitzungsschutz und Zugriffskontrolle. |
 | **Transaktion** | Zusammengehöriger Speichervorgang, der vollständig erfolgreich sein muss oder komplett zurückgerollt wird. Wichtig beim Speichern einer Ausgabe mit mehreren Kostenanteilen. |
 | **Value Object** | Objekt ohne eigene Identität, das einen fachlichen Wert beschreibt. Beispiele sind Geldbetrag, Währungscode oder Wechselkurs. |
-| **Money / MoneyAmount** | Architekturbegriff für die technische Umsetzung von `MoneyAmountDT`: Betrag plus Währung, gespeichert als `long` in Cent (siehe ADR-006). |
+| **Money / MoneyAmount** | Architekturbegriff für die technische Umsetzung von `MoneyAmountDT`: Betrag plus Währung, gespeichert als `BigDecimal` (siehe ADR-006). |
 | **Currency Adapter** | Backend-Komponente, die Wechselkurse über die Frankfurter API abruft und technische API-Details vor der restlichen Anwendung verbirgt. |
 | **ExchangeRate** | Architekturbegriff für den verwendeten Wechselkurs zwischen Originalwährung und Gruppenwährung. Entspricht fachlich `ExchangeRateDT`, technisch als `BigDecimal` umgesetzt (siehe ADR-006). |
 | **Export Writer** | Komponente, die vorbereitete Exportdaten in ein konkretes Ausgabeformat schreibt, z. B. PDF oder CSV. |
