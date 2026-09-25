@@ -88,9 +88,53 @@ flowchart TD
 |---|---|
 | Startbarkeit | Spring-Boot-Anwendung und PostgreSQL müssen mit dokumentierten Schritten startbar sein. |
 | Testdaten | Für die Präsentation können Beispielbenutzer, Gruppen, Ausgaben und Salden vorbereitet werden. |
-| Externe API | Internetzugriff ist nur für Fremdwährungsausgaben nötig. Ausgaben in Gruppenwährung funktionieren ohne Wechselkursdienst. |
+| Externe API | Der Wechselkursdienst wird für Fremdwährungsausgaben und die EUR-Gesamtübersicht bei USD-Gruppen benötigt. Google-Anmeldung benötigt ebenfalls Internetzugriff; Ausgaben in Gruppenwährung benötigen keinen Wechselkursabruf. |
 | Export | PDF/CSV wird auf Anforderung erzeugt und heruntergeladen. |
 | Datenbestand | Kein Altdatenimport; CampusSplit startet als Greenfield-System. |
+
+
+### 7.1.3 Online-Projektinstanz auf Railway
+
+Stand: 25.09.2026. Die Review-/Demo-Instanz wird auf Railway betrieben:
+[CampusSplit öffnen](https://wk1106campussplit-production.up.railway.app/).
+
+```mermaid
+flowchart LR
+    BROWSER[Webbrowser] -->|HTTPS| PROXY[Railway HTTPS-Proxy]
+    subgraph RAILWAY[Railway · production]
+        PROXY -->|Port 8080| APP[Spring Boot · Java 21 · Thymeleaf]
+        APP -->|JDBC im privaten Netzwerk| DB[(PostgreSQL mit persistentem Volume)]
+    end
+    GITHUB[GitHub · main] -->|Automatischer Build und Deployment| APP
+    APP -->|HTTPS · Wechselkurse| FX[Frankfurter API]
+    BROWSER <-->|Anmeldung und Weiterleitung| GOOGLE[Google OIDC]
+    APP -->|HTTPS · OIDC| GOOGLE
+```
+
+| Bestandteil | Konkreter Betrieb |
+|---|---|
+| Quellcode | [Bunyamin0101/WK_1106_CampusSplit](https://github.com/Bunyamin0101/WK_1106_CampusSplit), verbundener Branch `main`. |
+| Anwendung | Ein Railway-App-Dienst für die gesamte Spring-Boot-Anwendung einschließlich Thymeleaf; kein separater Frontend-Dienst. |
+| Datenbank | Separater PostgreSQL-Dienst mit persistentem Volume im selben Railway-Projekt. Die Anwendung verwendet die interne Verbindung. |
+| Öffentlicher Zugriff | Railway-Domain über HTTPS; Gruppen und persönliche Daten erfordern eine Anmeldung und die fachliche Zugriffsprüfung. |
+| Aktualisierung | Ein Push auf `main` löst den Build und das Deployment aus. Danach müssen Deployment-Status und Webseite geprüft werden; ein erfolgreicher Push allein bestätigt keinen erfolgreichen Betrieb. |
+| Schema | Flyway führt versionierte Migrationen aus `src/main/resources/db/migration/` beim Start aus; Hibernate prüft das Schema mit `ddl-auto: validate`. |
+| Google-Anmeldung | Aktiviert über Servicevariablen. Autorisierter Callback: `https://wk1106campussplit-production.up.railway.app/login/oauth2/code/google`. |
+| Verfügbarkeit | Die Projektinstanz nutzt den Railway-Testtarif. Laufzeit und verbleibendes Guthaben sind im Railway-Konto zu prüfen; dauerhafter kostenloser Betrieb wird nicht vorausgesetzt. |
+
+Die Railway-Servicevariablen konfigurieren den Betrieb ohne Zugangsdaten im Repository:
+
+| Variable | Verwendung |
+|---|---|
+| `DB_URL` | JDBC-URL der internen PostgreSQL-Verbindung. |
+| `DB_USER`, `DB_PASSWORD` | Zugangsdaten aus dem PostgreSQL-Dienst. |
+| `SERVER_PORT=8080`, `PORT=8080` | Anwendungsport und dazu passende Railway-Portzuordnung. Die Anwendung liest `SERVER_PORT`. |
+| `SERVER_FORWARD_HEADERS_STRATEGY=framework` | Berücksichtigt die vom Railway-Proxy weitergereichten HTTPS-Informationen, unter anderem für OAuth-Weiterleitungen. |
+| `SERVER_SERVLET_SESSION_COOKIE_SECURE=true` | Überträgt das Sitzungscookie nur über HTTPS. |
+| `GOOGLE_LOGIN_ENABLED=true` | Aktiviert den Google-OIDC-Client. |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Google-Clientkonfiguration; Werte bleiben in Railway. |
+
+**Datensicherung:** Eine manuelle PostgreSQL-Sicherung wurde erstellt und durch Wiederherstellung in eine separate Prüfdatenbank kontrolliert. Automatische Backups sind bislang nicht eingerichtet. Ein persistentes Volume ersetzt keine Sicherung. Vor Datenbankänderungen sollte eine aktuelle Sicherung erstellt werden; die bestehende Sicherung enthält nur den Datenstand ihres Erstellungszeitpunkts.
 
 ---
 
@@ -147,7 +191,7 @@ Die konkreten Ports können in der Implementierung angepasst werden. Für Entwic
 |---|---:|---|
 | Spring-Boot-Anwendung | `8080` | Einstiegspunkt für Browseraufrufe, Formularaktionen, Login, Gruppen, Ausgaben, Salden und Export. |
 | PostgreSQL | `5432` | Nur für die Anwendung bzw. lokale Entwicklung erreichbar, nicht direkt für Endnutzer. |
-| Frankfurter API | `443` | Externer HTTPS-Aufruf nur bei Fremdwährungsausgaben. |
+| Frankfurter API | `443` | Externer HTTPS-Aufruf für Fremdwährungsausgaben und die EUR-Gesamtübersicht bei USD-Gruppen. |
 
 Da Thymeleaf serverseitig durch Spring Boot gerendert wird, ist kein separater Vite- oder React-Entwicklungsserver notwendig.
 
@@ -164,12 +208,12 @@ Die Konfiguration muss zwischen Entwicklungsumgebung und Demo-Umgebung untersche
 | Datenbankbenutzer | `campussplit` | Umgebungsvariable oder lokales Profil |
 | Datenbankpasswort | nicht im Klartext im Repository | Umgebungsvariable |
 | Wechselkurs-API Base URL | `https://api.frankfurter.dev` | Backend-Konfiguration |
-| Aktives Spring-Profil | `dev`, `test` oder `demo` | Umgebungsvariable oder Startparameter |
+| Testprofil | `test` für automatisierte Tests mit H2 | Testkonfiguration; kein Produktionsprofil |
 
-Beispielhafte Startlogik:
+Lokaler Start nach Konfiguration der PostgreSQL-Zugangsdaten (siehe [README](../README.md)):
 
 ```text
-java -jar campussplit.jar --spring.profiles.active=demo
+sh ./mvnw spring-boot:run
 ```
 
 ---
@@ -206,7 +250,6 @@ Nicht Bestandteil dieser Verteilungssicht sind:
 
 - produktive Hochverfügbarkeit,
 - automatische Skalierung,
-- Cloud-native Infrastruktur,
 - Kubernetes,
 - Docker-Compose-Architektur,
 - Zahlungsprovider-Deployment,
