@@ -11,26 +11,39 @@ Die fachliche Abgrenzung basiert auf [`P2 — Architekturüberblick`](../Spezifi
 
 ## 3.1 Fachlicher Kontext
 
-CampusSplit unterstützt Benutzer bei der Verwaltung gemeinsamer Ausgaben in Gruppen. Gruppenadministratoren besitzen zusätzliche Rechte zur Mitgliederverwaltung. Wird eine Ausgabe in einer anderen Währung als der Gruppenwährung erfasst, verwendet CampusSplit den Frankfurter Wechselkursdienst zur Umrechnung.
+CampusSplit unterstützt Benutzer bei der Verwaltung gemeinsamer Ausgaben in Gruppen. Gruppenadministratoren besitzen zusätzliche Rechte zur Mitgliederverwaltung. Wird eine Ausgabe in einer anderen Währung als der Gruppenwährung erfasst, verwendet CampusSplit den Frankfurter Wechselkursdienst zur Umrechnung. Google OAuth2 ist Authentifizierungsdienst für den Login.
 
 ```mermaid
 flowchart LR
-    USER[Benutzer / Gruppenmitglied]
-    ADMIN[Gruppenadministrator]
-    CS[CampusSplit]
-    FX[Frankfurter Wechselkursdienst]
-    PDF[PDF-Export]
-    CSV[CSV-Export]
+    subgraph AKTEURE[Akteure]
+        USER[Benutzer / Gruppenmitglied]
+        ADMIN[Gruppenadministrator]
+    end
 
-    USER -->|Gruppen, Ausgaben, Salden| CS
-    CS -->|Ergebnisse und Übersichten| USER
+    subgraph SYSTEM[System]
+        CS[CampusSplit]
+    end
 
-    ADMIN -->|Mitgliederverwaltung| CS
-    CS -->|Gruppen- und Mitgliedsdaten| ADMIN
+    subgraph DIENSTE[Externe Dienste]
+        FX[Frankfurter Wechselkursdienst]
+        AUTH[Google OAuth2 Provider]
+    end
 
-    CS -->|Ausgangswährung, Zielwährung, Datum| FX
-    FX -->|Wechselkurs| CS
+    subgraph EXPORTS[Ausgaben]
+        PDF[PDF-Export]
+        CSV[CSV-Export]
+    end
 
+    %% Akteure Interaktion
+    USER <-->|Gruppen, Ausgaben, Salden| CS
+    USER <-->|Authentifizierung / Login| AUTH
+    ADMIN <-->|Mitgliederverwaltung| CS
+
+    %% Externe Dienste
+    CS <-->|Währungsanfrage / Wechselkurs| FX
+    CS <-->|OAuth2 Token / Profil| AUTH
+
+    %% Exporte
     CS -->|erzeugt| PDF
     CS -->|erzeugt| CSV
 ```
@@ -46,6 +59,7 @@ PDF und CSV sind dabei keine eigenständigen Nachbarsysteme, sondern Ausgaben vo
 | Akteur | Benutzer / Gruppenmitglied | Registrierung, Anmeldung, Gruppen, Ausgaben, Salden und Export | Benutzer führt eine Aktion aus. |
 | Akteur | Gruppenadministrator | Verwaltung von Gruppenmitgliedern und Gruppenrechten | Administrator verwaltet eine Gruppe. |
 | Nachbarsystem | Frankfurter Wechselkursdienst | Ausgangswährung, Zielwährung und Datum werden gesendet; ein Wechselkurs wird zurückgegeben. | Eine Ausgabe wird in einer anderen Währung als der Gruppenwährung erfasst oder bearbeitet. |
+| Nachbarsystem | Google OAuth2 Provider | Authentifizierungs-Token, E-Mail-Adresse und Profilinformationen werden ausgetauscht. | Benutzer startet den Anmelde-/Registrierungsprozess über Google. |
 | Datenfluss | PDF-Export | Übersicht über Gruppen-, Ausgaben-, Salden- und Ausgleichsdaten | Benutzer fordert einen PDF-Export an. |
 | Datenfluss | CSV-Export | Gruppenausgaben werden tabellarisch bereitgestellt. | Benutzer fordert einen CSV-Export an. |
 
@@ -95,9 +109,8 @@ PostgreSQL liegt innerhalb der Systemgrenze von CampusSplit. Der Browser befinde
 | Browser ↔ CampusSplit | HTTP / HTTPS | Anmeldung, Gruppen-, Mitglieder- und Ausgabendaten sowie Ansichten und Fehlermeldungen | Geschützte Funktionen erfordern eine gültige Anmeldung. |
 | CampusSplit ↔ PostgreSQL | JPA / JDBC | Benutzer, Gruppen, Mitgliedschaften, Ausgaben, Kostenanteile und weitere persistente Daten | Datenbankzugangsdaten werden serverseitig konfiguriert. |
 | CampusSplit ↔ Frankfurter Wechselkursdienst | HTTPS / JSON | Ausgangswährung, Zielwährung, Datum und Wechselkurs | Es werden keine personenbezogenen Daten übertragen. |
+| CampusSplit ↔ Google OAuth2 | HTTPS / OAuth2 | Client ID, Client Secret, Authorization Code, Access Token, Benutzerprofil (E-Mail, Name) | Gesichert über HTTPS und OAuth2-Protokollstandard. Client Secrets werden serverseitig geschützt. |
 | CampusSplit → Browser | HTTP-Dateiantwort | PDF- oder CSV-Export | Export nur für berechtigte Gruppenmitglieder. |
-
-Die genaue Form der Kommunikation zwischen Browser und Anwendung hängt von der noch offenen Entscheidung zur Oberflächentechnologie ab.
 
 ---
 
@@ -127,6 +140,7 @@ flowchart LR
     USER[Benutzer]
     BROWSER[Webbrowser]
     FX[Frankfurter Wechselkursdienst]
+    AUTH[Google OAuth2 Provider]
 
     subgraph CS[CampusSplit]
         APP[Anwendungs- und Fachlogik]
@@ -134,16 +148,19 @@ flowchart LR
         DB[(PostgreSQL)]
         EXPORT[Exportlogik]
         FXADAPTER[Wechselkursanbindung]
+        AUTHADAPTER[Security / OAuth2 Anbindung]
 
         APP --> PERSIST
         PERSIST --> DB
         APP --> EXPORT
         APP --> FXADAPTER
+        APP --> AUTHADAPTER
     end
 
     USER --> BROWSER
     BROWSER <-->|Anfragen und Antworten| APP
     FXADAPTER <-->|Wechselkursdaten| FX
+    AUTHADAPTER <-->|OAuth2 Token & Profil| AUTH
     EXPORT -->|PDF / CSV| BROWSER
 ```
 
@@ -195,6 +212,23 @@ Der Frankfurter Wechselkursdienst wird verwendet, wenn die Währung einer Ausgab
 | Fehlerverhalten | Ohne gültigen Wechselkurs wird keine Umrechnung mit einem erfundenen oder ungültigen Kurs durchgeführt. |
 
 Die technische Anbindung wird von der fachlichen Berechnungslogik getrennt. Dadurch bleiben Details des externen Dienstes möglichst unabhängig von der übrigen Anwendung.
+
+---
+
+## 3.7 Authentifizierungsdienst (Google OAuth2)
+
+Google OAuth2 wird für die sichere Benutzerauthentifizierung und den Login verwendet.
+
+| Aspekt | Festlegung |
+|---|---|
+| Anbieter |Google Identity Platform |
+| Protokoll | HTTPS / OAuth2 (OpenID Connect) |
+| Datenformat | JSON |
+| Richtung | CampusSplit ↔ Google OAuth2 API |
+| Gesendete Daten | Client ID, Authorization Code, Redirect URI |
+| Empfangene Daten | OAuth2 Access Token, Benutzer-ID, E-Mail-Adresse, Name |
+| Nicht gesendete Daten | Gruppendaten, Ausgaben, Salden oder Passwörter |
+| Fehlerverhalten | Bei fehlschlagender Authentifizierung wird der Zugriff auf geschützte Bereiche verweigert. |
 
 ---
 
