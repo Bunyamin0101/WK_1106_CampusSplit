@@ -17,7 +17,7 @@ Die nachfolgenden Tabellen dienen als Arbeitsindex für die Architektur. Detaill
 | TECH-06 | Relationale Datenbank | Benutzer, Gruppen, Mitgliedschaften, Ausgaben und Kostenanteile werden relational gespeichert. |
 | TECH-07 | PostgreSQL | Als Datenbank wird PostgreSQL verwendet. Sie enthält die persistenten Anwendungsdaten von CampusSplit. |
 | TECH-09 | Serverseitige Fachlogik | Kostenanteile, Salden, Ausgleichsvorschläge, Autorisierung und Validierung werden zentral serverseitig umgesetzt. |
-| TECH-10 | Centgenaue Geldverarbeitung | Geldbeträge dürfen nicht mit ungenauen Gleitkommazahlen verarbeitet werden. Die konkrete technische Darstellung wird in der zugehörigen Architekturentscheidung festgelegt. |
+| TECH-10 | Geldbetragsverarbeitung | Geldbeträge werden mit `BigDecimal` und fixer Skalierung (2 Nachkommastellen) verarbeitet. |
 | TECH-11 | Gruppenwährung und Fremdwährungen | Gruppen besitzen eine Gruppenwährung. Fremdwährungsausgaben werden in die Gruppenwährung umgerechnet, bevor Kostenanteile und Salden berechnet werden. |
 | TECH-12 | Externer Wechselkursdienst | Für Fremdwährungsausgaben wird die Frankfurter API angebunden. Der Zugriff auf den Dienst wird von der übrigen Fachlogik getrennt. |
 | TECH-13 | Keine personenbezogenen Daten an Wechselkursdienst | An den Wechselkursdienst werden nur die für die Umrechnung notwendigen Währungsdaten übertragen. Gruppen-, Mitglieder- oder Benutzerdaten werden nicht übertragen. |
@@ -26,6 +26,7 @@ Die nachfolgenden Tabellen dienen als Arbeitsindex für die Architektur. Detaill
 | TECH-16 | Keine Datenmigration | CampusSplit ist ein Greenfield-Projekt. Es gibt kein Vorgängersystem, aus dem Daten übernommen werden müssen. |
 | TECH-17 | Desktop und Mobile | Die zentralen Funktionen müssen sowohl im Desktop- als auch im mobilen Browser nutzbar sein. |
 | TECH-18 | Lokale Entwicklungsumgebung | Das System soll lokal entwickelbar und für Review und Präsentation startbar sein. Konkrete Startschritte werden in der Implementierungsdokumentation festgelegt. |
+| TECH-19 | Google OAuth2 Authentifizierung | Die Anmeldung und Registrierung von Benutzern erfolgt extern über Google OAuth2 / OpenID Connect. |
 
 ---
 
@@ -89,21 +90,7 @@ Die nachfolgenden Tabellen dienen als Arbeitsindex für die Architektur. Detaill
 
 ---
 
-## 2.6 Offene Architekturentscheidungen
-
-Einige technische Entscheidungen sind noch nicht endgültig getroffen. Sie werden in den Architecture Decision Records dokumentiert und anschließend in den betroffenen Architekturkapiteln einheitlich übernommen.
-
-| Thema | Aktueller Stand |
-|---|---|
-| Oberflächentechnologie | Noch offen ist die Entscheidung zwischen Spring Boot mit Thymeleaf und einem getrennten React-/TypeScript-Frontend. |
-| Kommunikation mit der Benutzeroberfläche | Hängt von der gewählten Oberflächentechnologie ab. Eine REST-API wird daher noch nicht als verbindlich festgelegt. |
-| Darstellung von Geldbeträgen | Eine centgenaue Verarbeitung ist verpflichtend. Die konkrete technische Darstellung wird in einem ADR festgelegt. |
-
-Bereits getroffene Architekturentscheidungen werden in den zugehörigen ADRs dokumentiert.
-
----
-
-## 2.7 Abgrenzung dieses Kapitels
+## 2.6 Abgrenzung dieses Kapitels
 
 Dieses Kapitel legt Randbedingungen fest. Es beschreibt noch nicht die interne Bausteinstruktur, Laufzeitszenarien, Deployment-Topologie oder konkrete Architecture Decision Records. Diese folgen in späteren Kapiteln.
 
