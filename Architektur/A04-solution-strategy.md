@@ -10,13 +10,13 @@ CampusSplit wird als browserbasierte Webanwendung mit getrenntem Frontend und Ba
 
 | Bereich | Entscheidung | Begründung |
 |---|---|---|
-| Frontend | React mit TypeScript und Vite | Moderne Weboberfläche, gute Komponentenstruktur, geeignet für responsive Dialoge aus B1. |
+| Frontend | Spring Boot mit Thymeleaf | Ein Deployable, ein Routing-System, geringerer Aufwand, für den Projektumfang ausreichend. |
 | Backend | Java 21 mit Spring Boot | Passt zur Projektvorgabe Java, bietet REST, Validierung, Security und Datenbankzugriff. |
-| Schnittstelle Frontend/Backend | REST über HTTPS/HTTP im Projektkontext | Klare Trennung zwischen Oberfläche und Anwendungslogik; gut testbar und dokumentierbar. |
+| Schnittstelle Frontend/Backend | Spring-Boot-Deployable mit Thymeleaf-Views | Ein Deployable, keine separate API-Schicht nötig, einfacher zu betreiben. |
 | Persistenz | PostgreSQL | Relationale Daten passen gut zu User, Group, Membership, Expense und ExpenseShare. |
 | Datenzugriff | Spring Data JPA | Standardisierte Repository-Struktur und Abbildung der fachlichen Entitäten. |
 | Geldbeträge | Centgenaue Verarbeitung, fachlich als MoneyAmountDT | Keine Gleitkommafehler bei Kostenanteilen, Salden und Exportdaten. |
-| Externe API | Frankfurter Wechselkursdienst über REST/JSON | Einfache externe Schnittstelle für Fremdwährungsausgaben ohne personenbezogene Daten. |
+| Externe API | Frankfurter Wechselkursdienst und Google OAuth2 | Einfache externe Schnittstelle für Fremdwährungsausgaben und Authentifizierung und Login über Google |
 | Export | Backendseitige PDF- und CSV-Erzeugung | Exportdaten entstehen aus gespeicherten Gruppen-, Ausgaben- und Saldendaten. |
 | Dokumentation | Markdown, Mermaid, arc42-Kapitelstruktur | Versionierbar in Git und passend zur vorhandenen Spezifikation. |
 
@@ -30,31 +30,32 @@ Die Anwendung wird in klar getrennte Verantwortungsbereiche zerlegt:
 
 ```mermaid
 flowchart LR
-    UI[React Frontend]
-    API[REST API / Controller]
-    APP[Application Services]
+    UI[Thymeleaf Views / Frontend]
+    APP[Application Services / Backend]
     DOMAIN[Domain Model und Geldlogik]
     DB[(PostgreSQL)]
     EXPORT[PDF/CSV Export]
     FX[Wechselkursadapter]
     FRANK[Frankfurter API]
+    AUTH[Google OAuth2]
 
-    UI -->|HTTP/JSON| API
-    API --> APP
+    UI -->|Methodenaufruf / Controller| APP
     APP --> DOMAIN
     APP --> DB
     APP --> EXPORT
     APP --> FX
+    APP -->|HTTPS/OAuth2| AUTH
     FX -->|HTTPS/JSON| FRANK
 ```
 
 | Bereich | Verantwortung |
 |---|---|
-| React Frontend | Dialoge anzeigen, Formulare erfassen, REST-API aufrufen, Ergebnisse darstellen. |
-| REST API / Controller | HTTP-Anfragen entgegennehmen, Eingaben validieren, angemeldeten Benutzer ermitteln, Services aufrufen. |
+| Thymeleaf Views / Frontend | HTML-Templates rendern, Dialoge anzeigen, Formulare erfassen und Benutzereingaben entgegennehmen.    |
+| Spring Boot Controller | HTTP-Anfragen entgegennehmen, Eingaben validieren, Authentifizierung verwalten und Aufrufe an Application Services weiterleiten. |
 | Application Services | Use-Case-nahe Abläufe koordinieren, z. B. Gruppe erstellen, Ausgabe speichern, Export erzeugen. |
 | Domain Model und Geldlogik | Fachliche Regeln für Kostenanteile, Salden, Debitor/Kreditor und Ausgleichsvorschläge. |
 | Persistenz | Dauerhafte Speicherung von Benutzer-, Gruppen-, Mitgliedschafts- und Ausgabendaten. |
+| Authentifizierung (Google OAuth2) | Externe Anbindung für den sicheren Login und die Benutzerauthentifizierung. |
 | Wechselkursadapter | Externe Wechselkurse abrufen und technische API-Details kapseln. |
 | Export | Exportdaten fachlich aufbereiten und als PDF oder CSV bereitstellen. |
 
