@@ -31,21 +31,6 @@
         Diese Gruppe ist archiviert. Alle Ausgaben und Abrechnungen bleiben
         verfügbar; Korrekturen sind weiterhin möglich.
       </aside>
-      <form
-        th:if="${summary.admin}"
-        method="post"
-        th:action="@{/groups/{id}/archive(id=${summary.group.id})}"
-      >
-        <input
-          type="hidden"
-          name="archived"
-          th:value="${!summary.group.archived}"
-        />
-        <button
-          class="secondary"
-          th:text="${summary.group.archived ? 'Gruppe wiederherstellen' : 'Gruppe archivieren'}"
-        ></button>
-      </form>
       <section class="columns">
         <article>
           <h2>Salden</h2>
@@ -350,6 +335,21 @@
 
         </article>
       </section>
+      <form
+        th:if="${summary.admin}"
+        method="post"
+        th:action="@{/groups/{id}/archive(id=${summary.group.id})}"
+      >
+        <input
+          type="hidden"
+          name="archived"
+          th:value="${!summary.group.archived}"
+        />
+        <button
+          class="secondary"
+          th:text="${summary.group.archived ? 'Gruppe wiederherstellen' : 'Gruppe archivieren'}"
+        ></button>
+      </form>
       <details id="delete-group" class="group-delete" th:if="${summary.admin}">
         <summary>Gruppe löschen</summary>
         <h2>Diese Gruppe endgültig löschen?</h2>
