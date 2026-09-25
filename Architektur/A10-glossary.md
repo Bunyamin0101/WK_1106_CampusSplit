@@ -37,10 +37,3 @@ Dieses Glossar definiert Begriffe, die in der Architekturdokumentation von Campu
 | **Synchrone Verarbeitung** | Eine Aktion wird direkt während der Benutzeranfrage verarbeitet. CampusSplit nutzt dies für Ausgaben, Salden, Wechselkursabruf und Export. |
 | **Hintergrundjob** | Zeitgesteuerte oder asynchrone Verarbeitung ohne direkte Benutzeraktion. Für CampusSplit im MVP nicht vorgesehen. |
 
----
-
-## Eingesetzte KI-Werkzeuge
-
-Claude (Anthropic) wurde unterstützend für Formulierungen, Strukturierung und die Prüfung von Querverweisen verwendet.
-
-Die fachlichen Inhalte wurden anschließend mit den vorhandenen Spezifikationsbausteinen abgeglichen.
