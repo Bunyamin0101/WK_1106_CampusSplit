@@ -129,13 +129,13 @@ zusammengeführt.
 Siehe [N2.2 --- Authentifizierung und
 Sitzung](N2_Querschnittskonzepte.md#n22-authentifizierung-und-sitzung).
 
-Erfolgreich → DLG-03 Dashboard.
+Erfolgreich → Startseite `/`; von dort führt „Meine Gruppen“ zu DLG-03 Dashboard.
 
 ## B1.3 Übersicht
 
 ### DLG-03 Dashboard
 
-Das Dashboard ist die zentrale Übersicht nach der Anmeldung.
+Das Dashboard ist die über „Meine Gruppen“ erreichbare Übersicht für angemeldete Benutzer.
 
 Es zeigt:
 
@@ -244,6 +244,14 @@ Eine Rückzahlung wird mit Sender, Empfänger und Betrag erfasst. Nach
 erfolgreicher Erfassung werden die offenen Salden aktualisiert. Eine
 erfasste Rückzahlung kann storniert werden; dabei wird ein
 Stornierungsgrund angegeben und die Salden werden erneut berechnet.
+
+#### Einzelne Ausgaben und Teilzahlungen
+
+Unter „Zurückgezahlter Betrag“ lässt sich „Einzelne Ausgabe begleichen (optional)“ aufklappen. Jede zuordenbare Ausgabe zeigt Beschreibung, Datum, offenen Betrag und ein eigenes Betragsfeld. „Zahlung erfassen“ speichert den eingegebenen positiven Betrag; Teilzahlungen sind möglich. Es wird kein Geld überwiesen.
+
+Zur Auswahl stehen Ausgaben, die der Empfänger des aktuellen Ausgleichsvorschlags bezahlt hat und an denen der Sender beteiligt ist. Bereits zugeordnete, nicht stornierte Zahlungen werden vom jeweiligen Anteil abgezogen. Frühere Rückzahlungen zwischen diesen Personen ohne Ausgabenzuordnung werden für diese Auswahl auf die ältesten Ausgaben angerechnet (Datum, danach Kennung). Jeder angebotene Betrag ist zusätzlich durch den aktuellen Ausgleichsvorschlag begrenzt. Bei verrechneten Gruppenschulden muss deshalb nicht jede Ausgabe einzeln auswählbar sein.
+
+Das Backend berechnet die Grenze beim Speichern erneut und verhindert Überzahlungen, ungültige Zuordnungen und doppelte Anfragen. Gruppenadministratoren sowie Sender oder Empfänger dürfen erfassen. Eine Stornierung mit Begründung hebt die Wirkung auf Saldo und offene Anteile auf. Die Zuordnung erscheint in Aktivitäten, PDF und CSV.
 
 #### Belege
 
@@ -434,7 +442,7 @@ Geldübertragung findet weiterhin außerhalb von CampusSplit statt.
 
 ### DLG-11 Export
 
-Die Exportfunktion ist in das Gruppendetail integriert.
+Die Exportfunktion ist in das Gruppendetail integriert. Die Oberfläche enthält keine Datumsfelder. Der Export-Endpunkt unterstützt weiterhin optionale `from`-/`to`-Parameter; der normale Dialog exportiert ohne Zeitraumbegrenzung.
 
   -----------------------------------------------------------------------
   Feld                    Pflicht                 Verhalten
@@ -446,11 +454,6 @@ Die Exportfunktion ist in das Gruppendetail integriert.
   Format                  Ja                      PDF oder CSV-Dateien
                                                   als ZIP
 
-  Zeitraum von            Nein                    optionaler Start des
-                                                  Auswertungszeitraums
-
-  Zeitraum bis            Nein                    optionales Ende des
-                                                  Auswertungszeitraums
   -----------------------------------------------------------------------
 
 Die implementierten Exportinhalte entsprechen den technischen Werten:

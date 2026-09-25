@@ -103,7 +103,7 @@ Geldbeträge derselben Währung sind numerisch sortierbar, zum Beispiel: -5.00 E
 
 ### Verarbeitungshinweis
 
-Geldbeträge dürfen nicht über ungenaue Gleitkommazahlen verarbeitet werden. Empfohlen wird eine centbasierte Integer-Darstellung: Der Betrag wird intern als ganze Zahl in Cent geführt (z. B. 1000 statt 10.00 Euro), wodurch Rundungsfehler bei der Verarbeitung vermieden werden. Die Umrechnung in die für Menschen lesbare Darstellung mit zwei Nachkommastellen erfolgt erst bei der Anzeige oder im Export.
+Geldbeträge werden mit `BigDecimal` und zwei Nachkommastellen verarbeitet und gespeichert. Für die gleichmäßige Aufteilung verwendet `SplitService` vorübergehend ganze Centbeträge, um Rundungsreste deterministisch zu verteilen. Wechselkurse besitzen eine höhere Dezimalpräzision. `double` und `float` werden nicht für Geldbeträge verwendet.
 
 # D2.4 CurrencyCodeDT
 
@@ -111,7 +111,7 @@ CurrencyCodeDT beschreibt die Währung eines Geldbetrags und ist Bestandteil von
 
 ### Wertebereich
 
-Ein CurrencyCodeDT ist ein gültiger Währungscode, wie er vom externen Wechselkursdienst aus [S1 — Nachbarsysteme](S1_Nachbarsysteme.md) unterstützt wird (z. B. EUR, USD). CampusSplit legt selbst keine feste, abschließende Liste unterstützter Währungen fest, sondern richtet sich nach dem, was der Wechselkursdienst liefern kann.
+CampusSplit erlaubt ausschließlich `EUR` (Euro) und `USD` (US-Dollar), sowohl für Gruppen als auch für Ausgaben. Das Backend prüft diese feste Auswahl unabhängig von den weiteren Währungen des Wechselkursdienstes.
 
 Jede Gruppe besitzt eine feste **Gruppenwährung** (siehe [Group.currency](D1_Datenmodell.md#group)). Eine Ausgabe kann in einer anderen Währung erfasst werden als die Gruppenwährung; in diesem Fall wird über den Wechselkursdienst ein Wechselkurs ermittelt und der Betrag in die Gruppenwährung umgerechnet (siehe [ExchangeRateDT](#d24a-exchangeratedt) und S1).
 

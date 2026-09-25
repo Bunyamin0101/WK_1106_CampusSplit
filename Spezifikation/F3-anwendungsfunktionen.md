@@ -69,7 +69,8 @@ Die Summe bleibt exakt 10,00 €.
 
 CampusSplit berechnet für jedes Gruppenmitglied:
 
-Saldo = gezahlte Beträge - eigene Kostenanteile
+Saldo = bezahlte Ausgaben - eigene Kostenanteile
+        + gesendete Rückzahlungen - empfangene Rückzahlungen
 
 Beispiel:
 
@@ -85,7 +86,7 @@ Interpretation:
 - Person B schuldet 10,00 €.
 - Person C schuldet 10,00 €.
 
-Die Summe der Salden ist 0,00 €.
+Die Summe der Salden ist 0,00 €. Stornierte Rückzahlungen werden nicht berücksichtigt; die optionale Ausgabenzuordnung ist keine zusätzliche Saldenbuchung.
 
 ### AF-03 — Ausgleichsvorschläge berechnen
 

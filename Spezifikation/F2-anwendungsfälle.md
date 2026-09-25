@@ -54,7 +54,7 @@ Systeminterne Berechnungen, wie die Saldenberechnung oder Validierung von Eingab
 | **Akteure**           | Benutzer                                                                                                                                                                                                                                                    |
 | **Vorbedingung**      | Benutzerkonto existiert.                                                                                                                                                                                                                                    |
 | **Nachbedingung**     | Eine authentifizierte Sitzung ist aktiv.                                                                                                                                                                                                                    |
-| **Hauptszenario**     | 1\. Benutzer öffnet die Login-Seite.2. System zeigt das Login-Formular an.3. Benutzer gibt E-Mail-Adresse und Passwort ein.4. System prüft die Zugangsdaten.5. System erstellt eine authentifizierte Sitzung.6. Benutzer wird zum Dashboard weitergeleitet. |
+| **Hauptszenario**     | 1\. Benutzer öffnet die Login-Seite.2. System zeigt das Login-Formular an.3. Benutzer gibt E-Mail-Adresse und Passwort ein.4. System prüft die Zugangsdaten.5. System erstellt eine authentifizierte Sitzung.6. Benutzer wird zur Startseite `/` weitergeleitet und kann dort „Meine Gruppen“ öffnen. |
 | **Ausnahmeszenarien** | Zugangsdaten sind falsch; System zeigt eine allgemeine Fehlermeldung an. Benutzerkonto existiert nicht; System zeigt eine allgemeine Fehlermeldung an.                                                                                                      |
 | **Qualitätsbezug**    | N1 Sicherheit, N2 Authentifizierung                                                                                                                                                                                                                         |
 
@@ -257,3 +257,10 @@ Folgende Punkte sind bewusst keine eigenen Use Cases:
 | S1       | Schnittstellen zu Browser, Datenbank und Exportmechanismus werden dort beschrieben.                              |
 | N1       | Sicherheit, Performance, Benutzbarkeit und Datenkonsistenz wirken auf alle Use Cases.                            |
 | N2       | Authentifizierung, Autorisierung, Validierung und Fehlerbehandlung wirken quer über mehrere Use Cases.           |
+
+
+## Implementierte Ergänzung: Rückzahlung erfassen und stornieren
+
+Angemeldete Gruppenmitglieder können unter „Wer zahlt wem?“ eine Rückzahlung dokumentieren, wenn sie Sender, Empfänger oder Gruppenadministrator sind. Der Betrag muss positiv sein und darf den aktuellen Vorschlag nicht überschreiten. Optional wird eine direkt zuordenbare Ausgabe gewählt; auch ein Teil ihres offenen Anteils kann erfasst werden. Die Auswahl und Berechnung sind in [B1](B1_Dialogspezifikation.md) beschrieben.
+
+Nach erfolgreicher Erfassung werden Salden und Ausgleichsvorschläge neu berechnet. Wiederholte Anfragekennungen, Überzahlungen und nicht mehr offene Zuordnungen werden abgewiesen. Eine berechtigte Person kann die Rückzahlung mit Begründung stornieren; der Vorgang bleibt sichtbar und beeinflusst die Salden nicht mehr. CampusSplit führt keine Überweisung aus.

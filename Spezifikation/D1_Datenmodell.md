@@ -12,7 +12,7 @@ CampusSplit verwaltet gemeinsame Ausgaben innerhalb von Gruppen.
 
 Ein Benutzer kann Mitglied mehrerer Gruppen sein. Eine Gruppe kann mehrere Mitglieder enthalten und besitzt eine feste Gruppenwährung. Innerhalb einer Gruppe können Ausgaben erfasst werden, auch in einer anderen Währung als der Gruppenwährung — in diesem Fall wird über den externen Wechselkursdienst (siehe [S1](S1_Nachbarsysteme.md)) ein Abrechnungsbetrag in Gruppenwährung ermittelt. Jede Ausgabe besitzt einen Zahler und wird über Kostenanteile auf beteiligte Gruppenmitglieder verteilt.
 
-Salden und Ausgleichsvorschläge werden nicht dauerhaft als eigene Entitäten gespeichert. Sie werden aus Ausgaben und Kostenanteilen berechnet.
+Salden und Ausgleichsvorschläge werden nicht dauerhaft als eigene Entitäten gespeichert. Sie werden aus Ausgaben, Kostenanteilen und wirksamen Rückzahlungen berechnet.
 
 ```mermaid
 erDiagram
@@ -24,12 +24,18 @@ erDiagram
     EXPENSE ||--o{ EXPENSE_SHARE : consists_of
     USER ||--o{ EXPENSE_SHARE : owes
     CATEGORY ||--o{ EXPENSE : classifies
+    GROUP ||--o{ REPAYMENT : records
+    USER ||--o{ REPAYMENT : sends
+    USER ||--o{ REPAYMENT : receives
+    EXPENSE ||--o{ RECEIPT : has
+    USER ||--o{ RECEIPT : uploads
 
     USER {
         Identifier id
         Text name
         Email email
-        Text passwordHash
+        Text passwordHash_optional
+        Text googleSubject_optional
         Timestamp createdAt
         Timestamp updatedAt
     }
@@ -39,6 +45,7 @@ erDiagram
         Text name
         Text description
         CurrencyCodeDT currency
+        Timestamp archivedAt_optional
         Identifier ownerId
         Timestamp createdAt
         Timestamp updatedAt
@@ -91,7 +98,8 @@ User repräsentiert eine registrierte Person, die CampusSplit nutzt.
 | id           | [Identifier](D2_Datentypenverzeichnis.md#d22-identifier) | Eindeutige Kennung des Benutzers.                                    |
 | name         | Text       | Anzeigename des Benutzers.                                           |
 | email        | Email      | E-Mail-Adresse zur Anmeldung und Identifikation.                     |
-| passwordHash | Text       | Gehashter Passwortwert. Das Klartextpasswort wird nicht gespeichert. |
+| passwordHash | Text [0..1] | Passwort-Hash; bei einem reinen Google-Konto nicht gesetzt. |
+| googleSubject | Text [0..1] | Eindeutige stabile Google-Identität; keine automatische Kontozusammenführung anhand gleicher E-Mail-Adressen. |
 | createdAt    | Timestamp  | Zeitpunkt der Erstellung des Benutzerkontos.                         |
 | updatedAt    | Timestamp  | Zeitpunkt der letzten Änderung des Benutzerkontos.                   |
 
@@ -302,7 +310,7 @@ Ein Saldo zeigt, ob ein Mitglied Geld zurückbekommt oder Geld schuldet.
 
 Der Saldo wird aus Expense (settlementAmount) und ExpenseShare berechnet.
 
-Saldo = Summe gezahlter Abrechnungsbeträge - Summe eigener Kostenanteile
+Saldo = Summe gezahlter Abrechnungsbeträge - Summe eigener Kostenanteile + gesendete Rückzahlungen - empfangene Rückzahlungen (jeweils ohne stornierte Rückzahlungen)
 
 ### Beispiel
 
@@ -433,3 +441,38 @@ Folgende Themen sind bewusst nicht Bestandteil des D1-Datenmodells:
 | [N1](N1_Nichtfunktionale%20Anforderungen.md)       | Sicherheits-, Konsistenz- und Performanceanforderungen wirken auf Speicherung und Berechnung.                                     |
 | [N2](N2_Querschnittskonzepte.md)       | Authentifizierung, Autorisierung, Validierung und Fehlerbehandlung greifen auf diese Entitäten zu.                                |
 | [E2](E2_Glossar.md)       | Das Glossar definiert Begriffe wie Benutzer, Gruppe, Ausgabe, Kostenanteil, Saldo, Schuldner und Gläubiger.                       |
+
+## D1.8 Erweiterungen des implementierten Datenmodells
+
+### Archivierungszustand der Gruppe
+
+`Group.archivedAt` ist ein optionaler Zeitpunkt. Ist er gesetzt, erscheint die Gruppe im Archiv. Ausgaben und Abrechnungen bleiben verfügbar; Korrekturen sind weiterhin möglich. Archivierung ist keine Löschung und entfernt die Gruppe nicht aus der persönlichen Betragsübersicht.
+
+### Repayment – Rückzahlung
+
+| Attribut | Typ | Bedeutung |
+|---|---|---|
+| group | Group | Zugehörige Gruppe. |
+| sender / recipient | User | Zahlendes und empfangendes Gruppenmitglied. |
+| recordedBy | User | Person, die den Vorgang erfasst hat. |
+| amount / paymentDate | MoneyAmountDT / Date | Positiver centgenauer Betrag in Gruppenwährung und Erfassungsdatum der Rückzahlung. |
+| requestId | Text [0..1] | Eindeutige Anfragekennung gegen doppelte Erfassung; neue Anfragen benötigen eine UUID. |
+| expenseId / expenseDescription | Identifier [0..1] / Text [0..1] | Optionale Ausgabenzuordnung mit Beschreibung zum Erfassungszeitpunkt. |
+| cancelledAt / cancelledBy / cancellationReason | Timestamp [0..1] / User [0..1] / Text [0..1] | Zeitpunkt, Person und Grund einer Stornierung. |
+
+Die Ausgabenzuordnung ist eine gespeicherte Referenz mit Beschreibung, keine löschabhängige Beziehung. Sie bleibt nach Änderung oder Löschung der Ausgabe nachvollziehbar. Eine Rückzahlung reduziert den Saldo des Empfängers und erhöht den Saldo des Senders. Stornierte Rückzahlungen bleiben gespeichert, wirken aber nicht mehr auf die Salden. Die Zuordnung reduziert die Schuld nicht ein zweites Mal.
+
+### Receipt – Beleg
+
+| Attribut | Typ | Bedeutung |
+|---|---|---|
+| expense | Expense | Zugehörige Ausgabe. |
+| filename / mediaType | Text / Text | Dateiname und geprüfter Medientyp. |
+| data | Binärdaten | In der Datenbank gespeicherter Dateiinhalt. |
+| uploadedBy | User | Hochladendes Gruppenmitglied. |
+
+### ExpenseChange – Änderungshistorie
+
+`groupId`, `expenseId`, `actorId`, `actorName` und `details` dokumentieren Ausgabe- und Belegvorgänge. Kennungen und der gespeicherte Name erhalten die Nachvollziehbarkeit auch nach dem Löschen einer Ausgabe. `ActivityDetails` bereitet den gespeicherten Text für die verständliche Anzeige auf; es ist kein zusätzliches persistentes Fachobjekt. Rückzahlungen werden als eigene Aktivität aus `Repayment` angezeigt.
+
+Die genannten persistenten Erweiterungen besitzen wie die übrigen `BaseEntity`-Objekte eine Kennung sowie Erstellungs- und Änderungszeitpunkte.

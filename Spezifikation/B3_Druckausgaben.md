@@ -307,3 +307,10 @@ Die konkreten Abschnittsanker sollten den tatsächlich vorhandenen Überschrifte
 Claude (Anthropic) und ChatGPT (OpenAI) wurden unterstützend für Formulierungen, Strukturierung und die Prüfung von Querverweisen verwendet.
 
 Die fachlichen Inhalte wurden anschließend mit dem aktuellen Implementierungsstand und den vorhandenen Spezifikationsbausteinen abgeglichen.
+
+
+## Ausgabenzuordnung bei Rückzahlungen
+
+Ist eine Rückzahlung einer einzelnen Ausgabe zugeordnet, zeigt das PDF „Für Ausgabe: …“ mit der gespeicherten Beschreibung. Die Rückzahlungs-CSV enthält zusätzlich die Spalte `Zugeordnete Ausgabe`; bei allgemeinen Rückzahlungen bleibt sie leer. Teilzahlungen erscheinen mit ihrem tatsächlich erfassten Betrag. Eine spätere Änderung oder Löschung der Ausgabe verändert die gespeicherte Beschreibung nicht. Stornierte Zahlungen bleiben entsprechend gekennzeichnet.
+
+Die Zeitraumfilter dieses Dokuments beschreiben die optionalen Parameter des Export-Endpunkts. Der aktuelle Dialog bietet ausschließlich Exportinhalt und Format an, keine Datumsfelder.
