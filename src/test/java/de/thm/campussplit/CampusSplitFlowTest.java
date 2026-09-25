@@ -399,6 +399,26 @@ class CampusSplitFlowTest {
   }
 
   @Test
+  void cancelledPaymentsRemainVisibleButDoNotReduceOpenAmountsInExport() throws Exception {
+    expenses.save(group.getId(), null, form(), email);
+    repayments.record(group.getId(), ben.getId(), anna.getId(), new BigDecimal("5.00"), email);
+    var payment = expenses.summary(group.getId(), email, null, null).repayments().getFirst();
+    repayments.cancel(group.getId(), payment.getId(), "Noch nicht überwiesen", email);
+    var summary = expenses.summary(group.getId(), email, null, null);
+    assertThat(summary.settlements()).hasSize(1);
+    assertThat(summary.settlements().getFirst().amount()).isEqualByComparingTo("5.00");
+    var bytes = mvc.perform(get("/groups/" + group.getId() + "/export")
+        .param("format", "pdf").with(user(email)))
+        .andExpect(status().isOk()).andReturn().getResponse().getContentAsByteArray();
+    try (var doc = Loader.loadPDF(bytes)) {
+      String text = new PDFTextStripper().getText(doc);
+      assertThat(text).contains("Storniert", "Noch nicht überwiesen", "Nicht in den offenen Beträgen berücksichtigt.", "Ausgaben gesamt: 10,01 EUR", "5,00")
+          .doesNotContain("STORNIERT:", "Bestätigt von", "Original:");
+      assertThat(text.indexOf("Offene Beträge")).isLessThan(text.indexOf("Ausgaben und Kostenanteile"));
+    }
+  }
+
+  @Test
   void sharesOnlyChangesAlsoRejectStaleUpdates() {
     expenses.save(group.getId(), null, form(), email);
     var id = expenses.summary(group.getId(), email, null, null).expenses().getFirst().getId();
