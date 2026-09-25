@@ -2,8 +2,6 @@
 
 Randbedingungen legen den verbindlichen Lösungsraum für die Architektur fest. Sie ergeben sich aus der Spezifikation, aus bereits getroffenen Technologieentscheidungen und aus organisatorischen Vorgaben des Hochschulprojekts.
 
-Noch offene Architekturentscheidungen werden nicht als verbindliche Randbedingungen behandelt, sondern separat dokumentiert.
-
 Die nachfolgenden Tabellen dienen als Arbeitsindex für die Architektur. Detaillierte fachliche Begründungen stehen in der Spezifikation; konkrete technische Entscheidungen werden in den Architecture Decision Records dokumentiert.
 ---
 
