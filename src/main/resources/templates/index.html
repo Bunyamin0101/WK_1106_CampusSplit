@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="de" xmlns:th="http://www.thymeleaf.org">
   <head th:replace="~{fragments :: head('Startseite')}">
-    <link rel="icon" type="image/png" href="../static/css/CS_LOGO.png">
+    <link rel="icon" type="image/png" th:href="@{../static/css/CS_LOGO.png}">
   </head>
   <body class="home-page">
     <header th:replace="~{fragments :: nav}"></header>
