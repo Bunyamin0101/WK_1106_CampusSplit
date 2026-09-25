@@ -85,10 +85,8 @@
           </div>
         </article>
       </section>
-      <details class="expense-list" id="expenses">
-        <summary class="activity-toggle">
-          Ausgaben <span class="expense-count" th:text="'(' + ${#lists.size(summary.expenses)} + ')'"></span>
-        </summary>
+      <section class="expense-list" aria-labelledby="expenses-title">
+        <h2 id="expenses-title">Ausgaben</h2>
         <p class="empty" th:if="${#lists.isEmpty(summary.expenses)}">
           Noch keine Ausgaben. Erfasse euren ersten gemeinsamen Einkauf.
         </p>
@@ -183,7 +181,7 @@
             </form>
           </div>
         </article>
-      </details>
+      </section>
       <details
         id="activities"
         class="activity-panel"
@@ -337,52 +335,53 @@
 
         </article>
       </section>
-      <form
-        th:if="${summary.admin}"
-        method="post"
-        th:action="@{/groups/{id}/archive(id=${summary.group.id})}"
-      >
-        <input
-          type="hidden"
-          name="archived"
-          th:value="${!summary.group.archived}"
-        />
-        <button
-          class="secondary"
-          th:text="${summary.group.archived ? 'Gruppe wiederherstellen' : 'Gruppe archivieren'}"
-        ></button>
-      </form>
-      <details id="delete-group" class="group-delete" th:if="${summary.admin}">
-        <summary>Gruppe löschen</summary>
-        <h2>Diese Gruppe endgültig löschen?</h2>
-        <p>
-          Die Gruppe wird für alle Mitglieder gelöscht – einschließlich
-          Ausgaben, Kostenanteilen, Belegen, Rückzahlungen und Aktivitäten. Das
-          kann nicht rückgängig gemacht werden. Benutzerkonten bleiben erhalten.
-        </p>
-        <p>
-          Wenn du die Gruppe nur aus der Übersicht entfernen möchtest,
-          archiviere sie stattdessen.
-        </p>
+      <div class="group-management" th:if="${summary.admin}">
         <form
           method="post"
-          th:action="@{/groups/{id}/delete(id=${summary.group.id})}"
+          th:action="@{/groups/{id}/archive(id=${summary.group.id})}"
         >
-          <label for="delete-confirmation"
-            >Gib zur Bestätigung den Gruppennamen ein:
-            <strong th:text="${summary.group.name}"></strong
-          ></label>
           <input
-            id="delete-confirmation"
-            name="confirmation"
-            required
-            autocomplete="off"
-            maxlength="100"
+            type="hidden"
+            name="archived"
+            th:value="${!summary.group.archived}"
           />
-          <button class="danger" type="submit">Gruppe endgültig löschen</button>
-          <a th:href="@{/dashboard}">Abbrechen</a>
+          <button
+            class="secondary"
+            th:text="${summary.group.archived ? 'Gruppe wiederherstellen' : 'Gruppe archivieren'}"
+          ></button>
         </form>
-      </details>
+        <details id="delete-group" class="group-delete">
+          <summary>Gruppe löschen</summary>
+          <h2>Diese Gruppe endgültig löschen?</h2>
+          <p>
+            Die Gruppe wird für alle Mitglieder gelöscht – einschließlich
+            Ausgaben, Kostenanteilen, Belegen, Rückzahlungen und Aktivitäten. Das
+            kann nicht rückgängig gemacht werden. Benutzerkonten bleiben erhalten.
+          </p>
+          <p>
+            Wenn du die Gruppe nur aus der Übersicht entfernen möchtest,
+            archiviere sie stattdessen.
+          </p>
+          <form
+            method="post"
+            th:action="@{/groups/{id}/delete(id=${summary.group.id})}"
+          >
+            <label for="delete-confirmation"
+              >Gib zur Bestätigung den Gruppennamen ein:
+              <strong th:text="${summary.group.name}"></strong
+            ></label>
+            <input
+              id="delete-confirmation"
+              name="confirmation"
+              required
+              autocomplete="off"
+              maxlength="100"
+            />
+            <button class="danger" type="submit">Gruppe endgültig löschen</button>
+            <a th:href="@{/dashboard}">Abbrechen</a>
+          </form>
+        </details>
+      </div>
     </main>
     <footer th:replace="~{fragments :: footer}"></footer>
   </body>
