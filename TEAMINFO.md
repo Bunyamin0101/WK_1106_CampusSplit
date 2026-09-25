@@ -36,5 +36,6 @@ https://github.com/Bunyamin0101/WK_1106_CampusSplit/tree/main
 ## Eingesetzte KI-Werkzeuge
 
 - GitHub Copilot zur Unterstützung bei der Code-Vervollständigung
-- ChatGPT zur Unterstützung bei Refactoring, Dokumentation und Architekturideen
-- Mermaid und PlantUML zur Erstellung technischer Diagramme
+- ChatGPT und Codex zur Unterstützung bei Implementierung, Refactoring, Tests, Oberfläche, Dokumentation und Bereitstellung
+
+Der Umfang und die Grenzen der KI-Unterstützung sind in [KI_DISCLOSURE.md](KI_DISCLOSURE.md) beschrieben. Mermaid und PlantUML dienen der Darstellung technischer Diagramme und sind selbst keine generativen KI-Werkzeuge.
