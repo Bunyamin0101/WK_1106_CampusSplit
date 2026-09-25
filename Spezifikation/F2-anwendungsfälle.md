@@ -227,7 +227,44 @@ Systeminterne Berechnungen, wie die Saldenberechnung oder Validierung von Eingab
 
 Das folgende Diagramm zeigt die wichtigsten Anwendungsfälle von CampusSplit aus Sicht der Benutzer:innen.
 
-![Use-Case-Diagramm](../images/Use-Case-Diagramm.png)
+```mermaid
+flowchart LR
+    G[Gast]
+    U[Angemeldeter Benutzer]
+    M[Gruppenmitglied]
+    A[Gruppenadministrator]
+    subgraph CS[CampusSplit]
+        UC1([UC-01 Registrieren])
+        UC2([UC-02 Anmelden])
+        UC3([UC-03 Abmelden])
+        UC4([UC-04 Dashboard anzeigen])
+        UC5([UC-05 Gruppe erstellen])
+        UC6([UC-06 Gruppe anzeigen])
+        UC7([UC-07 Mitglied hinzufügen])
+        UC8([UC-08 Ausgabe erfassen])
+        UC9([UC-09 Ausgabe bearbeiten])
+        UC10([UC-10 Ausgabe löschen])
+        UC11([UC-11 Salden anzeigen])
+        UC12([UC-12 Abrechnung exportieren])
+        R([Rückzahlung erfassen oder stornieren])
+    end
+    G --> UC1
+    G --> UC2
+    U --> UC3
+    U --> UC4
+    U --> UC5
+    M --> UC6
+    A --> UC7
+    M --> UC8
+    M --> UC9
+    M --> UC10
+    M --> UC11
+    M --> UC12
+    M --> R
+    A --> R
+```
+
+Gruppenmitglieder sind angemeldete Benutzer; Administratoren besitzen auch die Mitgliederrechte. Rückzahlungen dürfen nur beteiligte Personen oder Gruppenadministratoren erfassen bzw. stornieren. Die Diagrammquelle liegt unmittelbar im Markdown; externe Bilddateien werden für dieses Diagramm nicht benötigt.
 
 ## F2.9 Nicht Bestandteil von F2
 

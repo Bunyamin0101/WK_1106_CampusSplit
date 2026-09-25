@@ -69,7 +69,24 @@ Die Anwendungsdatenbank ist der zentrale Datenspeicher von CampusSplit. Externe 
 
 Das folgende Aktivitätsdiagramm zeigt den fachlichen Ablauf des Prozesses. Es unterscheidet zwischen manuellen Aktivitäten, browsergestützter Bedienung, CampusSplit-Verarbeitung und Datenhaltung.
 
-![Flowchart-Diagramm](../images/Flowchart-Diagramm.png)
+```mermaid
+flowchart TD
+    A1["A1 Gruppe entsteht · außerhalb der Anwendung"] --> A2["A2 Mitglied bezahlt · außerhalb der Anwendung"]
+    A2 --> A3["A3 CampusSplit im Browser öffnen"]
+    A3 --> A4["A4 Gruppe wählen"]
+    A4 --> A5["A5 Ausgabe erfassen"]
+    A5 --> A6["A6 Beteiligte und Aufteilung wählen"]
+    A6 --> V{"Eingaben gültig?"}
+    V -->|Nein| A5
+    V -->|Ja| A7["A7 Ausgabe und Anteile speichern"]
+    A7 --> DB[(Datenbank)]
+    A7 --> A8["A8 Salden berechnen"]
+    A8 --> A9["A9 Ausgaben und Salden prüfen"]
+    A9 --> A10["A10 Bei Bedarf PDF oder CSV-ZIP exportieren"]
+    A10 --> A11["A11 Außerhalb der Anwendung zurückzahlen"]
+    A11 --> R["Rückzahlung optional in CampusSplit dokumentieren"]
+    R --> A8
+```
 
 Die Schritte A1, A2 und A11 sind fachliche Aktivitäten außerhalb der Anwendung. Die Schritte A3 bis A10 bilden den von CampusSplit unterstützten Teil des Geschäftsprozesses.
 
