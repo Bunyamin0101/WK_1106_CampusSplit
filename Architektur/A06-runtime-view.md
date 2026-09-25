@@ -12,12 +12,12 @@ CampusSplit wird als serverseitig gerenderte Spring-Boot-Webanwendung mit Thymel
 
 | Szenario | Use Case | Warum architektonisch relevant? |
 |---|---|---|
-| [6.1](#61-registrierung-und-anmeldung) Registrierung und Anmeldung | UC-01, UC-02 | Öffentlicher Zugriff, Passwortschutz, Start einer serverseitigen Sitzung. |
-| [6.2](#62-gruppe-erstellen-und-mitglied-hinzufügen) Gruppe erstellen und Mitglied hinzufügen | UC-05, UC-07 | Membership, Rollen, Adminrechte und Zugriffsschutz. |
-| [6.3](#63-ausgabe-in-gruppenwährung-erfassen) Ausgabe in Gruppenwährung erfassen | UC-08 | Validierung, Kostenanteile, transaktionales Speichern. |
-| [6.4](#64-fremdwährungsausgabe-erfassen) Fremdwährungsausgabe erfassen | UC-08, S1 | Externe API, Wechselkurs, Fehlerfall ohne unvollständige Speicherung. |
-| [6.5](#65-salden-und-ausgleichsvorschläge-anzeigen) Salden und Ausgleichsvorschläge anzeigen | UC-11 | Backendseitige Geldlogik, Debitor/Kreditor, deterministische Berechnung. |
-| [6.6](#66-pdf-oder-csv-export-erzeugen) PDF- oder CSV-Export erzeugen | UC-12 | Exportdaten, Exportsicherheit, Datei als Datenfluss. |
+| [6.1](#61-registrierung-und-anmeldung) Registrierung und Anmeldung | [UC-01](../Spezifikation/F2-anwendungsfälle.md#uc-01--registrieren), [UC-02](../Spezifikation/F2-anwendungsfälle.md#uc-02--anmelden) | Öffentlicher Zugriff, Passwortschutz, Start einer serverseitigen Sitzung. |
+| [6.2](#62-gruppe-erstellen-und-mitglied-hinzufügen) Gruppe erstellen und Mitglied hinzufügen | [UC-05](../Spezifikation/F2-anwendungsfälle.md#uc-05--gruppe-erstellen), [UC-07](../Spezifikation/F2-anwendungsfälle.md#uc-07--mitglied-zur-gruppe-hinzufügen) | Membership, Rollen, Adminrechte und Zugriffsschutz. |
+| [6.3](#63-ausgabe-in-gruppenwährung-erfassen) Ausgabe in Gruppenwährung erfassen | [UC-08](../Spezifikation/F2-anwendungsfälle.md#uc-08--ausgabe-erfassen) | Validierung, Kostenanteile, transaktionales Speichern. |
+| [6.4](#64-fremdwährungsausgabe-erfassen) Fremdwährungsausgabe erfassen | [UC-08](../Spezifikation/F2-anwendungsfälle.md#uc-08--ausgabe-erfassen), [S1](../Spezifikation/S1_Nachbarsysteme.md) | Externe API, Wechselkurs, Fehlerfall ohne unvollständige Speicherung. |
+| [6.5](#65-salden-und-ausgleichsvorschläge-anzeigen) Salden und Ausgleichsvorschläge anzeigen | [UC-11](../Spezifikation/F2-anwendungsfälle.md#uc-11--salden-anzeigen) | Backendseitige Geldlogik, Debitor/Kreditor, deterministische Berechnung. |
+| [6.6](#66-pdf--oder-csv-export-erzeugen) PDF- oder CSV-Export erzeugen | [UC-12](../Spezifikation/F2-anwendungsfälle.md#uc-12--ausgabenübersicht-exportieren) | Exportdaten, Exportsicherheit, Datei als Datenfluss. |
 | [6.7](#67-weitere-implementierte-abläufe) Weitere implementierte Abläufe | Erweiterter Funktionsumfang | Rückzahlungen, Belege, Änderungshistorie und Archivierung. |
 
 Alle fachlichen Aktionen werden durch Benutzerinteraktionen ausgelöst. Es gibt keine Batch-Verarbeitung, keine Queue und keine Hintergrundjobs.
