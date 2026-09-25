@@ -145,8 +145,6 @@ Backendseitige Berechnung stellt sicher, dass Anzeige, Speicherung und Export di
 
 Geldbeträge müssen exakt und nachvollziehbar verarbeitet werden. Gleitkommazahlen können zu Rundungsfehlern führen und sind deshalb für Geldlogik ungeeignet. Für den Wechselkurs (ADR-007) wird zusätzlich eine präzise Dezimaldarstellung benötigt, die kein ganzzahliges Cent-Raster hat.
 
-Die vorherige Fassung dieses ADRs war widersprüchlich: Der Status war "Akzeptiert", die Entscheidung lautete aber nur vage "Cent-Integer bevorzugt, BigDecimal alternativ erlaubt" — das ist keine eindeutige Entscheidung.
-
 ### Optionen
 
 | Option | Beschreibung | Vorteile | Nachteile |
@@ -161,7 +159,7 @@ Option B — `BigDecimal` überall für alle Geldbeträge (`MoneyAmountDT`: `ori
 
 ### Begründung
 
-Centbasierte `long`-Werte machen die wichtigsten Regeln einfach prüfbar: Kostenanteile summieren sich exakt zum Abrechnungsbetrag, und Gruppensalden summieren sich exakt zu 0,00. Ein Wechselkurs wie `0.86` ist dagegen kein glattes Centraster und braucht echte Nachkommastellen-Präzision, daher `BigDecimal` nur an dieser einen Stelle. Die Umrechnung `originalAmount × rate = settlementAmount` erfolgt im Backend; das Ergebnis wird anschließend deterministisch auf volle Cent gerundet. Für Anzeige und Export wird der Centwert in eine Darstellung mit zwei Nachkommastellen umgewandelt.
+`BigDecimal` verhindert binäre Gleitkomma-Rundungsfehler (wie sie bei `double`/`float` auftreten) und ist der etablierte Standard für Finanzberechnungen in Java. Es ermöglicht eine einheitliche Repräsentation von Geldbeträgen in der gesamten Anwendung — von der Eingabe im Thymeleaf-Formular über die Berechnung im Service-Layer bis hin zur Speicherung als `NUMERIC` in der PostgreSQL-Datenbank. Beträge werden mit einer festen Skalierung von zwei Nachkommastellen (`Scale = 2`, `RoundingMode.HALF_UP`) verarbeitet.
 
 ---
 
@@ -193,7 +191,33 @@ Der Wechselkursadapter begrenzt die Abhängigkeit zur externen API auf eine Stel
 
 ---
 
-## ADR-008: Backendseitiger PDF- und CSV-Export
+## ADR-08: Benutzerauthentifizierung über Google OAuth2
+
+**Status:** Akzeptiert
+
+### Kontext
+
+CampusSplit erfordert eine sichere Identifizierung von Benutzern für die Erstellung von Gruppen, das Erfassen von Ausgaben und den Zugriff auf geschützte Ansichten. Um die Registrierungs- und Anmeldehürde für Benutzer zu minimieren und auf die eigene Verwaltung von sensiblen Passwörtern zu verzichten, wurde ein externer Identity Provider evaluiert.
+
+### Optionen
+
+| Option | Beschreibung | Vorteile | Nachteile |
+|---|---|---|---|
+| A — Eigene Passwort-Authentifizierung | Benutzer registrieren sich mit E-Mail und Passwort, die gehasht in PostgreSQL gespeichert werden. | Unabhängig von externen Anbietern. | Eigene Passwort-Sicherheit, Passwortherausforderung/Reset-Logik und größeres Risiko bei Datenlecks. |
+| B — Google OAuth2 Integration | Authentifizierung erfolgt über die Google Identity Platform (OAuth2 / OpenID Connect). | Hohe Sicherheit, kein Verwalten von Passwörtern, sehr bequemer Login für Benutzer. | Abhängigkeit von Google als externem Dienst. |
+| C — Hybride Authentifizierung | Sowohl eigene E-Mail/Passwort-Anmeldung als auch Google OAuth2 parallel. | Maximale Flexibilität für den Nutzer. | Höherer Entwicklungs- und Testaufwand für zwei Auth-Pfade. |
+
+### Entscheidung
+
+Option B — Benutzereinzellogin und Registrierung über Google OAuth2 (`spring-boot-starter-oauth2-client`).
+
+### Begründung
+
+Die Nutzung von Google OAuth2 vereinfacht den Registrierungs- und Anmeldeprozess erheblich und erhöht die Sicherheit der Anwendung, da CampusSplit selbst keine Passwörter speichern oder verwalten muss. Die Authentifizierung lässt sich über Spring Security nahtlos in die serverseitige Session-Verwaltung integrieren.
+
+---
+
+## ADR-009: Backendseitiger PDF- und CSV-Export
 
 **Status:** Akzeptiert
 
@@ -219,7 +243,7 @@ Backendseitiger Export stellt sicher, dass PDF und CSV dieselben Daten und Berec
 
 ---
 
-## ADR-009: Keine Hintergrundjobs im MVP
+## ADR-010: Keine Hintergrundjobs im MVP
 
 **Status:** Akzeptiert
 
@@ -244,7 +268,7 @@ CampusSplit benötigt keine regelmäßigen Nachtläufe, keine automatischen Zahl
 
 ---
 
-## ADR-010: Spring Security mit serverseitiger Sitzung
+## ADR-011: Spring Security mit serverseitiger Sitzung
 
 **Status:** Akzeptiert
 
@@ -266,7 +290,7 @@ Option A — Spring Security mit serverseitiger Sitzung und HTTP-only Session-Co
 
 ### Begründung
 
-Diese Lösung passt zur Spezifikation (N2.2) und vermeidet dauerhaft gespeicherte Tokens im Client. Da CampusSplit nach ADR-003 als ein einziges Spring-Boot-Deployable mit Thymeleaf läuft, entfällt außerdem die frühere Sorge um CORS/CSRF zwischen getrennten Frontend-/Backend-Origins — Frontend und Backend laufen unter derselben Origin. Diese Entscheidung muss durchgängig in A05 und A08 nachgezogen werden: dort darf nicht mehr offen "Session-Cookie oder Token" stehen, sondern nur noch diese Session-Variante.
+Diese Lösung passt zur Spezifikation (N2.2) und vermeidet dauerhaft gespeicherte Tokens im Client. Da CampusSplit nach ADR-003 als ein einziges Spring-Boot-Deployable mit Thymeleaf läuft, entfällt außerdem die frühere Sorge um CORS/CSRF zwischen getrennten Frontend-/Backend-Origins. Die Kombination aus Spring Security, HTTP-only Session-Cookies und Google OAuth2 stellt eine sichere, moderne und benutzerfreundliche Authentifizierungslösung dar.
 
 ---
 
