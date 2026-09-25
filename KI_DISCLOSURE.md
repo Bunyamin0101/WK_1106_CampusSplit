@@ -6,8 +6,8 @@ CampusSplit ist ein Hochschulprojekt der Gruppe 16. KI-Werkzeuge wurden als Unte
 
 ## Verwendete Werkzeuge
 
-- **ChatGPT und Codex:** Unterstützung bei Implementierung, Fehleranalyse, Refactoring, Gestaltung, Tests, Dokumentation und Bereitstellung.
-- **GitHub Copilot:** Laut [TEAMINFO.md](TEAMINFO.md) zur Code-Vervollständigung eingesetzt.
+- **ChatGPT, Codex und Claude (Anthropic):** Unterstützung bei Implementierung, Fehleranalyse, Refactoring, Gestaltung, Tests, Dokumentation und Bereitstellung.
+- **GitHub Copilot:** Zur Code-Vervollständigung eingesetzt.
 - **Mermaid und PlantUML:** Werkzeuge für technische Diagramme; sie sind selbst keine generativen KI-Systeme.
 
 ## Einsatzbereiche
