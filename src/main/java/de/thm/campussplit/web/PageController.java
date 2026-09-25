@@ -35,9 +35,13 @@ public class PageController {
     return "index";
   }
 
+  @ModelAttribute("googleEnabled")
+  boolean googleEnabled() {
+    return googleEnabled;
+  }
+
   @GetMapping("/login")
-  String login(Model model) {
-    model.addAttribute("googleEnabled", googleEnabled);
+  String login() {
     return "login";
   }
 
