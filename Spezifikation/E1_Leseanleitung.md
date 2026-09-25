@@ -1,4 +1,4 @@
-# E1 — Leseanleitung
+﻿# E1 — Leseanleitung
 
 E1 erklärt, wie die Spezifikation von CampusSplit aufgebaut ist und wie die einzelnen Bausteine gelesen werden sollen. Die Leseanleitung richtet sich vor allem an das Entwicklungsteam, Prüfer, Betreuer und neue Mitwirkende.
 
@@ -47,10 +47,10 @@ Die Spezifikation ist nach Bausteinen gegliedert. Jeder Baustein behandelt einen
 | Daten | [D1](D1_Datenmodell.md) | Datenmodell |
 | Daten | [D2](D2_Datentypenverzeichnis.md) | Datentypenverzeichnis |
 | Benutzerschnittstelle | [B1](B1_Dialogspezifikation.md) | Dialogspezifikation |
-| Benutzerschnittstelle | [B2](B2_Batch.md) | Batch-Prozesse |
+| Benutzerschnittstelle | B2 | Batch-Prozesse |
 | Benutzerschnittstelle | [B3](B3_Druckausgaben.md) | Druck- und Exportausgaben |
 | Schnittstellen | [S1](S1_Nachbarsysteme.md) | Nachbarsysteme |
-| Schnittstellen | [S2](S2_Datenmigration.md) | Datenmigration |
+| Schnittstellen | S2 | Datenmigration |
 | Schnittstellen | [S3](S3_Inbetriebnahme.md) | Inbetriebnahme |
 | Übergreifendes | [N1](N1_Nichtfunktionale%20Anforderungen.md) | Nichtfunktionale Anforderungen |
 | Übergreifendes | [N2](N2_Querschnittskonzepte.md) | Querschnittskonzepte |
@@ -66,8 +66,8 @@ Für einen vollständigen Überblick wird folgende Reihenfolge empfohlen:
 1. [P1](P1_Ziele_und_Rahmenbedingungen.md) und [P2](P2_Architekturueberblick.md) für Ziele, Umfang und Systemkontext
 2. [F1](F1-geschaeftsprozesse.md), [F2](F2-anwendungsf%C3%A4lle.md) und [F3](F3-anwendungsfunktionen.md) für Abläufe, Use Cases und Funktionen
 3. [D1](D1_Datenmodell.md) und [D2](D2_Datentypenverzeichnis.md) für Daten und Datentypen
-4. [B1](B1_Dialogspezifikation.md), [B2](B2_Batch.md) und [B3](B3_Druckausgaben.md) für Dialoge, Batch-Einordnung und Exporte
-5. [S1](S1_Nachbarsysteme.md), [S2](S2_Datenmigration.md) und [S3](S3_Inbetriebnahme.md) für Schnittstellen, Migration und Inbetriebnahme
+4. [B1](B1_Dialogspezifikation.md), B2 und [B3](B3_Druckausgaben.md) für Dialoge, Batch-Einordnung und Exporte
+5. [S1](S1_Nachbarsysteme.md), S2 und [S3](S3_Inbetriebnahme.md) für Schnittstellen, Migration und Inbetriebnahme
 6. [N1](N1_Nichtfunktionale%20Anforderungen.md) und [N2](N2_Querschnittskonzepte.md) für Qualitätsanforderungen und übergreifende Regeln
 7. [E2](E2_Glossar.md) für zentrale Begriffe
 
@@ -121,8 +121,8 @@ Einige Bausteine oder Themen passen nicht zur ersten Version von CampusSplit. Di
 
 | Thema | Status | Grund |
 |---|---|---|
-| [B2 Batch-Prozesse](B2_Batch.md) | nicht anwendbar | keine zeitgesteuerten Batch-Prozesse geplant |
-| [S2 Datenmigration](S2_Datenmigration.md) | nicht anwendbar | neues Projekt ohne Altdaten |
+| B2 Batch-Prozesse | nicht anwendbar | keine zeitgesteuerten Batch-Prozesse geplant |
+| S2 Datenmigration | nicht anwendbar | neues Projekt ohne Altdaten |
 | Zahlungsabwicklung | nicht Bestandteil | Zahlungen erfolgen außerhalb der Anwendung |
 | Bankintegration | nicht Bestandteil | keine Verarbeitung von Bankdaten |
 | OCR oder KI-Erkennung | nicht Bestandteil | Belege werden nicht automatisch erkannt |
@@ -208,3 +208,4 @@ E1 ist nur eine Leseanleitung. Fachliche Details stehen in den jeweiligen Bauste
 ## Eingesetzte KI-Werkzeuge
 
 ChatGPT wurde unterstützend für Kürzung, Strukturierung und Formulierung verwendet. Die Inhalte wurden anschließend fachlich geprüft und an die übrigen Spezifikationsbausteine angepasst.
+

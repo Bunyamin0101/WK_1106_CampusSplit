@@ -1,4 +1,4 @@
-# E2 — Glossar
+﻿# E2 — Glossar
 
 E2 erklärt zentrale Begriffe, die in der Spezifikation von **CampusSplit** verwendet werden. Das Glossar soll helfen, Begriffe einheitlich zu verwenden und Missverständnisse zu vermeiden.
 
@@ -96,7 +96,7 @@ Ein Datenfluss beschreibt, wie Daten zwischen Beteiligten oder Systemteilen übe
 
 ### Datenmigration
 
-Datenmigration bedeutet, dass Daten aus einem alten System in ein neues System übernommen werden. Für CampusSplit ist das in der ersten Version nicht vorgesehen, weil das Projekt neu entwickelt wird. Siehe [S2 — Datenmigration](S2_Datenmigration.md).
+Datenmigration bedeutet, dass Daten aus einem alten System in ein neues System übernommen werden. Für CampusSplit ist das in der ersten Version nicht vorgesehen, weil das Projekt neu entwickelt wird. Ein eigener Baustein S2 ist für CampusSplit daher nicht anwendbar.
 
 ### Debitor
 
@@ -221,3 +221,4 @@ Das Glossar erklärt nur Begriffe. Es ersetzt keine fachlichen Anforderungen und
 ## E2.4 Eingesetzte KI-Werkzeuge
 
 ChatGPT (OpenAI) wurde unterstützend für Formulierungen, Kürzung, Strukturierung und Prüfung der Querverweise verwendet. Die fachlichen Inhalte wurden anschließend mit dem Projektkontext und den übrigen Spezifikationsbausteinen abgeglichen.
+

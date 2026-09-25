@@ -1,4 +1,4 @@
-# P2 — Architekturüberblick
+﻿# P2 — Architekturüberblick
 
 Dieser Baustein beschreibt grob, wie CampusSplit aufgebaut ist und mit welchen angrenzenden Systemen die Anwendung zusammenarbeitet. Es geht noch nicht um konkrete Klassen, Frameworks oder Datenbanktabellen, sondern um Systemkontext, Akteure, Schnittstellen und wichtige Datenflüsse.
 
@@ -32,7 +32,7 @@ Akteure sind Personen, die mit CampusSplit arbeiten. Sie sind nicht automatisch 
 | Gruppenmitglied | Sieht Gruppendaten, Ausgaben und Salden. |
 | Gruppenersteller | Erstellt eine Gruppe und kann Mitglieder hinzufügen. |
 
-Die fachlichen Use Cases dieser Akteure werden in [F2 — Anwendungsfälle](F2-anwendungsf%23U00e4lle.md) beschrieben. Regeln zu Zugriff und Rollen stehen in [N2 — Querschnittskonzepte](N2_Querschnittskonzepte.md).
+Die fachlichen Use Cases dieser Akteure werden in [F2 — Anwendungsfälle](F2-anwendungsf%C3%A4lle.md) beschrieben. Regeln zu Zugriff und Rollen stehen in [N2 — Querschnittskonzepte](N2_Querschnittskonzepte.md).
 
 ---
 
@@ -166,7 +166,7 @@ Zur Anwendung gehören Benutzerverwaltung, Gruppenverwaltung, Ausgabenverwaltung
 | Baustein | Relevanz |
 |---|---|
 | [P1 — Ziele und Rahmenbedingungen](P1_Ziele_und_Rahmenbedingungen.md) | Ziele, Umfang und Nichtziele. |
-| [F2 — Anwendungsfälle](F2-anwendungsf%23U00e4lle.md) | Aktionen der Akteure. |
+| [F2 — Anwendungsfälle](F2-anwendungsf%C3%A4lle.md) | Aktionen der Akteure. |
 | [F3 — Anwendungsfunktionen](F3-anwendungsfunktionen.md) | Kostenaufteilung und Saldenberechnung. |
 | [D1 — Datenmodell](D1_Datenmodell.md) | Gespeicherte Datenobjekte. |
 | [B3 — Druck- und Exportausgaben](B3_Druckausgaben.md) | PDF- und CSV-Export. |
@@ -176,3 +176,4 @@ Zur Anwendung gehören Benutzerverwaltung, Gruppenverwaltung, Ausgabenverwaltung
 ## Eingesetzte KI-Werkzeuge
 
 ChatGPT (OpenAI) wurde unterstützend für Formulierungen, Strukturierung, Mermaid-Diagramme und die Prüfung von Querverweisen verwendet. Die fachlichen Inhalte wurden anschließend mit dem Projektkontext und den übrigen Spezifikationsbausteinen abgeglichen.
+

@@ -1,4 +1,4 @@
-# P1 — Ziele und Rahmenbedingungen
+﻿# P1 — Ziele und Rahmenbedingungen
 
 Grundlagenbaustein der CampusSplit-Spezifikation nach Siedersleben. Dieser Baustein beschreibt, warum das System entwickelt wird, für wen es gedacht ist und welche Rahmenbedingungen den Lösungsraum eingrenzen.
 
@@ -10,7 +10,7 @@ CampusSplit ist eine Webanwendung zur Verwaltung gemeinsamer Ausgaben in Gruppen
 
 Das System soll den Aufwand verringern, der sonst oft durch Chatnachrichten, Tabellen oder manuelle Berechnungen entsteht. Nutzer sollen schnell sehen können, welche Ausgaben es gibt und wer wem noch Geld schuldet.
 
-CampusSplit ersetzt keine echte Zahlungsabwicklung. Die Anwendung dokumentiert gemeinsame Kosten, berechnet offene Beträge und ermöglicht den Export von Ausgabenübersichten. Die fachlichen Abläufe werden in [F1 — Geschäftsprozesse](F1-geschaeftsprozesse.md) und [F2 — Anwendungsfälle](F2-anwendungsf%23U00e4lle.md) genauer beschrieben.
+CampusSplit ersetzt keine echte Zahlungsabwicklung. Die Anwendung dokumentiert gemeinsame Kosten, berechnet offene Beträge und ermöglicht den Export von Ausgabenübersichten. Die fachlichen Abläufe werden in [F1 — Geschäftsprozesse](F1-geschaeftsprozesse.md) und [F2 — Anwendungsfälle](F2-anwendungsf%C3%A4lle.md) genauer beschrieben.
 
 ---
 
@@ -156,7 +156,7 @@ Für die erste Version von CampusSplit gelten folgende Annahmen:
 |---|---|
 | [P2 — Architekturüberblick](P2_Architekturueberblick.md) | Systemkontext und grobe Struktur. |
 | [F1 — Geschäftsprozesse](F1-geschaeftsprozesse.md) | Fachliche Abläufe. |
-| [F2 — Anwendungsfälle](F2-anwendungsf%23U00e4lle.md) | Aktionen der Nutzer. |
+| [F2 — Anwendungsfälle](F2-anwendungsf%C3%A4lle.md) | Aktionen der Nutzer. |
 | [F3 — Anwendungsfunktionen](F3-anwendungsfunktionen.md) | Kostenaufteilung und Saldenberechnung. |
 | [B1 — Dialogspezifikation](B1_Dialogspezifikation.md) | Dialoge der Anwendung. |
 | [B3 — Druck- und Exportausgaben](B3_Druckausgaben.md) | PDF- und CSV-Export. |
@@ -166,3 +166,4 @@ Für die erste Version von CampusSplit gelten folgende Annahmen:
 ## Eingesetzte KI-Werkzeuge
 
 ChatGPT (OpenAI) wurde unterstützend für Formulierungen, Strukturierung und die Prüfung von Querverweisen verwendet. Die fachlichen Inhalte wurden anschließend mit dem Projektkontext und den übrigen Spezifikationsbausteinen abgeglichen.
+
