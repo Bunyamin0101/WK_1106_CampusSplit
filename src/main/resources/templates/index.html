@@ -1,6 +1,8 @@
 <!doctype html>
 <html lang="de" xmlns:th="http://www.thymeleaf.org">
-  <head th:replace="~{fragments :: head('Startseite')}"></head>
+  <head th:replace="~{fragments :: head('Startseite')}">
+    <link rel="icon" type="image/png" href="../static/css/CS_LOGO.png">
+  </head>
   <body class="home-page">
     <header th:replace="~{fragments :: nav}"></header>
     <main class="home-main">
