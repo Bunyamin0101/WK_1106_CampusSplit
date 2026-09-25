@@ -399,6 +399,45 @@ class CampusSplitFlowTest {
   }
 
   @Test
+  void expensePaymentsRespectPreviousPaymentsAndCancellation() throws Exception {
+    expenses.save(group.getId(), null, form(), email);
+    expenses.save(group.getId(), null, form(), email);
+    var initial = expenses.summary(group.getId(), email, null, null);
+    var options = repayments.options(initial, ben.getId(), anna.getId());
+    assertThat(options).hasSize(2);
+    var target = options.getLast();
+    mvc.perform(get("/groups/" + group.getId()).with(user(email)))
+        .andExpect(status().isOk())
+        .andExpect(content().string(org.hamcrest.Matchers.containsString("Einzelne Ausgabe begleichen")));
+    mvc.perform(post("/groups/" + group.getId() + "/repayments").with(user(email)).with(csrf())
+        .param("senderId", ben.getId().toString()).param("recipientId", anna.getId().toString())
+        .param("amount", "2.00").param("requestId", UUID.randomUUID().toString())
+        .param("expenseId", target.id().toString()))
+        .andExpect(status().is3xxRedirection());
+    var paid = expenses.summary(group.getId(), email, null, null);
+    assertThat(paid.repayments()).hasSize(1);
+    assertThat(paid.repayments().getFirst().getAmount()).isEqualByComparingTo("2.00");
+    assertThat(paid.repayments().getFirst().getExpenseId()).isEqualTo(target.id());
+    assertThat(repayments.options(paid, ben.getId(), anna.getId())).hasSize(2);
+    assertThat(repayments.options(paid, ben.getId(), anna.getId()).getLast().amount())
+        .isEqualByComparingTo("3.00");
+    org.assertj.core.api.Assertions.assertThatThrownBy(() -> repayments.record(group.getId(),
+        ben.getId(), anna.getId(), new BigDecimal("3.01"), email, UUID.randomUUID().toString(), target.id()))
+        .isInstanceOf(BusinessException.class);
+    repayments.cancel(group.getId(), paid.repayments().getFirst().getId(), "Testkorrektur", email);
+    assertThat(repayments.options(expenses.summary(group.getId(), email, null, null),
+        ben.getId(), anna.getId())).hasSize(2);
+    repayments.record(group.getId(), ben.getId(), anna.getId(), new BigDecimal("3.00"), email);
+    var remaining = repayments.options(expenses.summary(group.getId(), email, null, null),
+        ben.getId(), anna.getId());
+    assertThat(remaining.getFirst().amount()).isEqualByComparingTo("2.00");
+    assertThat(remaining.getLast().amount()).isEqualByComparingTo("5.00");
+    org.assertj.core.api.Assertions.assertThatThrownBy(() -> repayments.record(group.getId(),
+        ben.getId(), anna.getId(), BigDecimal.ONE, email, UUID.randomUUID().toString(), -1L))
+        .isInstanceOf(BusinessException.class);
+  }
+
+  @Test
   void cancelledPaymentsRemainVisibleButDoNotReduceOpenAmountsInExport() throws Exception {
     expenses.save(group.getId(), null, form(), email);
     repayments.record(group.getId(), ben.getId(), anna.getId(), new BigDecimal("5.00"), email);

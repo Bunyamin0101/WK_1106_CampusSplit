@@ -58,30 +58,38 @@
               th:text="${#numbers.formatDecimal(s.amount,1,'POINT',2,'COMMA')} + ' ' + ${summary.group.currency}"
             >
             </strong>
-            <form
-              th:if="${summary.admin or summary.actorId == s.fromId or summary.actorId == s.toId}"
-              th:action="@{/groups/{id}/repayments(id=${summary.group.id})}"
-              method="post"
-            >
-              <input type="hidden" name="senderId" th:value="${s.fromId}" />
-              <input type="hidden" name="recipientId" th:value="${s.toId}" />
-              <input
-                type="hidden"
-                name="requestId"
-                th:value="${T(java.util.UUID).randomUUID().toString()}"
-              />
-              <label
-                >Zurückgezahlter Betrag<input
-                  type="number"
-                  name="amount"
-                  min="0.01"
-                  step="0.01"
-                  th:max="${s.amount}"
-                  th:value="${s.amount}"
-                  required
-              /></label>
-              <button class="secondary">Zahlung erfassen</button>
-            </form>
+            <div th:if="${summary.admin or summary.actorId == s.fromId or summary.actorId == s.toId}">
+              <form th:id="'repayment-' + ${s.fromId} + '-' + ${s.toId}"
+                th:action="@{/groups/{id}/repayments(id=${summary.group.id})}" method="post">
+                <input type="hidden" name="senderId" th:value="${s.fromId}" />
+                <input type="hidden" name="recipientId" th:value="${s.toId}" />
+                <input type="hidden" name="requestId" th:value="${T(java.util.UUID).randomUUID().toString()}" />
+                <label>Zurückgezahlter Betrag<input type="number" name="amount" min="0.01" step="0.01"
+                  th:max="${s.amount}" th:value="${s.amount}" required /></label>
+              </form>
+              <details class="expense-payment-options"
+                th:with="options=${expensePayments[s.fromId + ':' + s.toId]}">
+                <summary>Einzelne Ausgabe begleichen (optional)</summary>
+                <p th:if="${#lists.isEmpty(options)}">Keine einzelne Ausgabe direkt zuordenbar. Nutze den Gesamtbetrag oben; Gruppenschulden können miteinander verrechnet sein.</p>
+                <form class="expense-payment-option" th:each="option : ${options}"
+                  th:action="@{/groups/{id}/repayments(id=${summary.group.id})}" method="post">
+                  <input type="hidden" name="senderId" th:value="${s.fromId}" />
+                  <input type="hidden" name="recipientId" th:value="${s.toId}" />
+                  <input type="hidden" name="requestId" th:value="${T(java.util.UUID).randomUUID().toString()}" />
+                  <input type="hidden" name="expenseId" th:value="${option.id}" />
+                  <strong th:text="${option.description}"></strong>
+                  <span th:text="${#temporals.format(option.date, 'dd.MM.yyyy')}"></span>
+                  <span th:text="'Noch offen: ' + ${#numbers.formatDecimal(option.amount,1,'POINT',2,'COMMA')} + ' ' + ${summary.group.currency}"></span>
+                  <label th:text="'Dein Rückzahlungsbetrag (' + ${summary.group.currency} + ')'"
+                    th:for="'expense-payment-' + ${s.fromId} + '-' + ${s.toId} + '-' + ${option.id}"></label>
+                  <input type="number" name="amount" min="0.01" step="0.01" required
+                    th:id="'expense-payment-' + ${s.fromId} + '-' + ${s.toId} + '-' + ${option.id}"
+                    th:max="${option.amount}" th:value="${option.amount}" />
+                  <button class="secondary">Zahlung erfassen</button>
+                </form>
+              </details>
+              <button class="secondary" type="submit" th:attr="form='repayment-' + ${s.fromId} + '-' + ${s.toId}">Zahlung erfassen</button>
+            </div>
           </div>
         </article>
       </section>
@@ -252,6 +260,7 @@
             </div>
           </details>
           <div th:if="${entry.payment != null}" th:with="p=${entry.payment}">
+            <p th:if="${p.expenseDescription != null}" th:text="'Für Ausgabe: ' + ${p.expenseDescription}"></p>
             <strong
               th:text="${p.sender.name} + ' → ' + ${p.recipient.name} + ': ' + ${#numbers.formatDecimal(p.amount,1,'POINT',2,'COMMA')} + ' ' + ${summary.group.currency}"
             ></strong>

@@ -113,6 +113,16 @@ public class Repayment extends BaseEntity {
     requestId = value;
   }
 
+  // Snapshot survives later expense edits or deletion; no cascading dependency.
+  private Long expenseId;
+  @Column(length = 255)
+  private String expenseDescription;
+
+  public Long getExpenseId() { return expenseId; }
+  public void setExpenseId(Long value) { expenseId = value; }
+  public String getExpenseDescription() { return expenseDescription; }
+  public void setExpenseDescription(String value) { expenseDescription = value; }
+
   public boolean isCancelled() {
     return cancelledAt != null;
   }

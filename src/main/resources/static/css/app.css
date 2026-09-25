@@ -1950,3 +1950,9 @@ body.home-page {
 .group-archive[open] > summary { margin-bottom: 16px; }
 .expenses-page .expense-toggle { font-size: 18px; font-weight: 650; color: var(--ink); cursor: pointer; padding: 8px 0; line-height: 1.5; }
 .expenses-page .expense-list[open] > summary { margin-bottom: 16px; }
+
+.expense-payment-options { margin: 0.8rem 0; padding: 0.8rem; border: 1px solid #d7e5df; border-radius: 8px; }
+.expense-payment-options summary { cursor: pointer; color: #087f46; font-weight: 600; }
+.expense-payment-options p { font-size: 0.9rem; }
+.expense-payment-option { display: grid; gap: 0.4rem; padding: 0.8rem 0; border-top: 1px solid #d7e5df; }
+.expense-payment-option button { white-space: normal; }

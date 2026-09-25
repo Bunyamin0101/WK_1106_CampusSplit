@@ -45,6 +45,11 @@ public class GroupController {
       Model model) {
     var summary = expenses.summary(groupId, principal.getName(), null, null);
     model.addAttribute("summary", summary);
+    var expensePayments = new java.util.HashMap<String, java.util.List<RepaymentService.ExpenseOption>>();
+    for (var settlement : summary.settlements())
+      expensePayments.put(settlement.fromId() + ":" + settlement.toId(),
+          repayments.options(summary, settlement.fromId(), settlement.toId()));
+    model.addAttribute("expensePayments", expensePayments);
     model.addAttribute("receipts", receipts.list(groupId, principal.getName()));
     if (!java.util.Set.of("all", "expenses", "receipts", "payments").contains(activity))
       activity = "all";
@@ -129,12 +134,13 @@ public class GroupController {
       @PathVariable Long groupId,
       @RequestParam Long senderId,
       @RequestParam Long recipientId,
-      @RequestParam java.math.BigDecimal amount,
+      @RequestParam(required = false) java.math.BigDecimal amount,
       @RequestParam String requestId,
+      @RequestParam(required = false) Long expenseId,
       Principal principal,
       RedirectAttributes flash) {
     try {
-      repayments.record(groupId, senderId, recipientId, amount, principal.getName(), requestId);
+      repayments.record(groupId, senderId, recipientId, amount, principal.getName(), requestId, expenseId);
       flash.addFlashAttribute(
           "message", "Rückzahlung erfasst. Die offenen Salden wurden aktualisiert.");
     } catch (BusinessException ex) {
