@@ -157,7 +157,7 @@ Die vorherige Fassung dieses ADRs war widersprüchlich: Der Status war "Akzeptie
 
 ### Entscheidung
 
-Option C — `long` in Cent für alle `MoneyAmountDT`-Werte (originalAmount, settlementAmount, shareAmount), `BigDecimal` ausschließlich für `ExchangeRateDT.rate`.
+Option B — `BigDecimal` überall für alle Geldbeträge (`MoneyAmountDT`: `originalAmount`, `settlementAmount`, `shareAmount`) sowie für Wechselkurse (`ExchangeRateDT.rate`).
 
 ### Begründung
 
