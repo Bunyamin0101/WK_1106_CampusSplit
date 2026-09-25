@@ -1,234 +1,309 @@
-# B3 — Druck- und Exportausgaben
+# B3 – Druck- und Exportausgaben
 
-B3 legt fest, welche Inhalte CampusSplit beim Export erzeugt. Der Export wird über [DLG-11 in B1](B1_Dialogspezifikation.md#dlg-11--export) gestartet und gehört zu [UC-12 — Ausgabenübersicht exportieren](F2-anwendungsf%C3%A4lle.md#uc-12--ausgaben%C3%BCbersicht-exportieren).
+## B3.1 Zweck und Geltungsbereich
 
-Eine eigene Druckfunktion gibt es nicht. Der PDF-Export kann über den Browser oder einen PDF-Viewer ausgedruckt werden.
+Dieser Baustein beschreibt die von CampusSplit erzeugten Exportausgaben. Exporte dienen dazu, den aktuellen Abrechnungsstand einer Gruppe lesbar oder maschinell weiterverarbeitbar bereitzustellen.
 
-Technische Details wie verwendete PDF-Bibliothek oder konkrete CSV-Kodierung gehören nicht in B3.
+CampusSplit unterstützt zwei Exportformate:
 
-## B3.1 Formate
+- **PDF** als lesbare Gruppenabrechnung,
+- **CSV** als ZIP-Archiv mit fachlich getrennten CSV-Dateien.
 
-| Format | Wert | Zweck |
-|---|---|---|
-| PDF | `PDF` | Lesbare Übersicht für Benutzer und zum Ausdrucken |
-| CSV | `CSV` | Tabellarische Daten zur Weiterverarbeitung |
+Ein Export gehört immer zu genau einer Gruppe. Optional kann ein Zeitraum eingeschränkt und ein Exportinhalt gewählt werden.
 
-Die erlaubten Exportformate sind in [D2.7 — ExportFormatDT](D2_Datentypenverzeichnis_%28ZO%29.md#d27-exportformatdt) definiert.
+Der Export stellt eine Momentaufnahme des zum Erstellungszeitpunkt berechneten Datenstands dar. Das Erstellen eines Exports verändert keine gespeicherten Fachdaten.
 
-Ein Export bezieht sich immer auf genau eine Gruppe und auf den Datenstand zum Zeitpunkt der Erstellung. Optional kann in [DLG-11](B1_Dialogspezifikation.md#dlg-11--export) ein Zeitraum gewählt werden.
+Passwörter, Passwort-Hashes, Sitzungsdaten und andere nicht für die Abrechnung benötigte sicherheitsrelevante Daten dürfen nicht exportiert werden.
 
-## B3.2 Mindestinhalte
+## B3.2 Exportparameter und Exportumfänge
 
-Jeder Export enthält die Daten, die für eine nachvollziehbare Gruppenabrechnung benötigt werden.
+Der Export wird für eine Gruppe erzeugt. Dabei werden folgende Parameter berücksichtigt:
 
-| Bereich | Inhalt |
+| Parameter | Bedeutung |
 |---|---|
-| Gruppe | Gruppenname |
-| Export | Erstellungsdatum und ggf. gewählter Zeitraum |
-| Mitglieder | Namen der Gruppenmitglieder |
-| Ausgaben | Datum, Beschreibung, Kategorie, Zahler, Originalbetrag und Originalwährung; bei Fremdwährung zusätzlich Wechselkurs und Abrechnungsbetrag |
-| Kostenanteile | Beteiligte Mitglieder und deren Anteil an der Ausgabe |
-| Salden | aktueller Saldo je Mitglied in der Gruppenwährung |
-| Ausgleich | berechnete Ausgleichsvorschläge |
+| Gruppe | Gruppe, deren Abrechnung exportiert wird |
+| Format | `pdf` oder `csv` |
+| Von | optionales Anfangsdatum |
+| Bis | optionales Enddatum |
+| Inhalt | `all`, `open` oder `expenses` |
 
-Die fachlichen Datenobjekte sind in [D1 — Datenmodell](D1_Datenmodell_%28ZO%29.md) beschrieben. Die Berechnung von Kostenanteilen, Salden und Ausgleichsvorschlägen erfolgt gemäß [F3 — Anwendungsfunktionen](F3-anwendungsfunktionen.md).
+Für den Exportinhalt gelten drei fachliche Umfänge:
 
-Passwörter, Passwort-Hashes, Sitzungsdaten und andere nicht benötigte sicherheitsrelevante Daten dürfen nicht exportiert werden. Dazu gelten zusätzlich die Regeln aus [N2.8 — Exportsicherheit](N2_Querschnittskonzepte_%28ZO%29.md#n28-exportsicherheit).
+| Technischer Wert | Anzeige | Inhalt |
+|---|---|---|
+| `all` | Gesamte Abrechnung | Ausgaben und Kostenanteile, offene Beträge/Salden, Ausgleichsvorschläge sowie erfasste Rückzahlungen |
+| `open` | Offene Beträge | offene Beträge/Salden und Ausgleichsvorschläge |
+| `expenses` | Nur Ausgaben | Ausgaben und Kostenanteile |
+
+Ist kein Exportumfang angegeben, wird die **gesamte Abrechnung** verwendet.
+
+Ungültige Exportformate oder Exportumfänge werden abgewiesen. Kann der Export technisch nicht erstellt werden, erhält der Benutzer eine verständliche Fehlermeldung.
 
 ## B3.3 PDF-Export
 
-Der PDF-Export ist eine lesbare Zusammenfassung der Gruppe.
+Der PDF-Export ist eine lesbare Zusammenfassung der Gruppenabrechnung. Die konkrete Zusammenstellung richtet sich nach dem gewählten Exportumfang.
 
-### Aufbau
+### B3.3.1 Kopf- und Übersichtsbereich
 
-1. **Kopfbereich**
-   - Gruppenname
-   - Exportdatum
-   - gewählter Zeitraum, falls vorhanden
+Der PDF-Export enthält unabhängig vom Exportumfang mindestens:
 
-2. **Mitglieder**
-   - Liste der Gruppenmitglieder
+- Kennzeichnung als Gruppenabrechnung,
+- Gruppenname,
+- Erstellungsdatum,
+- Gruppenwährung,
+- gewählten Zeitraum beziehungsweise „Gesamter Zeitraum“,
+- gewählten Exportinhalt,
+- Summe der Ausgaben im berücksichtigten Datenbestand,
+- Anzahl der Ausgaben,
+- Anzahl der Gruppenmitglieder.
 
-3. **Ausgaben**
-   - Datum
-   - Beschreibung
-   - Kategorie, falls vorhanden
-   - Zahler
-   - Originalbetrag und Originalwährung
-   - bei Fremdwährung: verwendeter Wechselkurs und Abrechnungsbetrag in Gruppenwährung
-   - Beteiligte mit jeweiligem Kostenanteil in Gruppenwährung
+Wurde ein Zeitraum eingeschränkt, wird zusätzlich darauf hingewiesen, dass Salden und Ausgleichsvorschläge nur den ausgewählten Zeitraum berücksichtigen.
 
-4. **Salden**
-   - Saldo pro Gruppenmitglied
-   - gleiche Bedeutung wie in [DLG-10 — Salden anzeigen](B1_Dialogspezifikation.md#dlg-10--salden-anzeigen):
-     - „bekommt zurück“
-     - „schuldet“
-     - „ausgeglichen“
+### B3.3.2 Offene Beträge und Ausgleichsvorschläge
 
-5. **Ausgleichsvorschläge**
-   - wer wem welchen Betrag zahlen sollte
+Bei den Exportumfängen **Gesamte Abrechnung** und **Offene Beträge** enthält das PDF einen Bereich „Offene Beträge (Salden)“.
 
-6. **Hinweis**
-   - Die eigentliche Zahlung findet außerhalb von CampusSplit statt.
+Pro Person werden dargestellt:
 
-### Beispiel
+- Name,
+- fachlicher Stand,
+- Betrag in Gruppenwährung.
 
-```text
-CampusSplit — Gruppenabrechnung
-Gruppe: WG Sonnenallee
-Exportdatum: 23.08.2026
+Zusätzlich werden Ausgleichsvorschläge unter „Wer zahlt wem?“ ausgegeben. Ein Vorschlag enthält:
 
-Ausgaben
-----------------------------------------------------
-12.08.2026  Supermarkt   Anna   42,00 EUR
-  Anna: 14,00 EUR
-  Max:  14,00 EUR
-  Lisa: 14,00 EUR
+- zahlende Person,
+- empfangende Person,
+- Betrag in Gruppenwährung.
 
-Salden
-----------------------------------------------------
-Anna   bekommt 28,00 EUR zurück
-Max    schuldet 14,00 EUR
-Lisa   schuldet 14,00 EUR
+Sind keine Zahlungen mehr offen, wird dies ausdrücklich als ausgeglichener Zustand dargestellt.
 
-Ausgleichsvorschläge
-----------------------------------------------------
-Max  -> Anna   14,00 EUR
-Lisa -> Anna   14,00 EUR
-```
+### B3.3.3 Ausgaben und Kostenanteile
 
+Bei den Exportumfängen **Gesamte Abrechnung** und **Nur Ausgaben** enthält das PDF die Ausgaben und ihre Kostenanteile.
 
-Bei einer Fremdwährung muss die Umrechnung nachvollziehbar sein:
+Für eine Ausgabe werden, soweit vorhanden beziehungsweise fachlich erforderlich, dargestellt:
 
-```text
-Restaurant
-Originalbetrag:     30,00 USD
-Wechselkurs:        1 USD = 0,86 EUR
-Abrechnungsbetrag:  25,80 EUR
-```
+- Beschreibung,
+- Ausgabedatum,
+- zahlende Person,
+- Abrechnungsbetrag in Gruppenwährung,
+- Kategorie,
+- beteiligte Personen,
+- Kostenanteil je Person in Gruppenwährung.
 
-Das Beispiel legt kein endgültiges Layout fest. Es zeigt nur, welche Informationen im PDF erkennbar sein müssen.
+Bei einer Ausgabe in Fremdwährung werden zusätzlich dargestellt:
 
-Beträge werden entsprechend [D2.3 — MoneyAmountDT](D2_Datentypenverzeichnis_%28ZO%29.md#d23-moneyamountdt) dargestellt.
+- Originalbetrag,
+- Originalwährung,
+- verwendeter Wechselkurs,
+- gegebenenfalls Datum des verwendeten Wechselkurses.
 
-## B3.4 CSV-Export
+Damit bleibt nachvollziehbar, wie aus dem Originalbetrag der Abrechnungsbetrag in Gruppenwährung entstanden ist.
 
-Der CSV-Export dient der Weiterverarbeitung der Daten. Anders als beim PDF steht hier eine klare Tabellenstruktur im Vordergrund.
+Enthält der gewählte Zeitraum keine Ausgaben, wird im Ausgabenbereich ein entsprechender Hinweis ausgegeben.
 
-Der CSV-Export besteht aus **zwei fachlich getrennten Tabellen**:
+### B3.3.4 Rückzahlungen
 
-1. Ausgaben mit Kostenanteilen
-2. Salden mit Ausgleichsinformationen
+Nur der Exportumfang **Gesamte Abrechnung** enthält den Bereich „Erfasste Rückzahlungen“.
 
-Die konkrete technische Bereitstellung der beiden CSV-Dateien wird später in der Architektur festgelegt. Fachlich sind die beiden folgenden Strukturen verbindlich.
+Für eine Rückzahlung werden dargestellt:
 
-### B3.4.1 Ausgaben
+- Zahlungsdatum,
+- Betrag in Gruppenwährung,
+- Status „Erfasst“ oder „Storniert“,
+- Sender,
+- Empfänger,
+- Person, die die Rückzahlung erfasst hat.
 
-Eine Zeile steht für den Kostenanteil eines Mitglieds an einer Ausgabe. Dadurch bleibt die Datei tabellarisch und es werden keine variablen Spalten pro Gruppenmitglied benötigt.
+Bei einer stornierten Rückzahlung werden zusätzlich, soweit vorhanden, dargestellt:
 
-| Spalte | Inhalt |
-|---|---|
-| `expense_date` | Datum der Ausgabe |
-| `description` | Beschreibung |
-| `category` | Kategorie, falls vorhanden |
-| `payer` | Name des Zahlers |
-| `original_amount` | ursprünglicher Betrag der Ausgabe |
-| `original_currency` | Währung der Ausgabe |
-| `exchange_rate` | verwendeter Wechselkurs; leer, wenn keine Umrechnung nötig war |
-| `settlement_amount` | umgerechneter Gesamtbetrag in Gruppenwährung |
-| `settlement_currency` | Gruppenwährung |
-| `participant` | beteiligtes Mitglied |
-| `share` | Kostenanteil dieses Mitglieds in Gruppenwährung |
+- Hinweis, dass sie nicht in den offenen Beträgen berücksichtigt wird,
+- Stornierungszeitpunkt,
+- Person, die storniert hat,
+- Stornierungsgrund.
 
-Beispiel:
+Sind noch keine Rückzahlungen erfasst, wird dies im PDF kenntlich gemacht.
 
-```text
-expense_date,description,category,payer,original_amount,original_currency,exchange_rate,settlement_amount,settlement_currency,participant,share
-2026-08-12,Restaurant,Essen,Anna,30.00,USD,0.86,25.80,EUR,Anna,12.90
-2026-08-12,Restaurant,Essen,Anna,30.00,USD,0.86,25.80,EUR,Max,12.90
-```
+### B3.3.5 Zahlungshinweis
 
-Das verwendete Trennzeichen und die Zeichenkodierung sind technische Entscheidungen und werden hier nicht festgelegt.
+Der PDF-Export weist darauf hin, dass Zahlungen außerhalb von CampusSplit stattfinden.
 
-### B3.4.2 Salden
+## B3.4 CSV-/ZIP-Export
 
-Eine Zeile steht für ein Gruppenmitglied.
+Wird als Format CSV gewählt, stellt CampusSplit nicht nur eine einzelne CSV-Datei bereit. Die fachlich getrennten CSV-Daten werden in einem **ZIP-Archiv** zusammengefasst.
 
-| Spalte | Inhalt |
-|---|---|
-| `member` | Name des Mitglieds |
-| `balance` | berechneter Saldo |
-| `status` | `CREDIT`, `DEBT` oder `BALANCED` |
+Der Download wird als ZIP-Datei bereitgestellt. Die enthaltenen CSV-Dateien sind UTF-8-kodiert.
 
-Beispiel:
+Welche Dateien enthalten sind, hängt vom Exportumfang ab:
 
-```text
-member,balance,status
-Anna,28.00,CREDIT
-Max,-14.00,DEBT
-Lisa,-14.00,DEBT
-```
+| Datei | `all` | `open` | `expenses` |
+|---|:---:|:---:|:---:|
+| `gruppe.csv` | ja | ja | ja |
+| `ausgaben.csv` | ja | nein | ja |
+| `salden.csv` | ja | ja | nein |
+| `ausgleich.csv` | ja | ja | nein |
+| `rueckzahlungen.csv` | ja | nein | nein |
 
-Ausgleichsvorschläge müssen ebenfalls im CSV-Export enthalten sein. Sie können als zusätzliche Tabelle mit den Spalten `from`, `to` und `amount` ausgegeben werden.
+### B3.4.1 `gruppe.csv`
 
-## B3.5 Verhalten bei Sonderfällen
+`gruppe.csv` enthält Metadaten zum Export. Dazu gehören:
+
+- Gruppenname,
+- Gruppenwährung,
+- Exportzeitpunkt,
+- Zeitraum von,
+- Zeitraum bis,
+- gewählter Exportinhalt.
+
+Diese Datei ist in jedem CSV-/ZIP-Export enthalten.
+
+### B3.4.2 `ausgaben.csv`
+
+`ausgaben.csv` enthält die exportierten Ausgaben einschließlich der für die Abrechnung relevanten Angaben und Kostenanteile.
+
+Die Datei ist bei **Gesamte Abrechnung** und **Nur Ausgaben** enthalten.
+
+Die Daten müssen insbesondere nachvollziehbar machen:
+
+- wann die Ausgabe angefallen ist,
+- wofür sie angefallen ist,
+- wer bezahlt hat,
+- welcher Betrag abgerechnet wird,
+- welche Währung beziehungsweise Fremdwährungsinformationen gelten,
+- welche Personen beteiligt sind,
+- welcher Kostenanteil auf die jeweilige Person entfällt.
+
+Bei Fremdwährungen müssen Originalbetrag, Originalwährung und die für die Abrechnung gespeicherten Umrechnungsinformationen nachvollziehbar bleiben.
+
+### B3.4.3 `salden.csv`
+
+`salden.csv` enthält die berechneten offenen Beträge beziehungsweise Salden der Gruppenmitglieder.
+
+Die Datei ist bei **Gesamte Abrechnung** und **Offene Beträge** enthalten.
+
+Die Salden müssen mit dem zum Exportzeitpunkt berechneten Abrechnungsstand übereinstimmen.
+
+### B3.4.4 `ausgleich.csv`
+
+`ausgleich.csv` enthält die berechneten Ausgleichsvorschläge.
+
+Ein Ausgleichsvorschlag beschreibt fachlich:
+
+- wer zahlt,
+- an wen gezahlt wird,
+- welchen Betrag die Zahlung umfasst.
+
+Die Datei ist bei **Gesamte Abrechnung** und **Offene Beträge** enthalten.
+
+### B3.4.5 `rueckzahlungen.csv`
+
+`rueckzahlungen.csv` dokumentiert erfasste Rückzahlungen. Sie ist ausschließlich bei **Gesamte Abrechnung** enthalten.
+
+Neben den Zahlungsinformationen müssen auch vorhandene Stornierungsinformationen nachvollziehbar bleiben. Stornierte Rückzahlungen dürfen nicht so dargestellt werden, als würden sie weiterhin die offenen Beträge reduzieren.
+
+## B3.5 Zeitraumfilter
+
+Der Export kann optional durch ein Anfangsdatum und/oder ein Enddatum eingeschränkt werden.
+
+Dabei gelten folgende Regeln:
+
+- ohne Anfangs- und Enddatum wird der gesamte verfügbare Zeitraum betrachtet,
+- nur mit Anfangsdatum beginnt der Export mit diesem Datum,
+- nur mit Enddatum endet der Export mit diesem Datum,
+- mit beiden Angaben wird der eingeschlossene Zeitraum verwendet.
+
+Der gewählte Zeitraum wird im Export kenntlich gemacht.
+
+Salden und Ausgleichsvorschläge eines zeitlich eingeschränkten Exports beziehen sich auf den für diesen Export berechneten Zeitraum. Das PDF weist darauf ausdrücklich hin.
+
+## B3.6 Fremdwährungen und Geldbeträge
+
+Die Gruppenwährung ist die maßgebliche Abrechnungswährung für:
+
+- Kostenanteile,
+- Salden,
+- Ausgleichsvorschläge,
+- Rückzahlungen.
+
+Wurde eine Ausgabe ursprünglich in einer anderen Währung erfasst, muss der Export die Umrechnung nachvollziehbar darstellen. Dazu gehören, soweit gespeichert:
+
+- Originalbetrag,
+- Originalwährung,
+- Wechselkurs,
+- Kursdatum,
+- Abrechnungsbetrag in Gruppenwährung.
+
+Die Exportfunktion berechnet keinen neuen historischen Wechselkurs allein zum Zweck des Exports. Maßgeblich sind die für die Ausgabe und die Abrechnung vorliegenden Daten.
+
+## B3.7 Verhalten bei Sonderfällen
 
 | Fall | Erwartetes Verhalten |
 |---|---|
-| Gruppe hat keine Ausgaben | Export kann erstellt werden; Ausgabenbereich ist leer, Salden sind ausgeglichen |
-| Zeitraum enthält keine Ausgaben | Export wird mit leerem Ausgabenbereich und Hinweis auf den gewählten Zeitraum erzeugt |
-| Kategorie fehlt | Feld bleibt leer; Export darf nicht fehlschlagen |
-| Export kann nicht erstellt werden | Benutzer erhält in DLG-11 eine verständliche Fehlermeldung |
+| Gruppe hat keine Ausgaben | Export kann erstellt werden; der fehlende Ausgabenbestand wird angemessen dargestellt |
+| Zeitraum enthält keine Ausgaben | Export kann erstellt werden; der Ausgabenbereich bleibt leer beziehungsweise enthält einen entsprechenden Hinweis |
+| Keine offenen Zahlungen | PDF weist auf den ausgeglichenen Zustand hin; Ausgleichsdaten können entsprechend leer sein |
+| Keine Rückzahlungen vorhanden | Bei `all` wird im PDF darauf hingewiesen, dass noch keine Rückzahlungen erfasst wurden |
+| Rückzahlung wurde storniert | Stornierungsstatus und vorhandene Stornierungsinformationen werden dokumentiert; sie wird nicht als wirksame Rückzahlung für offene Beträge behandelt |
+| Kategorie fehlt | Der Export darf deswegen nicht fehlschlagen |
+| Optionaler Wert fehlt | Der Export darf deswegen nicht fehlschlagen, sofern der Wert fachlich optional ist |
+| Ungültiges Format | Export wird mit verständlicher Fehlermeldung abgewiesen |
+| Ungültiger Exportumfang | Export wird mit verständlicher Fehlermeldung abgewiesen |
+| Export kann technisch nicht erstellt werden | Benutzer erhält eine verständliche Fehlermeldung |
 | Daten ändern sich nach dem Export | Bereits erzeugter Export bleibt eine Momentaufnahme des damaligen Datenstands |
 
-Fehlermeldungen werden nach den allgemeinen Regeln aus [N2.6 — Fehlerbehandlung](N2_Querschnittskonzepte_%28ZO%29.md#n26-fehlerbehandlung) behandelt.
-
-## B3.6 Regeln
+## B3.8 Regeln
 
 | ID | Regel |
 |---|---|
 | EXP-01 | Ein Export gehört immer zu genau einer Gruppe. |
-| EXP-02 | Der Export verwendet den Datenstand zum Zeitpunkt der Erstellung. |
-| EXP-03 | Ein optional gewählter Zeitraum filtert die enthaltenen Ausgaben. |
-| EXP-04 | Kostenanteile, Salden und Ausgleichsvorschläge müssen mit den aktuellen Berechnungen aus F3 übereinstimmen. |
-| EXP-05 | Der PDF-Export enthält die Bereiche aus B3.3. |
-| EXP-06 | Der CSV-Export enthält Ausgaben, Kostenanteile, Salden und Ausgleichsvorschläge gemäß B3.4. |
-| EXP-07 | Das Erstellen eines Exports verändert keine gespeicherten Daten. |
-| EXP-08 | Geldbeträge werden gemäß D2 und N2.5 verarbeitet und dargestellt. |
-| EXP-09 | Sicherheitsregeln aus N2.8 gelten für jeden Export. |
-| EXP-10 | Nicht vorhandene optionale Werte führen nicht zum Abbruch des Exports. |
-| EXP-11 | Bei Fremdwährung werden Originalbetrag, Originalwährung, verwendeter Wechselkurs und Abrechnungsbetrag ausgegeben. |
-| EXP-12 | Salden, Kostenanteile und Ausgleichsvorschläge werden in der Gruppenwährung ausgegeben. |
+| EXP-02 | Der Export verwendet den zum Erstellungszeitpunkt für die Anfrage ermittelten Datenstand. |
+| EXP-03 | Ein optional gewählter Zeitraum begrenzt den für den Export ermittelten Abrechnungsstand. |
+| EXP-04 | Kostenanteile, Salden und Ausgleichsvorschläge müssen mit den für den Export verwendeten aktuellen Berechnungen übereinstimmen. |
+| EXP-05 | Zulässige Exportformate sind PDF und CSV/ZIP. |
+| EXP-06 | Zulässige Exportumfänge sind Gesamte Abrechnung (`all`), Offene Beträge (`open`) und Nur Ausgaben (`expenses`). |
+| EXP-07 | Ohne expliziten Exportumfang wird die gesamte Abrechnung verwendet. |
+| EXP-08 | Der PDF-Inhalt richtet sich nach dem gewählten Exportumfang. |
+| EXP-09 | Der CSV-Export wird als ZIP-Archiv mit fachlich getrennten CSV-Dateien bereitgestellt. |
+| EXP-10 | `gruppe.csv` ist in jedem CSV-/ZIP-Export enthalten. |
+| EXP-11 | `ausgaben.csv` ist bei `all` und `expenses` enthalten. |
+| EXP-12 | `salden.csv` und `ausgleich.csv` sind bei `all` und `open` enthalten. |
+| EXP-13 | `rueckzahlungen.csv` ist nur bei `all` enthalten. |
+| EXP-14 | Das Erstellen eines Exports verändert keine gespeicherten Fachdaten. |
+| EXP-15 | Nicht für die Abrechnung benötigte sicherheitsrelevante Daten werden nicht exportiert. |
+| EXP-16 | Nicht vorhandene optionale Werte führen nicht zum Abbruch des Exports. |
+| EXP-17 | Bei Fremdwährungen bleiben Originalbetrag, Originalwährung und vorhandene Umrechnungsinformationen nachvollziehbar. |
+| EXP-18 | Salden, Kostenanteile, Ausgleichsvorschläge und Rückzahlungen werden im fachlichen Kontext der Gruppenwährung dargestellt. |
+| EXP-19 | Stornierte Rückzahlungen müssen als storniert erkennbar sein und dürfen nicht als wirksame Rückzahlung in offenen Beträgen erscheinen. |
+| EXP-20 | Zahlungen selbst erfolgen außerhalb von CampusSplit. |
 
-Die Anforderungen an die Exportdauer stehen in [NFR-12a-02 — Wie lange ein Export dauern darf](N1_Nichtfunktionale%20Anforderungen_%28ZO%29.md#nfr-12a-02-wie-lange-ein-export-dauern-darf).
-
-## B3.7 Nicht Bestandteil von B3
+## B3.9 Nicht Bestandteil von B3
 
 Nicht festgelegt werden:
 
-- verwendete PDF-Bibliothek,
-- CSV-Trennzeichen und Zeichenkodierung,
-- genaue Schriftarten, Farben oder Seitenränder,
-- eine eigene Druckfunktion,
-- dauerhafte Speicherung der Exportdatei,
+- konkrete Implementierungsdetails der verwendeten PDF-Bibliothek,
+- genaue Schriftarten, Farben oder Seitenränder des PDFs,
+- eine eigenständige Druckfunktion des Browsers oder Betriebssystems,
+- dauerhafte Speicherung erzeugter Exportdateien,
 - automatischer Versand per E-Mail,
-- weitere Formate wie Excel oder JSON.
+- weitere Exportformate wie Excel oder JSON.
 
-## B3.8 Querverweise
+## B3.10 Querverweise
 
-| Baustein | Relevanz |
-|---|---|
-| [F2 — Anwendungsfälle](F2-anwendungsf%C3%A4lle.md#f27-export) | UC-12 beschreibt den Export aus Benutzersicht |
-| [F3 — Anwendungsfunktionen](F3-anwendungsfunktionen.md#af-04--exportdaten-aufbereiten) | AF-04 bereitet die Exportdaten fachlich auf |
-| [D1 — Datenmodell](D1_Datenmodell_%28ZO%29.md) | Datenobjekte, aus denen der Export erzeugt wird |
-| [D2 — Datentypenverzeichnis](D2_Datentypenverzeichnis_%28ZO%29.md) | Geldbeträge und Exportformate |
-| [B1 — Dialogspezifikation](B1_Dialogspezifikation.md#dlg-11--export) | DLG-11 startet den Export |
-| [N1 — Nichtfunktionale Anforderungen](N1_Nichtfunktionale%20Anforderungen_%28ZO%29.md) | Performance- und Qualitätsanforderungen |
-| [N2 — Querschnittskonzepte](N2_Querschnittskonzepte_%28ZO%29.md#n28-exportsicherheit) | Exportsicherheit und weitere Querschnittsregeln |
-| [S1 — Nachbarsysteme](S1_Nachbarsysteme.md) | Externer Dienst zur Ermittlung von Wechselkursen |
+Für B3 sind insbesondere folgende Spezifikationsbausteine relevant:
+
+- [B1 – Dialogspezifikation](B1_Dialogspezifikation.md) – Dialoge zum Anzeigen der Gruppe, der Salden und zum Starten des Exports.
+- [F2 – Anwendungsfälle](F2-anwendungsfälle.md) – Export aus Benutzersicht.
+- [F3 – Anwendungsfunktionen](F3-anwendungsfunktionen.md) – fachliche Funktionen zur Aufbereitung und Berechnung der Exportdaten.
+- [D1 – Datenmodell](D1_Datenmodell.md) – Datenobjekte, aus denen die Exportausgabe erzeugt wird.
+- [D2 – Datentypenverzeichnis](D2_Datentypenverzeichnis.md) – fachliche Datentypen, insbesondere Geldbeträge und Währungen.
+- [N1 – Nichtfunktionale Anforderungen](N1_Nichtfunktionale Anforderungen.md) – Qualitäts- und Performanceanforderungen.
+- [N2 – Querschnittskonzepte](N2_Querschnittskonzepte.md) – übergreifende Regeln, insbesondere Fehlerbehandlung, Geldbeträge und Exportsicherheit.
+- [S1 – Nachbarsysteme](S1_Nachbarsysteme.md) – externe Systeme, insbesondere der Wechselkursdienst.
+
+Die konkreten Abschnittsanker sollten den tatsächlich vorhandenen Überschriften der jeweiligen Dokumente entsprechen. Es werden keine neuen Use-Case- oder Anforderungs-IDs eingeführt, die in den referenzierten Bausteinen nicht vorhanden sind.
 
 ## Eingesetzte KI-Werkzeuge
 
 Claude (Anthropic) und ChatGPT (OpenAI) wurden unterstützend für Formulierungen, Strukturierung und die Prüfung von Querverweisen verwendet.
 
-Die fachlichen Inhalte wurden anschließend mit den vorhandenen Spezifikationsbausteinen abgeglichen.
+Die fachlichen Inhalte wurden anschließend mit dem aktuellen Implementierungsstand und den vorhandenen Spezifikationsbausteinen abgeglichen.
