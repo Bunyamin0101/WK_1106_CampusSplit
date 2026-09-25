@@ -256,7 +256,15 @@
                 th:text="${#lists.isEmpty(matches) ? 'Gelöschte Ausgabe' : matches[0].description}"
               ></span>
             </summary>
-            <p style="white-space: pre-wrap" th:text="${change.details}"></p>
+            <div class="activity-details" th:with="display=${change.displayDetails}">
+              <p class="activity-details-title" th:text="${display.title}"></p>
+              <dl class="activity-fields" th:if="${!#lists.isEmpty(display.fields)}">
+                <div th:each="field : ${display.fields}">
+                  <dt th:text="${field.label}"></dt>
+                  <dd th:text="${field.value}"></dd>
+                </div>
+              </dl>
+            </div>
           </details>
           <div th:if="${entry.payment != null}" th:with="p=${entry.payment}">
             <strong

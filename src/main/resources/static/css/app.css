@@ -1930,3 +1930,14 @@ body.home-page {
  .auth-page .narrow { padding: 24px 20px; }
  .auth-page h1 { font-size: 27px; }
 }
+
+/* Readable activity history, including older records. */
+.activity-details { margin-top: 1rem; padding: 1rem; background: #f6f9f7; border-radius: 8px; }
+.activity-details-title { font-weight: 600; margin: 0 0 1rem; }
+.activity-fields { margin: 0; }
+.activity-fields > div { display: grid; grid-template-columns: minmax(110px, 160px) minmax(0, 1fr); gap: 1rem; padding: .5rem 0; }
+.activity-fields dt { color: #596b65; }
+.activity-fields dd { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+@media (max-width: 600px) {
+  .activity-fields > div { grid-template-columns: 1fr; gap: .2rem; }
+}

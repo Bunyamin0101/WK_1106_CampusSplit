@@ -41,6 +41,10 @@ public class ExpenseChange extends BaseEntity {
     return actorName;
   }
 
+  public ActivityDetails getDisplayDetails() {
+    return ActivityDetails.from(details);
+  }
+
   public String getDetails() {
     return details;
   }
