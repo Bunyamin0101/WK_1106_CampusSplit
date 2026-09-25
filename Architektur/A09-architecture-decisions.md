@@ -292,10 +292,3 @@ Option A — Spring Security mit serverseitiger Sitzung und HTTP-only Session-Co
 
 Diese Lösung passt zur Spezifikation (N2.2) und vermeidet dauerhaft gespeicherte Tokens im Client. Da CampusSplit nach ADR-003 als ein einziges Spring-Boot-Deployable mit Thymeleaf läuft, entfällt außerdem die frühere Sorge um CORS/CSRF zwischen getrennten Frontend-/Backend-Origins. Die Kombination aus Spring Security, HTTP-only Session-Cookies und Google OAuth2 stellt eine sichere, moderne und benutzerfreundliche Authentifizierungslösung dar.
 
----
-
-## Eingesetzte KI-Werkzeuge
-
-Claude (Anthropic) wurde unterstützend für Formulierungen, Strukturierung und die Prüfung von Querverweisen verwendet.
-
-Die fachlichen Inhalte wurden anschließend mit den vorhandenen Spezifikationsbausteinen abgeglichen.
