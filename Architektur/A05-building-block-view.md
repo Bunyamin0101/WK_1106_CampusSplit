@@ -59,7 +59,7 @@ flowchart LR
 | [5.1.5](#515-blackbox-persistence) | Persistence | `.../entity/`, `.../repository/`, `backend/src/main/resources/db/` | Dauerhafte Speicherung über PostgreSQL. |
 | [5.1.6](#516-blackbox-export-module) | Export Module | `.../export/` | PDF- und CSV-Export erzeugen. |
 | [5.1.7](#517-blackbox-currency-integration) | Currency Integration | `.../currency/` | Frankfurter API anbinden und Wechselkurse kapseln. |
-| [5.1.8](#518-blackbox-google-oauth2-integration) | Google OAuth2 Integration | `.../security/`, `.../auth/` | Authentifizierung und Login-Abwicklung über Google OAuth2 bereitstellen. |
+| [5.1.8](#518-blackbox-google-oauth2-integration) | Google OAuth2 Integration | `config/`, `service/GoogleAccountService.java` | Authentifizierung und Login-Abwicklung über Google OAuth2 bereitstellen. |
 
 ### Lokale Beziehungen
 
@@ -211,12 +211,26 @@ flowchart LR
 | Benötigte Schnittstellen | Google OAuth2 Identity Provider via HTTPS. |
 | Qualität | Sichere Abwicklung des OAuth2-Flows, Session-Management über Spring Security. |
 | Abhängigkeiten | `spring-boot-starter-oauth2-client`, Google Cloud Console Client credentials. |
-| Geplante Code-Artefakte | `SecurityConfig`, `CustomOAuth2UserService`, `OAuth2UserBinding`. |
+| Implementierte Code-Artefakte | `config/SecurityConfig`, `config/GoogleLoginConfig`, `config/GoogleOidcUserService`, `config/CampusOidcUser`, `config/GoogleLinkIntent`, `config/LinkAuthorizationResolver` sowie `service/GoogleAccountService` (jeweils unter `src/main/java/de/thm/campussplit/`). |
 | Erfüllte Anforderungen | Externe API/Auth, N2-Authentifizierung. |
 | Variabilität | Weitere OAuth2-Provider könnten später ergänzt werden. |
 | Tests | Security-Tests für geschützte Routen mit Mock-OAuth2-User. |
-| Offene Punkte | OAuth2 Client-ID und Secret über Umgebungsvariablen bereitstellen. |
-| Verfeinert in | Nicht weiter verfeinert; wird durch Standard-Spring-Security abgedeckt. |
+| Konfiguration | `GOOGLE_LOGIN_ENABLED`, `GOOGLE_CLIENT_ID` und `GOOGLE_CLIENT_SECRET`; auf Railway als Servicevariablen hinterlegt, keine Zugangsdaten im Repository. |
+| Umsetzung | OpenID Connect auf Basis von Spring Security OAuth2 Client; die Zuordnung zur lokalen Identität übernimmt Anwendungscode. |
+
+Die implementierten Klassen haben folgende Aufgaben:
+
+| Klasse | Verantwortung |
+|---|---|
+| `SecurityConfig` | Konfiguriert Zugriffsschutz, Formular- und Google-Anmeldung sowie Erfolgs- und Fehlerweiterleitungen. |
+| `GoogleLoginConfig` | Registriert bei aktivierter Google-Anmeldung den Client mit den Scopes `openid`, `profile`, `email` und dem Callback `/login/oauth2/code/google`. |
+| `GoogleOidcUserService` | Lädt das OIDC-Profil und delegiert Anmeldung bzw. explizite Kontoverknüpfung an `GoogleAccountService`. |
+| `GoogleAccountService` | Ordnet den stabilen Google-Subject einem lokalen Benutzer zu, erstellt neue Benutzer oder verknüpft ein bestehendes Konto. Eine gleiche E-Mail-Adresse allein führt nicht zur automatischen Zusammenführung. |
+| `CampusOidcUser` | Stellt dem Anwendungscode die lokale E-Mail-Adresse als Namen des authentifizierten Benutzers bereit. |
+| `GoogleLinkIntent` | Hält die zeitlich begrenzte Verknüpfungsabsicht mit E-Mail-Adresse, Ablaufzeit und OAuth-State in der Sitzung. |
+| `LinkAuthorizationResolver` | Bindet die Verknüpfungsabsicht an den OAuth-State und fordert bei der Verknüpfung die Google-Kontoauswahl an. |
+
+Die Google-Zuordnung wird über `User.googleSubject` und `UserRepository` gespeichert; eine separate Klasse `OAuth2UserBinding` existiert nicht.
 
 ---
 
