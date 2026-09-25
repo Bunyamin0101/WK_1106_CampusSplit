@@ -85,8 +85,8 @@
           </div>
         </article>
       </section>
-      <section class="expense-list" aria-labelledby="expenses-title">
-        <h2 id="expenses-title">Ausgaben</h2>
+      <details class="expense-list" id="expenses" open>
+        <summary class="expense-toggle">Ausgaben</summary>
         <p class="empty" th:if="${#lists.isEmpty(summary.expenses)}">
           Noch keine Ausgaben. Erfasse euren ersten gemeinsamen Einkauf.
         </p>
@@ -181,7 +181,7 @@
             </form>
           </div>
         </article>
-      </section>
+      </details>
       <details
         id="activities"
         class="activity-panel"
@@ -336,20 +336,23 @@
         </article>
       </section>
       <div class="group-management" th:if="${summary.admin}">
-        <form
-          method="post"
-          th:action="@{/groups/{id}/archive(id=${summary.group.id})}"
-        >
-          <input
-            type="hidden"
-            name="archived"
-            th:value="${!summary.group.archived}"
-          />
-          <button
-            class="secondary"
-            th:text="${summary.group.archived ? 'Gruppe wiederherstellen' : 'Gruppe archivieren'}"
-          ></button>
-        </form>
+        <details class="group-archive">
+          <summary th:text="${summary.group.archived ? 'Gruppe wiederherstellen' : 'Gruppe archivieren'}"></summary>
+          <form
+            method="post"
+            th:action="@{/groups/{id}/archive(id=${summary.group.id})}"
+          >
+            <input
+              type="hidden"
+              name="archived"
+              th:value="${!summary.group.archived}"
+            />
+            <button
+              class="secondary"
+              th:text="${summary.group.archived ? 'Gruppe wiederherstellen' : 'Gruppe archivieren'}"
+            ></button>
+          </form>
+        </details>
         <details id="delete-group" class="group-delete">
           <summary>Gruppe löschen</summary>
           <h2>Diese Gruppe endgültig löschen?</h2>

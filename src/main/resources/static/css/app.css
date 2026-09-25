@@ -1944,3 +1944,9 @@ body.home-page {
 @media (max-width: 600px) {
   .activity-fields > div { grid-template-columns: 1fr; gap: .2rem; }
 }
+
+/* Group controls share a compact disclosure layout. */
+.group-archive > summary { color: #087d40; cursor: pointer; font-size: 14px; }
+.group-archive[open] > summary { margin-bottom: 16px; }
+.expenses-page .expense-toggle { font-size: 18px; font-weight: 650; color: var(--ink); cursor: pointer; padding: 8px 0; line-height: 1.5; }
+.expenses-page .expense-list[open] > summary { margin-bottom: 16px; }
