@@ -85,7 +85,8 @@ public class ExportService {
         "Status",
         "Storniert am",
         "Storniert von",
-        "Stornogrund");
+        "Stornogrund",
+        "Zugeordnete Ausgabe");
     summary
         .repayments()
         .forEach(
@@ -101,7 +102,7 @@ public class ExportService {
                     p.isCancelled() ? "Storniert" : "Erfasst",
                     p.getCancelledAt(),
                     p.getCancelledBy() == null ? "" : p.getCancelledBy().getName(),
-                    p.getCancellationReason()));
+                    p.getCancellationReason(), p.getExpenseDescription()));
     var metadata = new StringBuilder();
     row(metadata, "Gruppe", "Währung", "Exportiert am", "Zeitraum von", "Zeitraum bis", "Inhalt");
     row(
@@ -202,6 +203,8 @@ public class ExportService {
                 + (payment.isCancelled() ? " | Storniert" : " | Erfasst"), 12);
             writer.line(payment.getSender().getName() + " an " + payment.getRecipient().getName(), 11);
             writer.line("Erfasst von " + payment.getRecordedBy().getName(), 10);
+            if (payment.getExpenseDescription() != null)
+              writer.line("Für Ausgabe: " + payment.getExpenseDescription(), 10);
             if (payment.isCancelled()) {
               writer.line("Nicht in den offenen Beträgen berücksichtigt.", 10);
               writer.line("Storniert am " + java.time.format.DateTimeFormatter.ofPattern("dd.MM.yyyy 'um' HH:mm")
