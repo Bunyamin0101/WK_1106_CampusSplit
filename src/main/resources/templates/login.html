@@ -23,12 +23,6 @@
           Die Google-Anmeldung wurde abgebrochen oder konnte nicht abgeschlossen
           werden. Bitte erneut versuchen.
         </p>
-        <div th:if="${googleEnabled}" class="google-login">
-          <a class="button secondary" th:href="@{/oauth2/authorization/google}"
-            >Mit Google anmelden</a
-          >
-          <p>Oder mit E-Mail und Passwort anmelden:</p>
-        </div>
         <form th:action="@{/login}" method="post">
           <label
             >E-Mail<input
@@ -48,6 +42,12 @@
           </label>
           <button>Anmelden</button>
         </form>
+        <div th:if="${googleEnabled}" class="google-login">
+          <p>oder</p>
+          <a class="button secondary" th:href="@{/oauth2/authorization/google}"
+            >Mit Google anmelden</a
+          >
+        </div>
         <p class="auth-switch">Noch kein Konto? <a th:href="@{/register}">Jetzt registrieren</a></p>
       </section>
     </main>

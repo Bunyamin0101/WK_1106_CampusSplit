@@ -7,12 +7,6 @@
       <section class="narrow">
         <span class="eyebrow">Dein CampusSplit-Konto</span>
         <h1>Konto erstellen</h1>
-        <div th:if="${googleEnabled}" class="google-login">
-          <a class="button secondary" th:href="@{/oauth2/authorization/google}"
-            >Mit Google registrieren</a
-          >
-          <p>Oder mit E-Mail und Passwort registrieren:</p>
-        </div>
         <form th:action="@{/register}" method="post" th:object="${form}">
           <div th:replace="~{fragments :: errors}"></div>
           <label
@@ -45,6 +39,12 @@
           <small>Mindestens 10 Zeichen; maximal 72 UTF-8-Bytes.</small>
           <button>Konto erstellen</button>
         </form>
+        <div th:if="${googleEnabled}" class="google-login">
+          <p>oder</p>
+          <a class="button secondary" th:href="@{/oauth2/authorization/google}"
+            >Mit Google registrieren</a
+          >
+        </div>
         <p class="auth-switch">Schon dabei? <a th:href="@{/login}">Anmelden</a></p>
       </section>
     </main>
