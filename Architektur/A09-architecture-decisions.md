@@ -191,7 +191,7 @@ Der Wechselkursadapter begrenzt die Abhängigkeit zur externen API auf eine Stel
 
 ---
 
-## ADR-08: Benutzerauthentifizierung über Google OAuth2
+## ADR-008: Benutzerauthentifizierung über Google OAuth2
 
 **Status:** Akzeptiert
 
