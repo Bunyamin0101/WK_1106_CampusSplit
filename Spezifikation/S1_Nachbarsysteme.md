@@ -1,8 +1,8 @@
-# S1 — Nachbarsysteme
+# S1 Nachbarsysteme
 
 CampusSplit tauscht mit zwei fremd betriebenen Systemen Daten aus ([P2](P2-architekturueberblick.md)). Für jedes gibt es einen Steckbrief.
 
-## S1.1 NS-01 — Frankfurter-Wechselkursdienst
+## S1.1 NS-01 Frankfurter-Wechselkursdienst
 
 Öffentlicher Dienst, der Referenzkurse für Währungen liefert.
 
@@ -16,7 +16,7 @@ CampusSplit tauscht mit zwei fremd betriebenen Systemen Daten aus ([P2](P2-archi
 | Frequenz und Art | bei Bedarf, ohne Zwischenspeicher: beim Speichern einer Ausgabe in Fremdwährung (AF-04, Kurs zum Ausgabedatum) und bei jedem Aufruf von DLG-04, wenn der Benutzer Gruppen in US-Dollar hat (AF-06, Kurs des heutigen Tages) |
 | Störung | Es wird kein Kurs angenommen. Die Ausgabe wird nicht gespeichert bzw. die Euro-Gesamtsumme entfällt, jeweils mit Meldung ([NFR-07](N1-nichtfunktionale-anforderungen.md#n14-zuverlässigkeit)). |
 
-## S1.2 NS-02 — Google-Anmeldung
+## S1.2 NS-02 Google-Anmeldung
 
 Anmeldedienst von Google nach OpenID Connect. CampusSplit nutzt ihn nur, wenn er im Betrieb eingeschaltet ist ([S3](S3-inbetriebnahme.md)); sonst sind die Google-Schaltflächen ausgeblendet.
 
