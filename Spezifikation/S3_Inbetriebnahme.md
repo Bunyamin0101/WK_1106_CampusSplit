@@ -1,25 +1,24 @@
 # S3 — Inbetriebnahme
 
-S3 beschreibt, wie CampusSplit in Betrieb genommen wird und welche Voraussetzungen dafür erfüllt sein müssen. Der Baustein beschreibt die Betriebsumgebung, dauerhaft zu erhaltende Datenbereiche, Erstinbetriebnahme, spätere Releases und grundlegende Prüfungen nach der Bereitstellung.
+S3 beschreibt, unter welchen fachlichen und betrieblichen Voraussetzungen CampusSplit in Betrieb genommen wird. Der Baustein regelt die Betriebsumgebung, dauerhaft zu erhaltende Datenbereiche, die Erstinbetriebnahme, spätere Releases sowie grundlegende Funktionsprüfungen nach der Bereitstellung.
 
-S3 ist keine Schritt-für-Schritt-Installationsanleitung mit konkreten Befehlen. Technische Detailbefehle, Dateipfade, Docker-Konfigurationen oder CI/CD-Skripte gehören in die Architektur- und Betriebsdokumentation.
+Konkrete Installationsbefehle, Server- und Containerkonfigurationen, Dateipfade sowie technische Abläufe der Auslieferung sind nicht Bestandteil der Spezifikation, sondern werden in der Architekturdokumentation und der Betriebsanleitung beschrieben.
 
 ---
 
 ## S3.1 Einordnung
 
-CampusSplit ist eine Webanwendung mit Frontend, Backend und relationaler Datenbank.
+CampusSplit ist eine webbasierte Mehrbenutzeranwendung mit zentraler Datenhaltung und Anbindung an externe Dienste.
 
 | Aspekt | Einordnung für CampusSplit |
 |-------|-----------------------------|
 | Projekttyp | Greenfield-Projekt |
 | Vorgängersystem | nicht vorhanden |
-| Betrieb | Webanwendung im Browser |
-| Backend | serverseitige Fachlogik und Spring MVC Web-Controller |
-| Frontend | serverseitig gerenderte HTML-Views (Thymeleaf) im Browser |
-| Datenbank | relationale Datenbank, z. B. PostgreSQL |
-| Externe Dienste | Frankfurter für Fremdwährungen und die EUR-Übersicht bei USD-Gruppen; Google OAuth2/OIDC nur bei aktivierter Google-Anmeldung. |
-| Batch-Prozesse | nicht erforderlich |
+| Nutzungskanal | Webbrowser |
+| Anwendungsbetrieb | Zentrale Webanwendung mit serverseitiger Verarbeitung |
+| Datenhaltung | Relationale Datenbank (PostgreSQL) |
+| Externe Dienste | Wechselkursdienst (Frankfurter-API) für Umrechnungen zwischen EUR und USD; optionaler externer Identitätsanbieter (Google) bei aktivierter Google-Anmeldung |
+| Hintergrundläufe (Batch) | nicht erforderlich |
 
 ---
 
@@ -29,13 +28,13 @@ Vor der Inbetriebnahme müssen folgende Voraussetzungen erfüllt sein.
 
 | Bereich | Voraussetzung | Zweck |
 |--------|---------------|------|
-| Browser | aktueller Webbrowser | Nutzung der Dialoge aus B1 |
-| Anwendungs-Laufzeit | lauffähige Spring Boot Anwendung (Java 21) | Serverseitiges Rendering der Views, Verarbeitung von Use Cases und Fachlogik |
-| HTTP-Kommunikation | Browser kann Anwendung über HTTP/HTTPS erreichen | Aufruf von Seiten und Übermittlung von Formulardaten |
-| Datenbank | erreichbare relationale Datenbank (PostgreSQL) | Speicherung von Benutzern, Gruppen und Ausgaben |
-| Konfiguration | gültige Umgebungswerte (z. B. OAuth2 Secrets, DB-Credentials) | Verbindung zu Datenbank und externen Diensten |
-| Sicherheit | Geheimnisse außerhalb des Quellcodes | Schutz von Passwörtern und OAuth2 Zugangsdaten |
-| Exportfähigkeit | PDF-/CSV-Erzeugung möglich | Bereitstellung von Ausgabenübersichten |
+| Client-Zugang | Aktueller Webbrowser mit aktiviertem JavaScript und Cookies | Darstellung der Dialoge aus B1 und Aufrechterhaltung der Benutzersitzung |
+| Anwendungsbetrieb | Lauffähige Laufzeitumgebung für die Webanwendung | Bereitstellung der Benutzeroberfläche sowie Ausführung der Use Cases(F2) und Anwendungsfunktionen(F3) |
+| Netzwerkerreichbarkeit | Erreichbarkeit der Anwendung über HTTPS sowie ausgehende HTTPS-Verbindung zu den externen Diensten | Kommunikation mit Benutzer:innen, Abruf von Wechselkursen und optionale Google-Anmeldung |
+| Datenhaltung | Erreichbare PostgreSQL-Datenbank mit eingerichteten Zugriffsrechten | Dauerhafte Speicherung aller fachlichen Daten(D1) |
+| Umgebungskonfiguration | Vollständig gesetzte Konfigurationsparameter (Datenbankzugang, Anwendungsadresse, Dienstendpunkte) | Trennung von Anwendungscode und umgebungsspezifischen Einstellungen |
+| Geheimnisverwaltung | Zugangsdaten und Schlüssel außerhalb des Quellcode-Repositorys | Schutz von Datenbankzugängen, Sitzungsgeheimnissen und Anmeldeschlüsseln |
+| Dokumentenerzeugung | Verfügbarkeit der erforderlichen Schriftarten und Exportfunktionen | Erzeugung der PDF- und CSV-Abrechnungen(B3) |
 
 ---
 
@@ -45,23 +44,13 @@ CampusSplit benötigt Konfigurationsdaten, die abhängig von der Betriebsumgebun
 
 | Konfiguration | Beschreibung |
 |---------------|--------------|
-| Datenbank-URL | Adresse der Datenbank |
-| Datenbankbenutzer | Benutzerkonto für den Datenbankzugriff |
-| Datenbankpasswort | Passwort für den Datenbankzugriff |
-| Backend-Port | Port, über den das Backend erreichbar ist |
-| Frontend-URL | Herkunft, von der Browseranfragen zugelassen werden |
-| Session-Konfiguration | Einstellungen für Anmeldung und Sitzung |
-| Export-Konfiguration | Einstellungen für PDF- und CSV-Erzeugung |
+| Datenbankverbindung | Adresse, Datenbankname sowie Benutzerkennung und Passwort für den Zugriff auf PostgreSQL |
+| Anwendungsport und Basisadresse | Netzwerkport und öffentliche Adresse, unter der die Webanwendung erreichbar ist (inkl. Rücksprungadresse für die Google-Anmeldung) |
+| Wechselkursdienst-Adresse | Basisadresse des externen Wechselkursdienstes (Standard: Frankfurter-API) |
+| Google-Anmeldung (optional) | Aktivierungsschalter sowie Client-Kennung und Geheimnis des externen Identitätsanbieters |
+| Sitzungs- und Sicherheitseinstellungen | Vorgaben zur Gültigkeit von Benutzersitzungen und zum Schutz gegen unbefugte Formularanfragen |
 
-Sicherheitsrelevante Konfigurationen dürfen nicht öffentlich im Repository gespeichert werden.
-
-Nicht ins Repository gehören insbesondere:
-
-- Datenbankpasswörter
-- Tokens
-- private Schlüssel
-- produktive `.env`-Dateien mit Geheimnissen
-- Session-Geheimnisse
+Sicherheitsrelevante Konfigurationswerte (insbesondere Datenbankpasswörter, Sitzungsgeheimnisse und Schlüssel für externe Dienste) dürfen nicht im Quellcode-Repository abgelegt werden.
 
 ---
 
@@ -71,12 +60,10 @@ Persistente Daten müssen über Neustarts und spätere Releases hinweg erhalten 
 
 | Datenbereich | Inhalt | Darf bei Release überschrieben werden? |
 |-------------|--------|------------------------------------------|
-| Anwendungsdatenbank | Benutzer, Gruppen, Mitgliedschaften, Ausgaben, Kostenanteile, Kategorien | nein |
-| Konfigurationsdaten | Datenbankverbindung, Sicherheitskonfiguration, Umgebungswerte | nein |
-| Logdaten | technische Ereignisse und Fehler | nein, sofern betrieblich benötigt |
-| Exportdateien | heruntergeladene PDF-/CSV-Dateien | liegen nach Download bei Benutzer:innen |
-
-Exportdateien sind keine dauerhaft gespeicherten Fachobjekte von CampusSplit. Sie werden auf Anforderung erzeugt und anschließend heruntergeladen.
+| Fachliche Anwendungsdaten | Benutzerkonten, Google-Kontoverknüpfungen, Gruppen, Mitgliedschaften, Ausgaben, Kostenanteile, Kategorien, Belege, Rückzahlungen und Änderungshistorie | nein |
+| Umgebungskonfiguration | Datenbankzugangsdaten, Schlüssel externer Dienste und betriebliche Parameter | nein |
+| Betriebs- und Fehlerprotokolle | Technische Ereignisse und Fehlerausgaben zur Betriebsanalyse | nein, sofern betrieblich aufbewahrt |
+| Exportierte Abrechnungen | Erzeugte PDF-Dateien und CSV-ZIP-Archive (werden nur temporär erzeugt und lokal bei Benutzer:innen gespeichert) | nicht zutreffend (keine dauerhafte Speicherung in CampusSplit) |
 
 ---
 
@@ -86,14 +73,13 @@ Die Erstinbetriebnahme erfolgt einmalig, wenn CampusSplit erstmals in einer lauf
 
 | Schritt | Aktivität | Ergebnis |
 |--------|-----------|----------|
-| 1 | Betriebsumgebung bereitstellen | Frontend, Backend und Datenbank sind vorhanden. |
-| 2 | Konfiguration bereitstellen | Backend kennt Datenbankverbindung, Frontend-URL und Sicherheitseinstellungen. |
-| 3 | Datenbank initialisieren | Leeres Schema für User, Group, Membership, Expense, ExpenseShare und Category ist vorhanden. |
-| 4 | Backend starten | Backend ist erreichbar und kann mit der Datenbank kommunizieren. |
-| 5 | Frontend bereitstellen | Anwendung ist im Browser aufrufbar. |
-| 6 | Funktionstest durchführen | Zentrale Use Cases funktionieren in der Umgebung. |
+| 1 | Betriebsumgebung einrichten | Laufzeitumgebung für die Webanwendung und PostgreSQL-Datenbank sind bereitgestellt und erreichbar. |
+| 2 | Konfiguration hinterlegen | Datenbankzugang, Basisadresse, Wechselkursdienst und ggf. Google-Anmeldedaten sind sicher konfiguriert. |
+| 3 | Datenstrukturen initialisieren | Alle erforderlichen Tabellen, Schlüssel, Integritätsregeln (D1) und Standardkategorien sind in der Datenbank angelegt. |
+| 4 | Webanwendung starten | Die Anwendung verbindet sich erfolgreich mit der Datenbank, prüft die Datenstruktur und nimmt Anfragen entgegen. |
+| 5 | Funktionsprüfung durchführen | Zentrale Anwendungsfälle aus F2 werden erfolgreich in der Zielumgebung geprüft. |
 
-Wenn eine Voraussetzung fehlt, ist die Inbetriebnahme nicht abgeschlossen.
+Fehlt eine dieser Voraussetzungen oder schlägt ein Schritt fehl, gilt die Erstinbetriebnahme als nicht abgeschlossen.
 
 ---
 
@@ -101,19 +87,15 @@ Wenn eine Voraussetzung fehlt, ist die Inbetriebnahme nicht abgeschlossen.
 
 Nach der Erstinbetriebnahme wird ein kurzer Funktionstest durchgeführt.
 
-| Testfall | Erwartetes Ergebnis |
-|---------|---------------------|
-| Anwendung im Browser öffnen | Startseite oder Anmeldeseite wird angezeigt. |
-| Benutzer registrieren | Benutzerkonto wird gespeichert. |
-| Benutzer anmelden | Startseite wird angezeigt; „Meine Gruppen“ öffnet das Dashboard. |
-| Gruppe erstellen | Gruppe wird gespeichert und geöffnet. |
-| Mitglied hinzufügen | Mitgliedschaft wird gespeichert, sofern Benutzer ADMIN ist. |
-| Ausgabe erfassen | Ausgabe und Kostenanteile werden gespeichert. |
-| Salden anzeigen | Salden werden korrekt berechnet. |
-| Export erzeugen | PDF- oder CSV-Datei wird bereitgestellt. |
-| Abmelden | Sitzung wird beendet. |
-
-Der Funktionstest orientiert sich an den Use Cases aus F2 und den Dialogen aus B1.
+| Prüfpunkt | Erwartetes Ergebnis |
+|----------|---------------------|
+| Start- und Anmeldeseite aufrufen | Die Anwendung antwortet im Browser und zeigt die Anmelde- bzw. Startseite an. |
+| Registrierung und Anmeldung | Ein neues Benutzerkonto lässt sich anlegen und anmelden (bei aktivierter Option auch per Google-Anmeldung). |
+| Gruppe anlegen und Mitglied aufnehmen | Eine Gruppe wird erstellt und ein weiteres Mitglied hinzugefügt. |
+| Ausgabe mit Fremdwährung und Beleg erfassen | Eine Ausgabe (z. B. in USD innerhalb einer EUR-Gruppe) wird erfasst, über den Wechselkursdienst umgerechnet, aufgeteilt und mit einem Beleg versehen. |
+| Salden, Ausgleichsvorschläge und Rückzahlung prüfen | Salden und Ausgleichsvorschläge werden korrekt angezeigt; eine Rückzahlung lässt sich erfassen und stornieren. |
+| Export erzeugen | Die Gruppenabrechnung wird vollständig als PDF-Datei und als CSV-ZIP-Archiv heruntergeladen. |
+| Gruppe archivieren und Abmeldung | Die Archivierung einer Gruppe und das Beenden der Benutzersitzung funktionieren fehlerfrei. |
 
 ---
 
@@ -123,14 +105,11 @@ Spätere Releases aktualisieren die Anwendung nach der Erstinbetriebnahme.
 
 | Schritt | Aktivität | Regel |
 |--------|-----------|-------|
-| 1 | Quellstand prüfen | Änderungen müssen zum Projektumfang passen. |
-| 2 | Tests ausführen | Zentrale Fachlogik muss geprüft werden. |
-| 3 | Anwendung bauen | Frontend und Backend werden aus aktuellem Stand erzeugt. |
-| 4 | Artefakte bereitstellen | Neue Anwendung ersetzt alte Anwendung. |
-| 5 | Datenbankänderungen prüfen | Schemaänderungen werden kontrolliert durchgeführt. |
-| 6 | Funktionstest durchführen | Zentrale Funktionen werden erneut geprüft. |
-
-Persistente Daten dürfen bei einem Release nicht gelöscht oder überschrieben werden.
+| 1 | Stand prüfen und testen | Alle fachlichen Anforderungen und automatisierten Prüfungen sind erfolgreich durchlaufen. |
+| 2 | Datensicherung erstellen | Vor Änderungen an der Datenstruktur wird eine vollständige Sicherung der PostgreSQL-Datenbank erstellt. |
+| 3 | Neue Anwendungsversion bereitstellen | Die aktualisierte Anwendung ersetzt die bisherige Version, ohne persistente Daten oder Konfigurationen zu überschreiben. |
+| 4 | Datenbankschema kontrolliert anpassen | Notwendige Erweiterungen der Datenstruktur werden schrittweise auf den bestehenden Datenbestand angewendet. |
+| 5 | Funktionsprüfung wiederholen | Die zentralen Abläufe aus S3.6 werden nach dem Release erneut verifiziert. |
 
 ---
 
@@ -138,14 +117,13 @@ Persistente Daten dürfen bei einem Release nicht gelöscht oder überschrieben 
 
 Wenn ein Release das Datenmodell verändert, müssen Datenbankänderungen kontrolliert durchgeführt werden.
 
-| Beispiel | Bedeutung |
-|---------|-----------|
-| Neues Attribut bei Expense | Datenbankschema muss erweitert werden. |
-| Neue Entität für spätere Funktionen | Neue Tabelle oder Struktur kann erforderlich sein. |
-| Neue Aufteilungsart | Datenmodell und Validierung müssen angepasst werden. |
-| Neues Exportformat | Fachlogik und Exportmodul müssen erweitert werden. |
+| Änderungstyp | Fachliche Auswirkung |
+|-------------|----------------------|
+| Neues Pflichtattribut an bestehender Entität | Bestehende Datensätze benötigen einen gültigen Standardwert oder eine definierte Überführungsregel. |
+| Neue Entität (z. B. für zusätzliche Nachweise oder Protokolle) | Neue Tabellen und Beziehungen werden ergänzt, bestehende Ausgaben und Salden bleiben unverändert. |
+| Erweiterung zulässiger Wertebereiche (z. B. zusätzliche Währung oder Kategorie) | Prüfregeln (D2) und Stammdaten werden konsistent aktualisiert. |
 
-Vor größeren Datenbankänderungen ist ein Backup sinnvoll. Konkrete Backup- und Migrationsbefehle gehören nicht zu S3, sondern zur technischen Betriebsdokumentation.
+Vor jeder Schemaänderung ist ein Wiederherstellungspunkt (Backup) der PostgreSQL-Datenbank anzulegen.
 
 ---
 
@@ -153,14 +131,11 @@ Vor größeren Datenbankänderungen ist ein Backup sinnvoll. Konkrete Backup- un
 
 Ein Rollback ist die Rückkehr zu einem früheren Stand der Anwendung.
 
-| Situation | Bewertung |
-|----------|-----------|
-| Release ohne Datenbankänderung | Vorherige Anwendungsversion kann grundsätzlich wieder bereitgestellt werden. |
-| Release mit Datenbankänderung | Rollback ist schwieriger, weil die alte Anwendung eventuell nicht zum neuen Schema passt. |
-| Fehlerhafte Konfiguration | Korrektur der Konfiguration erforderlich. |
-| Fehlerhafte Exportfunktion | Anwendung kann auf vorherige Version zurückgesetzt werden, falls keine Schemaänderung erfolgt ist. |
-
-Der Zeitpunkt direkt vor einer Datenbankänderung ist ein wichtiger Sicherungspunkt.
+| Fehlersituation | Vorgehen |
+|----------------|----------|
+| Fehler in der Anwendungslogik ohne Änderung der Datenstruktur | Die vorherige Version der Webanwendung wird wieder bereitgestellt; der bestehende Datenbestand bleibt nutzbar. |
+| Fehlerhafte Umgebungskonfiguration | Die Konfigurationsparameter werden korrigiert und die Anwendung neu gestartet. |
+| Fehler in Verbindung mit einer Datenbankänderung | Ein einfaches Zurücksetzen der Anwendung genügt nicht, da die alte Version ggf. nicht mit der geänderten Datenstruktur arbeitet; die Datenbank muss auf die vor dem Release erstellte Sicherung zurückgesetzt werden. |
 
 ---
 
@@ -168,14 +143,11 @@ Der Zeitpunkt direkt vor einer Datenbankänderung ist ein wichtiger Sicherungspu
 
 | Thema | Begründung |
 |------|------------|
-| Exakte Installationsbefehle | Gehören in README oder Betriebsanleitung. |
-| Konkrete Dateipfade | Gehören zur technischen Deployment-Dokumentation. |
-| Docker-Compose-Dateien | Gehören zur Architektur oder Implementierung. |
-| CI/CD-Pipeline im Detail | Gehört zur Entwicklungs- und Architekturdokumentation. |
-| Webserver-Konfiguration | Gehört zum Betrieb. |
-| Backup-Mechanik im Detail | Gehört zum Betriebskonzept. |
-| Datenmigration aus Altsystem | Nicht anwendbar, siehe S2. |
-| Zahlungsanbieter-Einrichtung | Nicht Bestandteil des Projektumfangs. |
+| Konkrete Installations- und Startbefehle | Gehören in die Installationsanleitung (`README`) und Betriebsdokumentation. |
+| Server-, Container- und Hosting-Konfiguration | Gehört in die Architekturdokumentation. |
+| Automatisierte Build- und Auslieferungsabläufe | Gehören in die Entwicklungs- und Architekturdokumentation. |
+| Technische Backup- und Wiederherstellungsprozeduren | Gehören in das Betriebskonzept bzw. die Architekturdokumentation. |
+| Datenmigration aus einem Altsystem | Nicht anwendbar, da CampusSplit als Neuentwicklung ohne Vorgängersystem entsteht. |
 
 ---
 
@@ -183,17 +155,16 @@ Der Zeitpunkt direkt vor einer Datenbankänderung ist ein wichtiger Sicherungspu
 
 | Baustein | Relevanz für S3 |
 |----------|-----------------|
-| P1 | Definiert Rahmenbedingungen, Umfang und Nichtziele. |
-| P2 | Beschreibt Browser, CampusSplit, Datenbank und Exportdateien im Systemkontext. |
-| F1 | Geschäftsprozess liefert Grundlage für Funktionstests. |
-| F2 | Use Cases werden nach Inbetriebnahme exemplarisch geprüft. |
-| F3 | Kostenaufteilung, Saldenberechnung und Exportaufbereitung müssen funktionieren. |
-| D1 | Datenbank enthält die fachlichen Entitäten. |
-| D2 | Datentypen beeinflussen Validierung und Tests. |
-| B1 | Dialoge müssen im Browser erreichbar sein. |
-| B3 | PDF- und CSV-Exporte müssen erzeugbar sein. |
-| S1 | Nachbarsysteme wie Browser, Datenbank und Exportdatei müssen erreichbar sein. |
-| S2 | Datenmigration ist nicht anwendbar, da CampusSplit ein Greenfield-Projekt ist. |
-| N1 | Qualitätsanforderungen beeinflussen Betrieb, Sicherheit und Performance. |
-| N2 | Authentifizierung, Autorisierung, Validierung, Fehlerbehandlung und Logging wirken auf den Betrieb. |
-| E2 | Glossar erklärt Begriffe wie Inbetriebnahme, Release, Datenbank und Export. |
+| [P1](P1_Ziele_und_Rahmenbedingungen.md) | Definiert Rahmenbedingungen, Projektumfang und Nichtziele für den Betrieb. |
+| [P2](P2_Architekturueberblick.md) | Beschreibt die Systemgrenze und die externen Nachbarsysteme im Kontext. |
+| [F1](F1-geschaeftsprozesse.md) | Der Geschäftsprozess bildet den fachlichen Rahmen für die Funktionsprüfung. |
+| [F2](F2-anwendungsfälle.md) | Die Use Cases liefern die konkreten Prüffälle für S3.6. |
+| [F3](F3-anwendungsfunktionen.md) | Die Anwendungsfunktionen müssen nach der Inbetriebnahme fachlich korrekt arbeiten. |
+| [D1](D1_Datenmodell.md) | Definiert die dauerhaft zu speichernden Entitäten und Integritätsregeln in PostgreSQL. |
+| [D2](D2_Datentypenverzeichnis.md) | Definiert die fachlichen Datentypen und Wertebereiche. |
+| [B1](B1_Dialogspezifikation.md) | Die spezifizierten Dialoge müssen über den Webbrowser erreichbar sein. |
+| [B3](B3_Druckausgaben.md) | PDF- und CSV-Exporte müssen nach der Inbetriebnahme erzeugbar sein. |
+| [S1](S1_Nachbarsysteme.md) | Beschreibt die Schnittstellen zu externen Diensten (Wechselkursdienst, Google-Anmeldung). |
+| [N1](N1_Nichtfunktionale_Anforderungen.md) | Qualitätsanforderungen an Sicherheit, Verfügbarkeit und Antwortzeiten bestimmen die Betriebsvoraussetzungen. |
+| [N2](N2_Querschnittskonzepte.md) | Querschnittliche Regeln zu Authentifizierung, Autorisierung und Protokollierung wirken auf den Betrieb. |
+| [E2](E2_Glossar.md) | Das Glossar definiert zentrale Begriffe. |
