@@ -4,174 +4,91 @@ Dieser Baustein beschreibt grob, wie CampusSplit aufgebaut ist und mit welchen a
 
 ---
 
-## P2.1 Systemkontext
+## P2.1 Zweck
 
-CampusSplit ist eine Webanwendung zur Verwaltung gemeinsamer Ausgaben. Nutzer greifen über einen Webbrowser auf die Anwendung zu. Die Anwendung verarbeitet Gruppen, Ausgaben, Kostenanteile und offene Beträge.
+P2 zeigt CampusSplit als **Black Box** in seiner fachlichen Umgebung: wer mit dem System arbeitet (Akteure), mit welchen anderen Systemen es Informationen austauscht (Nachbarsysteme) und welche Informationen dabei fließen. Was im Inneren des Systems geschieht, beschreibt die Spezifikation in den Bausteinen F, D und B; wie es technisch aufgebaut ist, beschreibt die Architekturdokumentation. Die Einzelheiten der Schnittstellen zu den Nachbarsystemen stehen in [S1](S1_Nachbarsysteme.md); P2 gibt nur den Überblick.
 
-Die Daten werden dauerhaft in einer Datenbank gespeichert. PDF- und CSV-Dateien sind kein eigenes aktives Nachbarsystem, sondern ein ausgehender Datenfluss, der beim Export entsteht.
-
-```mermaid
-flowchart LR
-    U[Nutzer] -->|bedient| B[Webbrowser]
-    B -->|Anfragen und Antworten| CS[CampusSplit]
-    CS -->|liest und speichert| DB[(Datenbank)]
-    CS -->|erzeugt bei Export| EX[PDF- oder CSV-Datei]
-    EX -->|Download| U
-```
-
----
-
-## P2.2 Akteure
-
-Akteure sind Personen, die mit CampusSplit arbeiten. Sie sind nicht automatisch Nachbarsysteme.
-
-| Akteur | Beschreibung |
-|---|---|
-| Gast | Kann sich registrieren oder anmelden. |
-| Nutzer | Angemeldete Person mit Zugriff auf eigene Gruppen. |
-| Gruppenmitglied | Sieht Gruppendaten, Ausgaben und Salden. |
-| Gruppenersteller | Erstellt eine Gruppe und kann Mitglieder hinzufügen. |
-
-Die fachlichen Use Cases dieser Akteure werden in [F2 — Anwendungsfälle](F2-anwendungsf%C3%A4lle.md) beschrieben. Regeln zu Zugriff und Rollen stehen in [N2 — Querschnittskonzepte](N2_Querschnittskonzepte.md).
-
----
-
-## P2.3 Nachbarsysteme und Datenflüsse
-
-CampusSplit hat in der ersten Version keine fachlichen externen Dienste wie Bankensysteme, Zahlungsanbieter oder KI-Services. Trotzdem gibt es technische Nachbarsysteme und Datenflüsse, die für die Anwendung wichtig sind.
-
-| ID | Element | Einordnung | Beschreibung |
-|---|---|---|---|
-| NS-01 | Webbrowser | Nachbarsystem | Zugang zur Webanwendung. |
-| NS-02 | Datenbank | Nachbarsystem / Persistenz | Speichert die Anwendungsdaten. |
-| DF-01 | PDF-Export | Datenfluss | Erzeugte Datei für den Download. |
-| DF-02 | CSV-Export | Datenfluss | Erzeugte Datei für den Download. |
-
-Banken, Zahlungsanbieter, Chatdienste und KI-Services sind nicht Teil der ersten Version. PDF und CSV werden als Datenfluss betrachtet, weil dabei Dateien erzeugt werden, aber kein fremdes System aktiv angebunden wird. Detaillierte Schnittstellen werden in [S1 — Nachbarsysteme](S1_Nachbarsysteme.md) beschrieben.
-
----
-
-## P2.4 Grobe Systemstruktur
-
-CampusSplit wird grob in Benutzeroberfläche, Anwendungsschnittstelle, Anwendungslogik und Datenhaltung getrennt. Dadurch bleibt klar, welcher Teil welche Aufgabe übernimmt.
-
-| Bereich | Aufgabe |
-|---|---|
-| Benutzeroberfläche | Formulare und Ansichten im Browser anzeigen. |
-| Anwendungsschnittstelle | Eingaben zwischen Oberfläche und Logik übertragen. |
-| Anwendungslogik | Regeln prüfen und offene Beträge berechnen. |
-| Datenhaltung | Benutzer, Gruppen, Mitglieder und Ausgaben speichern. |
-| Export | Ausgabenübersichten als PDF oder CSV erzeugen. |
-
-```mermaid
-flowchart TD
-    UI[Benutzeroberfläche im Browser]
-    API[Anwendungsschnittstelle]
-    LOGIC[Anwendungslogik]
-    DB[(Datenhaltung)]
-    EXP[Exportfunktion]
-    FILE[PDF- oder CSV-Datei]
-
-    UI --> API
-    API --> LOGIC
-    LOGIC --> DB
-    LOGIC --> EXP
-    EXP --> FILE
-```
-
-Die Anwendungsschnittstelle ist hier nur grob gemeint. Konkrete Endpunkte oder technische Details gehören nicht in P2, sondern in die spätere Architektur oder Schnittstellendokumentation.
-
----
-
-## P2.5 Wichtige Datenflüsse
-
-Ein typischer Ablauf beginnt im Browser. CampusSplit verarbeitet die Eingabe, speichert benötigte Daten und gibt eine passende Ansicht zurück.
-
-```mermaid
-sequenceDiagram
-    actor Nutzer
-    participant Browser
-    participant CS as CampusSplit
-    participant DB as Datenbank
-
-    Nutzer->>Browser: Eingabe machen
-    Browser->>CS: Anfrage senden
-    CS->>CS: Eingabe prüfen
-    CS->>DB: Daten lesen oder speichern
-    DB-->>CS: Daten zurückgeben
-    CS->>CS: offene Beträge berechnen
-    CS-->>Browser: Ergebnis senden
-    Browser-->>Nutzer: Ergebnis anzeigen
-```
-
-Der Export ist ein eigener Datenfluss. Dabei liest CampusSplit die benötigten Gruppen- und Ausgabendaten, bereitet sie auf und erzeugt daraus eine Datei.
+## P2.2 Systemkontext
 
 ```mermaid
 flowchart LR
-    U[Nutzer] -->|Export anfordern| CS[CampusSplit]
-    CS -->|Daten lesen| DB[(Datenbank)]
-    DB -->|Ausgaben und Salden| CS
-    CS -->|Datei erzeugen| F[PDF oder CSV]
-    F -->|Download| U
-```
-
-Die fachliche Saldenberechnung steht in [F3 — Anwendungsfunktionen](F3-anwendungsfunktionen.md). Der genaue Inhalt der Exportdateien steht in [B3 — Druck- und Exportausgaben](B3_Druckausgaben.md).
-
----
-
-## P2.6 Systemgrenze
-
-Die Systemgrenze zeigt, was zu CampusSplit gehört und was außerhalb liegt.
-
-```mermaid
-flowchart TD
-    subgraph CS[CampusSplit]
-        AUTH[Benutzerverwaltung]
-        GROUPS[Gruppenverwaltung]
-        EXPENSES[Ausgabenverwaltung]
-        BAL[Saldenberechnung]
-        EXPORT[Exportfunktion]
-        DATA[Datenzugriff]
+    subgraph AKT["Akteure"]
+        direction TB
+        G["AKT-01 Gast"]
+        B["AKT-02 Benutzer"]
+        M["AKT-03 Gruppenmitglied"]
+        A["AKT-04 Gruppenadministrator"]
     end
 
-    USER[Nutzer] --> BROWSER[Webbrowser]
-    BROWSER --> CS
-    DATA --> DB[(Datenbank)]
-    EXPORT --> FILE[PDF oder CSV]
+    CS[["CampusSplit"]]
 
-    PAY[Zahlungsanbieter / Bank] -. nicht Bestandteil .- CS
-    CHAT[Chatdienst] -. nicht Bestandteil .- CS
-    AI[KI-Service] -. nicht Bestandteil .- CS
+    subgraph NSY["Nachbarsysteme"]
+        direction TB
+        FX["NS-01 Wechselkursdienst"]
+        GO["NS-02 Google-Anmeldedienst"]
+    end
+
+    M -.->|"ist ein"| B
+    A -.->|"ist ein"| M
+
+    G -->|"Registrierung, Anmeldung"| CS
+    B -->|"Profil, neue Gruppe"| CS
+    CS -->|"persönliche Übersicht"| B
+    M -->|"Ausgaben, Belege, Rückzahlungen, Stornierungen"| CS
+    CS -->|"Salden, Ausgleichsvorschläge, Aktivitäten, Abrechnung"| M
+    A -->|"Mitglieder, Archivierung, Löschung"| CS
+
+    CS -->|"Währungspaar, Datum"| FX
+    FX -->|"Wechselkurs, Kursdatum"| CS
+    G -->|"meldet sich mit Google-Konto an"| GO
+    B -->|"bestätigt Verknüpfung mit Google-Konto"| GO
+    GO -->|"bestätigte Identität"| CS
 ```
 
-Zur Anwendung gehören Benutzerverwaltung, Gruppenverwaltung, Ausgabenverwaltung, Saldenberechnung, Exportfunktion und Datenzugriff. Nicht dazu gehören echte Geldüberweisungen, Bankkonten, Chatdienste oder KI-Services.
+**Legende:** Der doppelt umrahmte Kasten ist CampusSplit als Black Box. Durchgezogene Pfeile zeigen einen fachlichen Informationsfluss in Pfeilrichtung, beschriftet mit der übermittelten Information. Gestrichelte Pfeile mit „ist ein“ zeigen eine Spezialisierung zwischen Akteuren: Jeder Gruppenadministrator ist ein Gruppenmitglied, jedes Gruppenmitglied ist ein Benutzer und kann alles, was ein Benutzer kann.
+
+**Erläuterung:** Ein Gast kann sich nur registrieren oder anmelden, entweder direkt bei CampusSplit oder über sein Google-Konto. Nach der Anmeldung ist er Benutzer. Ein Benutzer pflegt sein Profil, legt Gruppen an und sieht seine persönliche Übersicht über alle seine Gruppen. Innerhalb einer Gruppe ist er Gruppenmitglied: Er erfasst Ausgaben, Belege und Rückzahlungen und erhält Salden, Ausgleichsvorschläge, Aktivitäten und die herunterladbare Abrechnung. Der Gruppenadministrator verwaltet zusätzlich die Mitglieder und den Zustand der Gruppe.
+
+CampusSplit fragt den Wechselkursdienst nur nach dem Kurs eines Währungspaares an einem Tag. Beim Google-Anmeldedienst meldet sich die Person selbst an; CampusSplit erhält danach nur die bestätigte Identität.
+
+## P2.3 Akteure
+
+| ID | Akteur | Beschreibung | Spezialisierung von | Leistungsbereiche ([P1.5](P1_Ziele_und_Rahmenbedingungen.md#p15-leistungsumfang)) |
+| --- | --- | --- | --- | --- |
+| AKT-01 | Gast | Person, die nicht angemeldet ist. Sieht nur die Startseite und die Seiten zur Registrierung und Anmeldung. | – | LB-01 |
+| AKT-02 | Benutzer | Angemeldete Person mit Benutzerkonto. Ändert ihren Anzeigenamen, verknüpft ihr Konto mit Google, legt Gruppen an und sieht die persönliche Übersicht. | – | LB-01, LB-02 (anlegen), LB-09 |
+| AKT-03 | Gruppenmitglied | Benutzer in Bezug auf eine bestimmte Gruppe, der er angehört. Sieht alle Inhalte der Gruppe, erfasst, ändert und löscht Ausgaben und Belege, erfasst und storniert Rückzahlungen, an denen er selbst beteiligt ist, und lädt die Abrechnung herunter. | Benutzer | LB-03 bis LB-08, LB-10 |
+| AKT-04 | Gruppenadministrator | Gruppenmitglied mit der Rolle Gruppenadministrator; das ist die Person, die die Gruppe angelegt hat. Fügt Mitglieder hinzu, archiviert die Gruppe, stellt sie wieder her oder löscht sie endgültig und darf Rückzahlungen auch für andere Mitglieder erfassen und stornieren. | Gruppenmitglied | LB-02, LB-07 |
+
+Eine Person kann gleichzeitig in einer Gruppe Gruppenadministrator und in einer anderen Gruppe einfaches Gruppenmitglied sein. Die Rechte im Einzelnen regelt [N2](N2_Querschnittskonzepte.md).
+
+## P2.4 Nachbarsysteme
+
+| ID | Nachbarsystem | Zweck für CampusSplit | Erhält von CampusSplit | Liefert an CampusSplit | Auslöser | Fachliche Folge bei Ausfall |
+| --- | --- | --- | --- | --- | --- | --- |
+| NS-01 | Wechselkursdienst (Frankfurter, öffentlicher Dienst mit Tagesreferenzkursen) | Umrechnung von Fremdwährungsausgaben in die Gruppenwährung; Euroübersicht | Ausgangswährung, Zielwährung und gewünschtes Datum, keine Personen- oder Gruppendaten | Wechselkurs und Kursdatum | Speichern einer Fremdwährungsausgabe mit neuem Betrag, neuer Währung oder neuem Ausgabedatum; Aufruf der persönlichen Übersicht, wenn der Benutzer einer Gruppe in US-Dollar angehört | Die Fremdwährungsausgabe wird nicht gespeichert; der Benutzer erhält eine Meldung und kann es später erneut versuchen. Ausgaben in Gruppenwährung, Salden und bereits gespeicherte Kurse sind nicht betroffen. Die Euroübersicht entfällt vollständig, es werden keine Teilsummen gezeigt. |
+| NS-02 | Google-Anmeldedienst (optional, siehe [RB-06](P1_Ziele_und_Rahmenbedingungen.md#p17-rahmenbedingungen)) | Anmeldung und Registrierung mit einem Google-Konto; Verknüpfung eines Benutzerkontos mit einem Google-Konto | Anmeldeanfrage von CampusSplit; die Person meldet sich bei Google selbst an | Bestätigte Identität: dauerhafte Google-Kennung, bestätigte E-Mail-Adresse, Name | Gast wählt „Mit Google anmelden“; Benutzer wählt im Profil „Mit Google verknüpfen“ | Anmeldung, Registrierung und Verknüpfung über Google sind nicht möglich. Die Anmeldung mit E-Mail und Passwort ist nicht betroffen. Benutzer ohne Passwort können sich nicht anmelden (Risiko [R-02](P1_Ziele_und_Rahmenbedingungen.md#p19-risiken)). |
+
+Beide Dienste sind ohne Vertrag und Nutzungsentgelt nutzbar ([RB-02](P1_Ziele_und_Rahmenbedingungen.md#p17-rahmenbedingungen)). Der Wechselkursdienst erhält keine personenbezogenen Daten; Google erfährt nur, dass sich eine Person bei CampusSplit anmeldet ([RB-03](P1_Ziele_und_Rahmenbedingungen.md#p17-rahmenbedingungen)).
+
+## P2.5 Nicht Teil des Kontexts
+
+Die folgenden Elemente sind keine Nachbarsysteme. Sie werden hier genannt, damit die Abgrenzung eindeutig ist.
+
+| Element | Warum kein Nachbarsystem |
+| --- | --- |
+| Webbrowser | Der Browser ist der Zugangsweg der Akteure, kein eigenständiges System mit eigener fachlicher Aufgabe. |
+| Datenbank | Die dauerhafte Speicherung ist Bestandteil von CampusSplit und liegt innerhalb der Systemgrenze. Ihr Aufbau ist Gegenstand der Architektur. |
+| Banken, Bezahl-Apps | Zahlungen finden außerhalb statt; CampusSplit hat keine Verbindung zu Zahlungsdiensten ([NZ-01](P1_Ziele_und_Rahmenbedingungen.md#p16-nichtziele)). |
+| E-Mail | CampusSplit versendet keine Nachrichten ([NZ-05](P1_Ziele_und_Rahmenbedingungen.md#p16-nichtziele)). |
+| Tabellenkalkulation, PDF-Anzeige | Die Benutzer öffnen heruntergeladene Abrechnungen selbst; es gibt keinen automatischen Austausch. |
+
+## P2.6 Einbettung in die Abläufe der Gruppen
+
+CampusSplit übernimmt in den Situationen aus [P1.2](P1_Ziele_und_Rahmenbedingungen.md#p12-typische-einsatzsituationen) jeweils einzelne Schritte. Davor liegen manuelle Tätigkeiten wie Einkaufen, Bezahlen und Aufbewahren des Belegs, danach das Übergeben oder Überweisen des Geldes und die Bestätigung durch die Beteiligten. Diese Abläufe mit ihren manuellen und unterstützten Aktivitäten beschreibt [F1](F1-geschaeftsprozesse.md).
 
 ---
 
-## P2.7 Architekturziele
-
-| ID | Architekturziel |
-|---|---|
-| AZ-01 | Oberfläche, Anwendungslogik und Datenhaltung sollen getrennt sein. |
-| AZ-02 | Die Struktur soll für das Team verständlich bleiben. |
-| AZ-03 | Die Saldenberechnung soll nachvollziehbar und testbar sein. |
-| AZ-04 | Daten sollen dauerhaft gespeichert werden. |
-| AZ-05 | Die Anwendung soll im Browser nutzbar sein. |
-| AZ-06 | Die Struktur soll spätere Erweiterungen ermöglichen. |
-
----
-
-## P2.8 Querverweise
-
-| Baustein | Relevanz |
-|---|---|
-| [P1 — Ziele und Rahmenbedingungen](P1_Ziele_und_Rahmenbedingungen.md) | Ziele, Umfang und Nichtziele. |
-| [F2 — Anwendungsfälle](F2-anwendungsf%C3%A4lle.md) | Aktionen der Akteure. |
-| [F3 — Anwendungsfunktionen](F3-anwendungsfunktionen.md) | Kostenaufteilung und Saldenberechnung. |
-| [D1 — Datenmodell](D1_Datenmodell.md) | Gespeicherte Datenobjekte. |
-| [B3 — Druck- und Exportausgaben](B3_Druckausgaben.md) | PDF- und CSV-Export. |
-| [S1 — Nachbarsysteme](S1_Nachbarsysteme.md) | Schnittstellen und Nachbarsysteme. |
-| [N2 — Querschnittskonzepte](N2_Querschnittskonzepte.md) | Zugriff, Validierung und Fehlerbehandlung. |
 
 ## Eingesetzte KI-Werkzeuge
 
