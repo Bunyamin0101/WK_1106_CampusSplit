@@ -1,224 +1,111 @@
 ﻿# E2 — Glossar
 
-E2 erklärt zentrale Begriffe, die in der Spezifikation von **CampusSplit** verwendet werden. Das Glossar soll helfen, Begriffe einheitlich zu verwenden und Missverständnisse zu vermeiden.
-
-Die Begriffe sind alphabetisch sortiert. Ausführliche Anforderungen stehen nicht im Glossar, sondern in den jeweiligen Bausteinen.
+Das Glossar definiert die **Fachbegriffe** von CampusSplit verbindlich für alle Bausteine ([E1.4](E1_Leseanleitung.md#e14-konventionen)). Methodenbegriffe (z. B. Anwendungsfall, Dialog) und technische Begriffe (z. B. Dateiformate, Datenbank) sind nicht Teil des Glossars. Begriffe in der Spalte „Nicht verwenden“ sind Synonyme, die in der Spezifikation nicht vorkommen dürfen. Rechenregeln werden hier nur benannt; festgelegt sind sie in [F3](F3-anwendungsfunktionen.md) und [D1](D1_Datenmodell.md).
 
 ---
 
-## E2.1 Zentrale Begriffszusammenhänge
+## E2.1 Begriffsmodell
 
-Das folgende Diagramm zeigt die wichtigsten fachlichen Begriffe im Zusammenhang. Es ersetzt nicht das Datenmodell in [D1 — Datenmodell](D1_Datenmodell.md).
+Das Begriffsmodell zeigt, wie die zentralen Begriffe zusammenhängen.
 
 ```mermaid
-flowchart LR
-    U[Benutzer] --> M[Mitgliedschaft]
-    M --> G[Gruppe]
-    G --> A[Ausgabe]
-    A --> K[Kostenanteil]
-    A --> S[Saldo]
-    S --> D[Debitor]
-    S --> KR[Kreditor]
-    S --> AV[Ausgleichsvorschlag]
+flowchart TB
+    BEN["Benutzer"]
+    GK["Google-Konto"]
+    MIT["Gruppenmitglied"]
+    ROL["Rolle"]
+    GRU["Gruppe"]
+    GW["Gruppenwährung"]
+    AUS["Ausgabe"]
+    KA["Kostenanteil"]
+    KAT["Kategorie"]
+    BEL["Beleg"]
+    WK["Wechselkurs"]
+    RZ["Rückzahlung"]
+    AKV["Aktivität"]
+    SAL["Saldo"]
+    AV["Ausgleichsvorschlag"]
+
+    BEN -->|"ist verknüpft mit (1 : 0..1)"| GK
+    BEN -->|"ist (1 : 0..*)"| MIT
+    GRU -->|"hat (1 : 1..*)"| MIT
+    MIT -->|"hat (0..* : 1)"| ROL
+    GRU -->|"rechnet ab in (0..* : 1)"| GW
+    GRU -->|"enthält (1 : 0..*)"| AUS
+    MIT -->|"bezahlt als Zahler (1 : 0..*)"| AUS
+    AUS -->|"wird aufgeteilt in (1 : 1..*)"| KA
+    MIT -->|"trägt als Beteiligter (1 : 0..*)"| KA
+    AUS -->|"ist eingeordnet in (0..* : 0..1)"| KAT
+    AUS -->|"wird nachgewiesen durch (1 : 0..5)"| BEL
+    AUS -->|"wird umgerechnet mit (0..* : 0..1)"| WK
+    GRU -->|"enthält (1 : 0..*)"| RZ
+    MIT -->|"zahlt als Schuldner (1 : 0..*)"| RZ
+    MIT -->|"empfängt als Gläubiger (1 : 0..*)"| RZ
+    RZ -->|"bezieht sich auf (0..* : 0..1)"| AUS
+    GRU -->|"protokolliert (1 : 0..*)"| AKV
+    MIT -->|"hat (1 : 1)"| SAL
+    GRU -->|"ergibt (1 : 0..*)"| AV
+
+    classDef abgeleitet stroke-dasharray: 5 5
+    class SAL,AV abgeleitet
 ```
 
----
+**Legende:** Kästen sind Begriffe aus der Tabelle in E2.2. Pfeile werden in Pfeilrichtung gelesen („Gruppe enthält Ausgabe“). Die Angabe in Klammern ist die Kardinalität `(Anfang : Ende)`: „Gruppe enthält Ausgabe (1 : 0..*)“ bedeutet, dass eine Ausgabe zu genau einer Gruppe gehört und eine Gruppe beliebig viele Ausgaben enthält. Gestrichelt umrandete Begriffe werden nicht erfasst, sondern aus anderen Angaben berechnet.
 
 ## E2.2 Begriffe
 
-### Administrator
-
-Ein Administrator ist ein Benutzer mit erweiterten Rechten innerhalb einer Gruppe. Er kann zum Beispiel Mitglieder hinzufügen oder Gruppendaten verwalten. Die genauen Regeln stehen in [N2 — Querschnittskonzepte](N2_Querschnittskonzepte.md).
-
-### Anmeldung
-
-Die Anmeldung ist der Vorgang, bei dem sich ein registrierter Benutzer mit seinen Zugangsdaten bei CampusSplit einloggt. Nach erfolgreicher Anmeldung kann der Benutzer geschützte Funktionen nutzen. Siehe auch [UC-02 in F2](F2-anwendungsf%C3%A4lle.md#uc-02--anmelden).
-
-### Anwendungsfall
-
-Ein Anwendungsfall beschreibt eine Aktion, die ein Benutzer mit CampusSplit ausführen kann. Beispiele sind Registrierung, Anmeldung, Gruppe erstellen oder Ausgabe erfassen. Die Anwendungsfälle werden in [F2 — Anwendungsfälle](F2-anwendungsf%C3%A4lle.md) beschrieben.
-
-### Anwendungsfunktion
-
-Eine Anwendungsfunktion beschreibt eine fachliche Funktion des Systems. Dazu gehören zum Beispiel Kostenaufteilung, Saldenberechnung oder Exportaufbereitung. Die Funktionen stehen in [F3 — Anwendungsfunktionen](F3-anwendungsfunktionen.md).
-
-### Anwendungsschnittstelle
-
-Die Anwendungsschnittstelle beschreibt die Kommunikation zwischen Teilen der Anwendung, zum Beispiel zwischen Benutzeroberfläche und Anwendungslogik. In P2 wird sie nur grob beschrieben. Konkrete technische Details gehören nicht in das Glossar.
-
-### Aufteilungsart
-
-Die Aufteilungsart legt fest, wie eine Ausgabe auf Gruppenmitglieder verteilt wird. In der ersten Version wird vor allem die Aufteilung auf beteiligte Mitglieder betrachtet. Genauere Regeln stehen in [F3 — Anwendungsfunktionen](F3-anwendungsfunktionen.md).
-
-### Ausgabe
-
-Eine Ausgabe ist ein Geldbetrag, der innerhalb einer Gruppe erfasst wird. Zu einer Ausgabe gehören mindestens ein Betrag, eine Beschreibung, ein Datum, ein Zahler und die beteiligten Mitglieder. Im Datenmodell wird sie in [D1 — Datenmodell](D1_Datenmodell.md) beschrieben.
-
-### Ausgabenübersicht
-
-Eine Ausgabenübersicht fasst die Ausgaben und offenen Beträge einer Gruppe zusammen. Sie kann als PDF oder CSV exportiert werden. Der Export wird in [B3 — Druck- und Exportausgaben](B3_Druckausgaben.md) beschrieben.
-
-### Ausgleichsvorschlag
-
-Ein Ausgleichsvorschlag zeigt, welche Zahlung sinnvoll wäre, um offene Beträge auszugleichen. Er ist nur ein Vorschlag und keine echte Zahlung. Die Berechnung wird in [F3 — Anwendungsfunktionen](F3-anwendungsfunktionen.md#af-03--ausgleichsvorschl%C3%A4ge-berechnen) beschrieben.
-
-### Authentifizierung
-
-Authentifizierung bedeutet, dass das System die Identität eines Benutzers prüft. In CampusSplit passiert das bei der Anmeldung. Die Regeln dazu stehen in [N2 — Querschnittskonzepte](N2_Querschnittskonzepte.md#n22-authentifizierung-und-sitzung).
-
-### Autorisierung
-
-Autorisierung bedeutet, dass geprüft wird, ob ein angemeldeter Benutzer eine bestimmte Aktion ausführen darf. Bei CampusSplit hängt das vor allem von der Gruppenmitgliedschaft und Rolle ab. Die Regeln stehen in [N2 — Querschnittskonzepte](N2_Querschnittskonzepte.md#n23-autorisierung-und-gruppenrechte).
-
-### Benutzer
-
-Ein Benutzer ist eine registrierte Person, die CampusSplit verwendet. Ein Benutzer kann Gruppen erstellen, Mitglied in Gruppen sein, Ausgaben erfassen und Salden ansehen.
-
-### Benutzeroberfläche
-
-Die Benutzeroberfläche ist der sichtbare Teil der Anwendung im Browser. Über sie kann der Benutzer mit CampusSplit arbeiten. Die Dialoge werden in [B1 — Dialogspezifikation](B1_Dialogspezifikation.md) beschrieben.
-
-### CSV
-
-CSV ist ein Exportformat für tabellarische Daten. In CampusSplit kann eine Ausgabenübersicht als CSV-Datei exportiert werden. Die Inhalte stehen in [B3 — Druck- und Exportausgaben](B3_Druckausgaben.md).
-
-### Dashboard
-
-Das Dashboard ist die Übersichtsseite nach der Anmeldung. Dort sieht ein Benutzer seine Gruppen und wichtige Informationen zu offenen Beträgen.
-
-### Datenbank
-
-Die Datenbank speichert die Daten von CampusSplit dauerhaft. Dazu gehören Benutzer, Gruppen, Mitgliedschaften, Ausgaben und Kostenanteile. Der Zusammenhang wird in [P2 — Architekturüberblick](P2_Architekturueberblick.md) und [D1 — Datenmodell](D1_Datenmodell.md) beschrieben.
-
-### Datenfluss
-
-Ein Datenfluss beschreibt, wie Daten zwischen Beteiligten oder Systemteilen übertragen werden. Bei CampusSplit ist der PDF- oder CSV-Export ein Datenfluss, aber kein eigenes aktives Nachbarsystem.
-
-### Datenmigration
-
-Datenmigration bedeutet, dass Daten aus einem alten System in ein neues System übernommen werden. Für CampusSplit ist das in der ersten Version nicht vorgesehen, weil das Projekt neu entwickelt wird. Ein eigener Baustein S2 ist für CampusSplit daher nicht anwendbar.
-
-### Debitor
-
-Ein Debitor ist ein Gruppenmitglied, das laut Saldenberechnung noch Geld schuldet. Ein negativer Saldo bedeutet, dass das Mitglied Debitor ist.
-
-### Dialog
-
-Ein Dialog ist eine Ansicht oder Maske in CampusSplit, zum Beispiel Anmeldung, Gruppe erstellen oder Ausgabe erfassen. Die Dialoge stehen in [B1 — Dialogspezifikation](B1_Dialogspezifikation.md).
-
-### Export
-
-Ein Export erzeugt eine Ausgabenübersicht als Datei. In der ersten Version sind PDF und CSV vorgesehen. Der Export verändert keine gespeicherten Daten.
-
-### Gast
-
-Ein Gast ist eine Person, die noch nicht angemeldet ist. Ein Gast kann sich registrieren oder anmelden.
-
-### Geldbetrag
-
-Ein Geldbetrag ist ein Betrag in Euro. Er wird für Ausgaben, Kostenanteile, Salden und Ausgleichsvorschläge verwendet. Genauere Datentypen stehen in [D2 — Datentypenverzeichnis](D2_Datentypenverzeichnis.md).
-
-### Gruppe
-
-Eine Gruppe fasst mehrere Benutzer zusammen, die gemeinsame Ausgaben verwalten. Beispiele sind Wohngemeinschaften, Reisen oder studentische Projekte.
-
-### Gruppenmitglied
-
-Ein Gruppenmitglied ist ein Benutzer, der einer Gruppe zugeordnet ist. Gruppenmitglieder können Gruppendaten, Ausgaben und Salden der jeweiligen Gruppe sehen.
-
-### Gruppenersteller
-
-Der Gruppenersteller ist der Benutzer, der eine neue Gruppe anlegt. Er kann in der ersten Version Mitglieder zur Gruppe hinzufügen.
-
-### Kostenanteil
-
-Ein Kostenanteil beschreibt, welcher Teil einer Ausgabe auf ein bestimmtes Gruppenmitglied entfällt. Die Summe der Kostenanteile gehört zur jeweiligen Ausgabe.
-
-### Kreditor
-
-Ein Kreditor ist ein Gruppenmitglied, das laut Saldenberechnung Geld zurückbekommt. Ein positiver Saldo bedeutet, dass das Mitglied Kreditor ist.
-
-### Mitgliedschaft
-
-Eine Mitgliedschaft verbindet einen Benutzer mit einer Gruppe. Über die Mitgliedschaft kann auch festgelegt werden, welche Rolle ein Benutzer innerhalb der Gruppe hat.
-
-### Nachbarsystem
-
-Ein Nachbarsystem ist ein System außerhalb von CampusSplit, mit dem CampusSplit kommuniziert. Für CampusSplit sind vor allem Browser und Datenbank relevant. PDF- und CSV-Dateien werden als Datenfluss betrachtet. Details stehen in [P2 — Architekturüberblick](P2_Architekturueberblick.md) und [S1 — Nachbarsysteme](S1_Nachbarsysteme.md).
-
-### Nichtziel
-
-Ein Nichtziel beschreibt bewusst ausgeschlossene Funktionen. Dazu gehören zum Beispiel echte Zahlungsabwicklung, Bankanbindung oder eine eigene mobile App. Die Nichtziele stehen in [P1 — Ziele und Rahmenbedingungen](P1_Ziele_und_Rahmenbedingungen.md#p15-nichtziele).
-
-### PDF
-
-PDF ist ein Exportformat für eine lesbare Ausgabenübersicht. Es ist vor allem für das Anzeigen, Speichern oder Weitergeben der Übersicht geeignet.
-
-### Persistenz
-
-Persistenz bedeutet, dass Daten dauerhaft gespeichert werden. Dadurch bleiben Benutzer, Gruppen und Ausgaben auch nach dem Schließen der Anwendung erhalten.
-
-### Rolle
-
-Eine Rolle beschreibt, welche Rechte ein Benutzer innerhalb einer Gruppe hat. In CampusSplit wird zwischen normalen Gruppenmitgliedern und Benutzern mit erweiterten Rechten unterschieden.
-
-### Saldo
-
-Ein Saldo zeigt, ob ein Gruppenmitglied Geld zurückbekommt oder noch Geld schuldet. Ein positiver Saldo bedeutet Kreditor, ein negativer Saldo bedeutet Debitor.
-
-### Schnittstelle
-
-Eine Schnittstelle beschreibt eine Verbindung zwischen CampusSplit und einem angrenzenden System oder Systemteil. Schnittstellen werden im Architekturüberblick und genauer in [S1 — Nachbarsysteme](S1_Nachbarsysteme.md) betrachtet.
-
-### Sitzung
-
-Eine Sitzung entsteht nach erfolgreicher Anmeldung. Sie hält den Benutzer während der Nutzung angemeldet, bis er sich abmeldet oder die Sitzung endet.
-
-### Systemgrenze
-
-Die Systemgrenze legt fest, was zu CampusSplit gehört und was außerhalb liegt. Zum System gehören zum Beispiel Benutzerverwaltung, Gruppenverwaltung, Ausgabenverwaltung, Saldenberechnung und Exportfunktion. Siehe [P2 — Architekturüberblick](P2_Architekturueberblick.md#p26-systemgrenze).
-
-### Validierung
-
-Validierung ist die Prüfung von Eingaben, bevor sie gespeichert oder verarbeitet werden. Zum Beispiel darf ein Betrag nicht leer oder ungültig sein. Regeln zur Validierung stehen in [N2 — Querschnittskonzepte](N2_Querschnittskonzepte.md#n24-validierung).
-
-### Währung
-
-Die Währung beschreibt, in welcher Geldeinheit Beträge angegeben werden. In der ersten Version verwendet CampusSplit Euro.
-
-### Zahler
-
-Der Zahler ist das Gruppenmitglied, das eine Ausgabe bezahlt hat. Der Zahler muss Mitglied der Gruppe sein, zu der die Ausgabe gehört.
-
-### Zahlungsabwicklung
-
-Zahlungsabwicklung bedeutet, dass ein System echte Zahlungen ausführt oder Zahlungsanbieter einbindet. Das ist nicht Teil von CampusSplit. CampusSplit berechnet nur offene Beträge und Ausgleichsvorschläge.
+Die Begriffe sind alphabetisch sortiert; Umlaute werden wie der Grundbuchstabe einsortiert.
+
+| Begriff | Definition | Nicht verwenden | Siehe |
+| --- | --- | --- | --- |
+| Abrechnung | Herunterladbare Zusammenstellung der Daten einer Gruppe zum Weitergeben und Aufbewahren, als PDF-Dokument oder als Tabellendateien in einem ZIP-Archiv. Der Inhalt richtet sich nach dem gewählten Abrechnungsumfang. Jedes Gruppenmitglied kann die Abrechnung herunterladen. | Export, Report, Gruppenabrechnung (nur als Titel des Dokuments) | [B3](B3_Druckausgaben.md), [LB-10](P1_Ziele_und_Rahmenbedingungen.md#p15-leistungsumfang) |
+| Abrechnungsbetrag | Betrag einer Ausgabe in der Gruppenwährung. Er entspricht dem Originalbetrag, wenn Originalwährung und Gruppenwährung gleich sind; sonst dem mit dem Wechselkurs umgerechneten und auf ganze Cent gerundeten Originalbetrag. Der Abrechnungsbetrag ist die Grundlage für Kostenanteile und Salden. | umgerechneter Betrag, Gesamtbetrag | [F3](F3-anwendungsfunktionen.md) |
+| Abrechnungsumfang | Auswahl, welche Inhalte eine Abrechnung enthält: **gesamte Abrechnung** (Salden, Ausgleichsvorschläge, Ausgaben mit Kostenanteilen, Rückzahlungen), **offene Beträge** (Salden und Ausgleichsvorschläge) oder **nur Ausgaben** (Ausgaben mit Kostenanteilen). | Scope, Exportumfang | [B3](B3_Druckausgaben.md) |
+| Aktivität | Unveränderlicher Eintrag im Protokoll einer Gruppe über ein Ereignis: Ausgabe erstellt, geändert oder gelöscht (mit alten und neuen Werten), Beleg hinzugefügt oder entfernt, Rückzahlung erfasst oder storniert. Enthält Zeitpunkt und handelnde Person mit dem Anzeigenamen zum Zeitpunkt des Ereignisses. | Historie, Änderungsverlauf, Log | [D1](D1_Datenmodell.md), [Z-03](P1_Ziele_und_Rahmenbedingungen.md#p14-ziele-und-erfolgskriterien) |
+| Anmeldeweg | Art, wie sich ein Benutzer anmeldet: mit E-Mail-Adresse und Passwort oder über die Google-Anmeldung. Ein Benutzerkonto hat mindestens einen Anmeldeweg und kann beide haben. | Login-Methode | [LB-01](P1_Ziele_und_Rahmenbedingungen.md#p15-leistungsumfang) |
+| Anzeigename | Name, unter dem ein Benutzer in allen seinen Gruppen erscheint; 1 bis 100 Zeichen, im Profil änderbar. Muss nicht eindeutig sein. | Benutzername, Nickname | [D2](D2_Datentypenverzeichnis.md) |
+| Archivierung | Kennzeichnung einer Gruppe als abgeschlossen durch den Gruppenadministrator. Eine archivierte Gruppe erscheint in der Gruppenliste getrennt unter „Archivierte Gruppen“; alle Daten bleiben erhalten und können weiterhin geändert werden. Die Archivierung kann rückgängig gemacht werden (Wiederherstellung). | Deaktivierung, Schließen | [LB-02](P1_Ziele_und_Rahmenbedingungen.md#p15-leistungsumfang) |
+| Aufteilungsart | Regel, nach der der Abrechnungsbetrag einer Ausgabe auf die Beteiligten verteilt wird: **gleichmäßig** (alle Beteiligten tragen denselben Betrag, Restcents nach fester Regel) oder **individuelle Beträge** (der Kostenanteil jedes Beteiligten wird eingegeben). | Split-Methode, Verteilungsschlüssel | [F3](F3-anwendungsfunktionen.md), [D2](D2_Datentypenverzeichnis.md) |
+| Ausgabe | Betrag, den genau ein Gruppenmitglied (der Zahler) für einen Zweck an einem Tag für die Gruppe vorgestreckt hat und der auf mindestens einen Beteiligten aufgeteilt wird. Eine Ausgabe hat eine Beschreibung (bis 250 Zeichen), Originalbetrag, Originalwährung, Ausgabedatum, Zahler, Aufteilungsart, Kostenanteile, optional eine Kategorie und bis zu fünf Belege. | Kosten, Posten, Buchung, Transaktion | [D1](D1_Datenmodell.md), [LB-03](P1_Ziele_und_Rahmenbedingungen.md#p15-leistungsumfang) |
+| Ausgabedatum | Tag, an dem die Ausgabe getätigt wurde. Darf nicht in der Zukunft liegen. Bestimmt den Wechselkurs bei Fremdwährung und die Zuordnung zu einem Monat in der persönlichen Übersicht. | Buchungsdatum | [D1](D1_Datenmodell.md) |
+| Ausgleichsvorschlag | Von CampusSplit berechnete Angabe „Schuldner zahlt Gläubiger Betrag“, mit der die Salden einer Gruppe ausgeglichen werden können. Die Vorschläge einer Gruppe bringen zusammen alle Salden auf null. Ein Ausgleichsvorschlag ist keine Zahlung; erst eine erfasste Rückzahlung verändert die Salden. | Ausgleich, Settlement, Überweisungsvorschlag | [F3](F3-anwendungsfunktionen.md) |
+| Beleg | Nachweis zu einer Ausgabe, z. B. Kassenzettel oder Rechnung, als Foto (JPEG oder PNG) oder PDF-Dokument mit höchstens 10 MB. Zu einer Ausgabe gehören höchstens fünf Belege. Jedes Gruppenmitglied kann Belege hinzufügen, ansehen und entfernen. Mit der Ausgabe werden auch ihre Belege gelöscht. | Quittung, Anhang, Receipt | [D1](D1_Datenmodell.md), [LB-05](P1_Ziele_und_Rahmenbedingungen.md#p15-leistungsumfang) |
+| Benutzer | Person mit Benutzerkonto, die angemeldet ist. | Nutzer, Nutzer:in, User, Anwender | [AKT-02](P2_Architekturueberblick.md#p23-akteure) |
+| Benutzerkonto | Zugang einer Person zu CampusSplit mit eindeutiger E-Mail-Adresse (ohne Unterscheidung von Groß- und Kleinschreibung), Anzeigename und mindestens einem Anmeldeweg. Zwei Benutzerkonten werden nie automatisch zusammengeführt. | Account, Profil (Profil bezeichnet nur die Seite der eigenen Kontoangaben) | [D1](D1_Datenmodell.md) |
+| Beteiligter | Gruppenmitglied, das an einer Ausgabe einen Kostenanteil trägt. Jede Ausgabe hat mindestens einen Beteiligten; der Zahler kann selbst Beteiligter sein. | Teilnehmer, Mitzahler | [D1](D1_Datenmodell.md) |
+| Euroübersicht | Zeile der persönlichen Übersicht, in der die Beträge aller Währungen mit dem aktuellen Wechselkurs in Euro umgerechnet und addiert werden. Dient nur der Information und ist keine Verrechnung. Fehlt ein benötigter Kurs, entfällt die Euroübersicht ganz. | Gesamtsaldo, Verrechnung | [NZ-02](P1_Ziele_und_Rahmenbedingungen.md#p16-nichtziele) |
+| Fremdwährung | Originalwährung einer Ausgabe, die von der Gruppenwährung abweicht. Möglich sind nur Euro und US-Dollar, d. h. in einer EUR-Gruppe USD und in einer USD-Gruppe EUR. | Auslandswährung | [LB-04](P1_Ziele_und_Rahmenbedingungen.md#p15-leistungsumfang) |
+| Gast | Person, die nicht angemeldet ist. | Besucher, anonymer Benutzer | [AKT-01](P2_Architekturueberblick.md#p23-akteure) |
+| Gläubiger | Gruppenmitglied mit positivem Saldo: Es hat mehr für die Gruppe geleistet, als ihm zuzurechnen ist, und bekommt Geld zurück. Bei einer Rückzahlung der Empfänger. | Kreditor, Empfänger (außer bei der Rückzahlung) | [F3](F3-anwendungsfunktionen.md) |
+| Google-Anmeldedienst | Nachbarsystem, über das sich eine Person mit ihrem Google-Konto anmeldet und das CampusSplit die bestätigte Identität mitteilt. | Google OAuth, Google Login | [NS-02](P2_Architekturueberblick.md#p24-nachbarsysteme), [S1](S1_Nachbarsysteme.md) |
+| Google-Anmeldung | Optionaler Anmeldeweg über ein Google-Konto. Gibt es zur bestätigten E-Mail-Adresse noch kein Benutzerkonto, entsteht bei der ersten Google-Anmeldung ein neues Konto ohne Passwort. Gibt es bereits ein Konto mit dieser E-Mail-Adresse, wird die Anmeldung abgelehnt; das Konto kann nur über die Kontoverknüpfung mit Google verbunden werden. | Social Login, SSO | [LB-01](P1_Ziele_und_Rahmenbedingungen.md#p15-leistungsumfang) |
+| Google-Konto | Konto einer Person bei Google, das über eine dauerhafte Google-Kennung erkannt wird, nicht über die E-Mail-Adresse. Ein Google-Konto kann mit höchstens einem Benutzerkonto verknüpft sein und umgekehrt. | Google-Account | [D1](D1_Datenmodell.md) |
+| Gruppe | Zusammenschluss von Benutzern, die gemeinsame Ausgaben abrechnen, z. B. eine WG oder eine Reisegruppe. Hat einen Namen (bis 100 Zeichen), eine optionale Beschreibung (bis 500 Zeichen), eine Gruppenwährung und ist aktiv oder archiviert. | Team, Projekt, Abrechnungsgruppe | [D1](D1_Datenmodell.md), [LB-02](P1_Ziele_und_Rahmenbedingungen.md#p15-leistungsumfang) |
+| Gruppenadministrator | Rolle des Gruppenmitglieds, das die Gruppe angelegt hat. Jede Gruppe hat genau einen Gruppenadministrator; die Rolle wird nicht übertragen. Darf zusätzlich zu einem Gruppenmitglied Mitglieder hinzufügen, die Gruppe archivieren, wiederherstellen und löschen sowie Rückzahlungen für andere Mitglieder erfassen und stornieren. | Administrator, Admin, Gruppenersteller, Owner, Besitzer | [AKT-04](P2_Architekturueberblick.md#p23-akteure), [N2](N2_Querschnittskonzepte.md) |
+| Gruppenlöschung | Endgültiges Entfernen einer Gruppe durch den Gruppenadministrator nach Eingabe des exakten Gruppennamens. Gelöscht werden alle Ausgaben, Kostenanteile, Belege, Rückzahlungen, Aktivitäten und Mitgliedschaften der Gruppe; die Benutzerkonten bleiben erhalten. Nicht rückgängig zu machen. | Löschen (ohne Zusatz), Entfernen | [LB-02](P1_Ziele_und_Rahmenbedingungen.md#p15-leistungsumfang) |
+| Gruppenmitglied | Benutzer, der einer bestimmten Gruppe angehört, mit der Rolle Mitglied oder Gruppenadministrator. Wird vom Gruppenadministrator über die E-Mail-Adresse seines Benutzerkontos hinzugefügt und verbleibt in der Gruppe. Sieht alle Inhalte der Gruppe und darf jede Ausgabe erfassen, ändern und löschen. | Teilnehmer, Mitbewohner, Member | [AKT-03](P2_Architekturueberblick.md#p23-akteure) |
+| Gruppenwährung | Währung einer Gruppe, Euro (EUR) oder US-Dollar (USD), beim Anlegen festgelegt und danach nicht änderbar. Abrechnungsbeträge, Kostenanteile, Salden, Ausgleichsvorschläge und Rückzahlungen der Gruppe lauten immer auf die Gruppenwährung. | Hauptwährung, Basiswährung, Abrechnungswährung | [D2](D2_Datentypenverzeichnis.md) |
+| Kategorie | Optionale Einordnung einer Ausgabe aus einer festen Liste: Fahrtkosten, Freizeit, Haushalt, Lebensmittel, Sonstiges, Unterkunft. Benutzer können keine Kategorien anlegen. | Typ, Tag | [NZ-08](P1_Ziele_und_Rahmenbedingungen.md#p16-nichtziele) |
+| Kontoverknüpfung | Verbinden eines bestehenden Benutzerkontos mit einem Google-Konto, ausgelöst im Profil nach Bestätigung des aktuellen Passworts. Danach stehen beide Anmeldewege zur Verfügung; Gruppen, Ausgaben und E-Mail-Adresse bleiben unverändert. | Zusammenführung, Merge | [LB-01](P1_Ziele_und_Rahmenbedingungen.md#p15-leistungsumfang) |
+| Kostenanteil | Teil des Abrechnungsbetrags einer Ausgabe, den ein Beteiligter trägt; centgenau und nicht negativ. Die Kostenanteile einer Ausgabe ergeben zusammen genau ihren Abrechnungsbetrag (Regel in [F3](F3-anwendungsfunktionen.md)). | Anteil (ohne Zusatz), Share | [D1](D1_Datenmodell.md) |
+| Kursdatum | Tag, für den ein Wechselkurs veröffentlicht wurde. Liegt nie nach dem Ausgabedatum; an Tagen ohne Veröffentlichung gilt der letzte veröffentlichte Kurs davor. | Stichtag | [RB-05](P1_Ziele_und_Rahmenbedingungen.md#p17-rahmenbedingungen) |
+| Monatsausgaben | Summe der eigenen Kostenanteile eines Benutzers aus Ausgaben, deren Ausgabedatum im laufenden Kalendermonat liegt, je Währung über alle seine Gruppen. In der persönlichen Übersicht als „Ausgaben diesen Monat“ bezeichnet. | Monatsbudget | [LB-09](P1_Ziele_und_Rahmenbedingungen.md#p15-leistungsumfang) |
+| Originalbetrag | Betrag einer Ausgabe in der Originalwährung, wie er auf dem Beleg steht; positiv und centgenau. | Rechnungsbetrag | [D1](D1_Datenmodell.md) |
+| Originalwährung | Währung, in der eine Ausgabe bezahlt wurde: Euro (EUR) oder US-Dollar (USD). | Belegwährung | [D2](D2_Datentypenverzeichnis.md) |
+| Persönliche Übersicht | Zusammenfassung für den angemeldeten Benutzer über alle seine Gruppen, getrennt nach Währung: was er zurückbekommt (Summe seiner positiven Salden), was er schuldet (Summe seiner negativen Salden) und seine Monatsausgaben; ergänzt um die Euroübersicht. | Dashboard, Startseite | [LB-09](P1_Ziele_und_Rahmenbedingungen.md#p15-leistungsumfang) |
+| Restcent | Cent, der bei gleichmäßiger Aufteilung übrig bleibt, weil sich der Abrechnungsbetrag nicht ohne Rest durch die Anzahl der Beteiligten teilen lässt (z. B. 10,00 EUR auf drei Beteiligte: 3,34 + 3,33 + 3,33). Welche Beteiligten einen Restcent tragen, legt eine feste Regel in [F3](F3-anwendungsfunktionen.md) fest. | Rundungsdifferenz | [F3](F3-anwendungsfunktionen.md) |
+| Rolle | Stellung eines Gruppenmitglieds in einer Gruppe: Mitglied oder Gruppenadministrator. Bestimmt die Rechte in dieser Gruppe. | Berechtigung, Status | [N2](N2_Querschnittskonzepte.md) |
+| Rückzahlung | In CampusSplit erfasste Zahlung, die ein Schuldner außerhalb von CampusSplit an einen Gläubiger derselben Gruppe geleistet hat. Lautet auf die Gruppenwährung, ist höchstens so hoch wie der offene Ausgleichsvorschlag zwischen beiden und kann optional einer Ausgabe des Gläubigers zugeordnet werden. Erfassen dürfen die beiden Beteiligten und der Gruppenadministrator; als Zahlungsdatum gilt der Tag der Erfassung. Eine Rückzahlung wird nicht gelöscht, sondern höchstens storniert. | Zahlung (ohne Zusatz), Ausgleichszahlung, Überweisung, Settlement | [D1](D1_Datenmodell.md), [LB-07](P1_Ziele_und_Rahmenbedingungen.md#p15-leistungsumfang) |
+| Saldo | Stand eines Gruppenmitglieds in einer Gruppe in der Gruppenwährung: was es für die Gruppe geleistet hat (Abrechnungsbeträge seiner bezahlten Ausgaben, von ihm geleistete Rückzahlungen) abzüglich dessen, was ihm zuzurechnen ist (seine Kostenanteile, an ihn geleistete Rückzahlungen). Stornierte Rückzahlungen zählen nicht. Positiv: Gläubiger; negativ: Schuldner; null: ausgeglichen. Die Salden einer Gruppe ergeben zusammen null. | Kontostand, Bilanz, offener Betrag | [F3](F3-anwendungsfunktionen.md) |
+| Schuldner | Gruppenmitglied mit negativem Saldo: Ihm ist mehr zuzurechnen, als es für die Gruppe geleistet hat, und es schuldet Geld. Bei einer Rückzahlung der Zahlende. | Debitor | [F3](F3-anwendungsfunktionen.md) |
+| Stornierung | Kennzeichnung einer Rückzahlung als ungültig, z. B. weil sie versehentlich erfasst wurde, mit Angabe eines Grundes (1 bis 250 Zeichen). Eine stornierte Rückzahlung bleibt mit Grund, Zeitpunkt und stornierender Person sichtbar, zählt aber nicht mehr zum Saldo. Kann nicht rückgängig gemacht werden. Stornieren dürfen die beiden Beteiligten und der Gruppenadministrator. | Löschung, Rückbuchung | [LB-07](P1_Ziele_und_Rahmenbedingungen.md#p15-leistungsumfang) |
+| Wechselkurs | Umrechnungsfaktor „1 Einheit Originalwährung = x Einheiten Gruppenwährung“ aus dem Wechselkursdienst für das Ausgabedatum. Wird mit Kursdatum bei der Ausgabe gespeichert und bleibt erhalten, solange Originalbetrag, Originalwährung und Ausgabedatum nicht geändert werden. | Kurs (ohne Zusatz nur im Fließtext zulässig), Umrechnungskurs | [F3](F3-anwendungsfunktionen.md), [RB-05](P1_Ziele_und_Rahmenbedingungen.md#p17-rahmenbedingungen) |
+| Wechselkursdienst | Öffentlicher Dienst (Frankfurter), der Tagesreferenzkurse liefert; Nachbarsystem von CampusSplit. | Währungs-API, Kurs-API | [NS-01](P2_Architekturueberblick.md#p24-nachbarsysteme), [S1](S1_Nachbarsysteme.md) |
+| Zahler | Gruppenmitglied, das eine Ausgabe bezahlt hat. Jede Ausgabe hat genau einen Zahler. | Bezahler, Käufer | [D1](D1_Datenmodell.md) |
 
 ---
 
-## E2.3 Nicht Bestandteil des Glossars
-
-Das Glossar erklärt nur Begriffe. Es ersetzt keine fachlichen Anforderungen und keine technische Beschreibung.
-
-| Thema | Steht in |
-|---|---|
-| Ziele und Projektumfang | [P1](P1_Ziele_und_Rahmenbedingungen.md) |
-| Architekturüberblick | [P2](P2_Architekturueberblick.md) |
-| Geschäftsprozesse | [F1](F1-geschaeftsprozesse.md) |
-| Anwendungsfälle | [F2](F2-anwendungsf%C3%A4lle.md) |
-| Anwendungsfunktionen | [F3](F3-anwendungsfunktionen.md) |
-| Datenmodell | [D1](D1_Datenmodell.md) |
-| Datentypen | [D2](D2_Datentypenverzeichnis.md) |
-| Dialoge | [B1](B1_Dialogspezifikation.md) |
-| Exportausgaben | [B3](B3_Druckausgaben.md) |
-| Nachbarsysteme | [S1](S1_Nachbarsysteme.md) |
-| Inbetriebnahme | [S3](S3_Inbetriebnahme.md) |
-| Nichtfunktionale Anforderungen | [N1](N1_Nichtfunktionale%20Anforderungen.md) |
-| Querschnittskonzepte | [N2](N2_Querschnittskonzepte.md) |
-
----
-
-## E2.4 Eingesetzte KI-Werkzeuge
+## E2.3 Eingesetzte KI-Werkzeuge
 
 ChatGPT (OpenAI) wurde unterstützend für Formulierungen, Kürzung, Strukturierung und Prüfung der Querverweise verwendet. Die fachlichen Inhalte wurden anschließend mit dem Projektkontext und den übrigen Spezifikationsbausteinen abgeglichen.
 
