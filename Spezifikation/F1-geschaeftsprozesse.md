@@ -114,4 +114,4 @@ Folgende Aktivitäten und Themen sind bewusst nicht Teil des durch CampusSplit u
 | [D2](D2_Datentypenverzeichnis.md)       | Beschreibt die fachlichen Datentypen und Attribute.                                                                      |
 | [B1](B1_Dialogspezifikation.md)       | Beschreibt die Dialoge für Gruppenübersicht, Ausgabenerfassung, Saldenanzeige und Export.                                  |
 | [S1](S1_Nachbarsysteme.md)       | Beschreibt Schnittstellen zu Nachbarsystemen, insbesondere Browser, Datenbank und Export.                                       |
-| [N1](N1_Nichtfunktionale Anforderungen.md)       | Beschreibt nichtfunktionale Anforderungen wie Sicherheit, Performance, Benutzbarkeit und Datenkonsistenz.       |
+| [N1](N1_Nichtfunktionale_Anforderungen.md)       | Beschreibt nichtfunktionale Anforderungen wie Sicherheit, Performance, Benutzbarkeit und Datenkonsistenz.       |
