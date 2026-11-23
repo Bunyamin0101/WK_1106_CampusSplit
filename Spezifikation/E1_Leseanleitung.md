@@ -145,7 +145,7 @@ Daraus ergeben sich diese Pflichtangaben:
 
 ---
 
-## Eingesetzte KI-Werkzeuge
+## E.1.8 Eingesetzte KI-Werkzeuge
 
 ChatGPT wurde unterstützend für Kürzung, Strukturierung und Formulierung verwendet. Die Inhalte wurden anschließend fachlich geprüft und an die übrigen Spezifikationsbausteine angepasst.
 
