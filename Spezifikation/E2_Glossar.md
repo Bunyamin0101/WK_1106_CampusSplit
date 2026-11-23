@@ -108,4 +108,3 @@ Die Begriffe sind alphabetisch sortiert; Umlaute werden wie der Grundbuchstabe e
 ## E2.3 Eingesetzte KI-Werkzeuge
 
 ChatGPT (OpenAI) wurde unterstützend für Formulierungen, Kürzung, Strukturierung und Prüfung der Querverweise verwendet. Die fachlichen Inhalte wurden anschließend mit dem Projektkontext und den übrigen Spezifikationsbausteinen abgeglichen.
-
