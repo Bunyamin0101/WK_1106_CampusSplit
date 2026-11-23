@@ -1,207 +1,147 @@
 ﻿# E1 — Leseanleitung
 
-E1 erklärt, wie die Spezifikation von CampusSplit aufgebaut ist und wie die einzelnen Bausteine gelesen werden sollen. Die Leseanleitung richtet sich vor allem an das Entwicklungsteam, Prüfer, Betreuer und neue Mitwirkende.
-
-Die Spezifikation beschreibt fachlich, was CampusSplit leisten soll. Technische Details werden nur dort erwähnt, wo sie für das Verständnis notwendig sind.
-
+E1 erklärt, wie die Spezifikation von CampusSplit aufgebaut ist, in welcher Reihenfolge sie gelesen werden sollte und welche Konventionen in allen Bausteinen gelten. Die Konventionen sind verbindlich: Ein Baustein, der von ihnen abweicht, gilt als fehlerhaft.
 ---
 
-## E1.1 Zweck der Spezifikation
+## E1.1 Zweck und Zielgruppen
 
-Die Spezifikation beschreibt die Webanwendung CampusSplit fachlich und nachvollziehbar. Sie legt fest, welche Funktionen zum System gehören und welche bewusst nicht umgesetzt werden.
+Die Spezifikation legt fest, **was** CampusSplit fachlich leisten muss. Sie ist die Vorgabe für Implementierung und Test: Ändert sich das Verhalten der Anwendung, wird zuerst die Spezifikation geändert, dann der Code. Wie das System technisch aufgebaut ist, beschreibt die Architekturdokumentation im Ordner [Architektur](../Architektur/).
 
-CampusSplit dient zur Verwaltung gemeinsamer Ausgaben in Gruppen. Nutzer können Gruppen erstellen, Ausgaben erfassen, Kosten auf Gruppenmitglieder verteilen, offene Salden anzeigen und Ausgabenübersichten exportieren.
+| Zielgruppe | Nutzt die Spezifikation, um … |
+| --- | --- |
+| Modulverantwortliche (Auftraggeber, Prüfende) | Umfang, Ziele und Erfolgskriterien zu prüfen und die Abnahme vorzubereiten |
+| Software Architect | die fachlichen Vorgaben für die Architektur abzuleiten |
+| Implementation Lead und Entwickelnde | Abläufe, Regeln, Daten und Dialoge umzusetzen |
+| QA/Test Lead | Testfälle aus Akzeptanzkriterien, Erfolgskriterien und nichtfunktionalen Anforderungen abzuleiten |
+| Benutzervertreter (z. B. Mitglieder einer Test-WG) | zu prüfen, ob die Anwendung ihre Situation abbildet |
 
-Die Spezifikation soll:
+## E1.2 Aufbau der Spezifikation
 
-- den fachlichen Umfang festlegen,
-- Anforderungen nachvollziehbar dokumentieren,
-- Begriffe einheitlich verwenden,
-- die spätere Umsetzung vorbereiten,
-- Missverständnisse im Team vermeiden.
+Die Spezifikation folgt den Bausteinen nach Siedersleben. Jeder Baustein steht in einer eigenen Datei im Ordner `Spezifikation/`.
 
----
+| Gruppe | Baustein | Inhalt | Status |
+| --- | --- | --- | --- |
+| Projektgrundlagen | [P1 – Ziele und Rahmenbedingungen](P1_Ziele_und_Rahmenbedingungen.md) | Ausgangssituation, Ziele mit Erfolgskriterien, Leistungsumfang, Nichtziele, Rahmenbedingungen, Annahmen, Risiken | vorhanden |
+| | [P2 – Architekturüberblick](P2_Architekturueberblick.md) | System als Black Box mit Akteuren und Nachbarsystemen | vorhanden |
+| Fachliches Modell: Abläufe und Funktionen | [F1 – Geschäftsprozesse](F1-geschaeftsprozesse.md) | Wiederkehrende Abläufe der Gruppen mit manuellen und unterstützten Aktivitäten | vorhanden |
+| | [F2 – Anwendungsfälle](F2-anwendungsf%C3%A4lle.md) | Anwendungsfalldiagramm und Anwendungsfälle mit Akzeptanzkriterien | vorhanden |
+| | [F3 – Anwendungsfunktionen](F3-anwendungsfunktionen.md) | Fachliche Rechenregeln und Prüfungen (Aufteilung, Umrechnung, Saldo, Ausgleich) | vorhanden |
+| Fachliches Modell: Daten | [D1 – Datenmodell](D1_Datenmodell.md) | Fachliche Entitäten, Beziehungen, Invarianten | vorhanden |
+| | [D2 – Datentypenverzeichnis](D2_Datentypenverzeichnis.md) | Fachliche Datentypen mit Wertebereich | vorhanden |
+| Fachliches Modell: Benutzerschnittstelle | [B1 – Dialogspezifikation](B1_Dialogspezifikation.md) | Dialoglandkarte, Dialoge mit Feldern, Aktionen und Mockups | vorhanden |
+| | B2 – Batchspezifikation | – | **entfällt**: CampusSplit hat keine zeitgesteuerten Verarbeitungen; Salden und Vorschläge werden bei jeder Anzeige neu ermittelt. |
+| | [B3 – Druckausgaben](B3_Druckausgaben.md) | Abrechnung als PDF und als Tabellendateien | vorhanden |
+| Fachliches Modell: Umgebung | [S1 – Nachbarsysteme](S1_Nachbarsysteme.md) | Fachliche Schnittstellen zu NS-01 und NS-02 im Detail | vorhanden |
+| | S2 – Migration | – | **entfällt**: Es werden keine Altdaten übernommen ([NZ-04](P1_Ziele_und_Rahmenbedingungen.md#p16-nichtziele)). |
+| | [S3 – Inbetriebnahme](S3_Inbetriebnahme.md) | Voraussetzungen und Schritte der fachlichen Inbetriebnahme, Abnahmetest | vorhanden |
+| Nichtfunktionale Anforderungen | [N1 – Nichtfunktionale Anforderungen](N1_Nichtfunktionale%20Anforderungen.md) | Qualitätsanforderungen mit Fit Criterion, Mengengerüst | vorhanden |
+| | [N2 – Querschnittskonzepte](N2_Querschnittskonzepte.md) | Fachliche Querschnittsregeln (Rechte, Meldungen, Protokollierung) | vorhanden |
+| Ergänzendes | E1 – Leseanleitung | dieser Baustein | vorhanden |
+| | [E2 – Glossar](E2_Glossar.md) | Fachbegriffe mit Definition und Synonymregelung | vorhanden |
 
-## E1.2 Zielgruppen
+## E1.3 Lesereihenfolge
 
-| Zielgruppe | Interesse |
-|---|---|
-| Entwicklungsteam | Grundlage für Umsetzung und Tests |
-| Prüfer und Betreuer | Prüfung von Struktur und Vollständigkeit |
-| Tester | Ableitung von Testfällen |
-| Neue Mitwirkende | Schneller Einstieg in das Projekt |
+Allen Zielgruppen wird empfohlen, mit P1 und P2 zu beginnen und das Glossar E2 beim Lesen offen zu halten.
 
----
+| Zielgruppe | Empfohlene Reihenfolge |
+| --- | --- |
+| Erster Überblick | P1 → P2 → F1 → Anwendungsfalldiagramm in F2 |
+| Modulverantwortliche | P1 → P2 → F1 → F2 → N1 → S3 |
+| Software Architect | P1 → P2 → S1 → D1 → D2 → N1 → N2 |
+| Entwickelnde | F2 → F3 → D1 → D2 → B1 → B3 → N2 |
+| QA/Test | P1.4 (Erfolgskriterien) → F2 (Akzeptanzkriterien) → F3 → N1 → S3 |
+| Benutzervertreter | P1.2 → F1 → B1 (Mockups) |
 
-## E1.3 Aufbau der Spezifikation
+## E1.4 Konventionen
 
-Die Spezifikation ist nach Bausteinen gegliedert. Jeder Baustein behandelt einen bestimmten Teil des Systems.
+**Sprache und Begriffe**
 
-| Bereich | Baustein | Inhalt |
-|---|---|---|
-| Projektgrundlagen | [P1](P1_Ziele_und_Rahmenbedingungen.md) | Ziele, Umfang, Nichtziele und Rahmenbedingungen |
-| Projektgrundlagen | [P2](P2_Architekturueberblick.md) | Architekturüberblick und Systemkontext |
-| Funktionen | [F1](F1-geschaeftsprozesse.md) | Geschäftsprozesse |
-| Funktionen | [F2](F2-anwendungsf%C3%A4lle.md) | Anwendungsfälle |
-| Funktionen | [F3](F3-anwendungsfunktionen.md) | Anwendungsfunktionen |
-| Daten | [D1](D1_Datenmodell.md) | Datenmodell |
-| Daten | [D2](D2_Datentypenverzeichnis.md) | Datentypenverzeichnis |
-| Benutzerschnittstelle | [B1](B1_Dialogspezifikation.md) | Dialogspezifikation |
-| Benutzerschnittstelle | B2 | Batch-Prozesse |
-| Benutzerschnittstelle | [B3](B3_Druckausgaben.md) | Druck- und Exportausgaben |
-| Schnittstellen | [S1](S1_Nachbarsysteme.md) | Nachbarsysteme |
-| Schnittstellen | S2 | Datenmigration |
-| Schnittstellen | [S3](S3_Inbetriebnahme.md) | Inbetriebnahme |
-| Übergreifendes | [N1](N1_Nichtfunktionale%20Anforderungen.md) | Nichtfunktionale Anforderungen |
-| Übergreifendes | [N2](N2_Querschnittskonzepte.md) | Querschnittskonzepte |
-| Ergänzendes | E1 | Leseanleitung |
-| Ergänzendes | [E2](E2_Glossar.md) | Glossar |
+- Die Spezifikation ist auf Deutsch geschrieben.
+- Fachbegriffe werden ausschließlich so verwendet, wie sie in [E2](E2_Glossar.md) definiert sind. Begriffe in der Spalte „Nicht verwenden“ sind ausgeschlossen. Insbesondere heißt es immer **Benutzer** (nicht „Nutzer“ oder „User“), **Gruppenadministrator** (nicht „Administrator“, „Admin“ oder „Gruppenersteller“), **Schuldner** und **Gläubiger** (nicht „Debitor“ und „Kreditor“).
+- Verbindlichkeit: „muss“ ist verbindlich, „soll“ ist angestrebt und wird bei der Abnahme bewertet, „kann“ ist optional.
+- Die Spezifikation beschreibt fachlich. Namen von Klassen, Tabellen, Spalten, Adressen (Routen), Parametern, Programmiersprachen und Frameworks gehören in die Architekturdokumentation, nicht in die Spezifikation.
 
----
+**Werte und Darstellung**
 
-## E1.4 Empfohlene Lesereihenfolge
+- Geldbeträge mit zwei Nachkommastellen, Komma als Dezimaltrennzeichen, Punkt als Tausendertrennzeichen und Währungscode nach dem Betrag: `1.234,56 EUR`.
+- Datumsangaben als `TT.MM.JJJJ`, Uhrzeiten als `HH:MM` in deutscher Zeit (Europe/Berlin).
 
-Für einen vollständigen Überblick wird folgende Reihenfolge empfohlen:
+**Form der Bausteine**
 
-1. [P1](P1_Ziele_und_Rahmenbedingungen.md) und [P2](P2_Architekturueberblick.md) für Ziele, Umfang und Systemkontext
-2. [F1](F1-geschaeftsprozesse.md), [F2](F2-anwendungsf%C3%A4lle.md) und [F3](F3-anwendungsfunktionen.md) für Abläufe, Use Cases und Funktionen
-3. [D1](D1_Datenmodell.md) und [D2](D2_Datentypenverzeichnis.md) für Daten und Datentypen
-4. [B1](B1_Dialogspezifikation.md), B2 und [B3](B3_Druckausgaben.md) für Dialoge, Batch-Einordnung und Exporte
-5. [S1](S1_Nachbarsysteme.md), S2 und [S3](S3_Inbetriebnahme.md) für Schnittstellen, Migration und Inbetriebnahme
-6. [N1](N1_Nichtfunktionale%20Anforderungen.md) und [N2](N2_Querschnittskonzepte.md) für Qualitätsanforderungen und übergreifende Regeln
-7. [E2](E2_Glossar.md) für zentrale Begriffe
+- Titel: `# <Baustein> – <Titel>` mit Halbgeviertstrich, z. B. `# F2 – Anwendungsfälle`.
+- Jeder Baustein beginnt mit der Kopftabelle (Bausteingruppe, Stand, Verantwortlich, zugehörige Bausteine) und einem Satz zum Zweck.
+- Abschnitte werden durchgängig als `<Baustein>.<Nummer>` nummeriert (z. B. `P1.4`), Unterabschnitte als `<Baustein>.<Nummer>.<Nummer>`. Andere Nummerierungen werden nicht verwendet.
+- Tabellen im GitHub-Format (Pipe-Tabellen), damit sie im Repository gerendert werden.
+- Diagramme als Mermaid direkt im Markdown. Jedes Diagramm hat eine Legende und wird im Text erläutert. Übersichtsdiagramme stehen vor den Detailbeschreibungen, die sie zusammenfassen (z. B. das Anwendungsfalldiagramm am Anfang von F2).
+- Szenarien und Abläufe als nummerierte Markdown-Liste, ein Schritt je Zeile.
+- Verweise als relative Links auf den Baustein, bei Bedarf mit Abschnittsanker. Eine ID wird beim ersten Vorkommen in einem Abschnitt verlinkt.
 
-Einzelne Bausteine können auch gezielt gelesen werden, wenn nur ein bestimmtes Thema relevant ist.
+## E1.5 ID-Schema
 
----
+Alle IDs der Spezifikation folgen dem Format `<Präfix>-<laufende Nummer, zweistellig>`. Andere Präfixe als die folgenden werden nicht verwendet. Eine vergebene ID wird nie neu vergeben; entfällt ein Element, bleibt die ID mit dem Vermerk „entfallen“ stehen.
 
-## E1.5 Nummerierung und Bezeichner
+| Präfix | Bedeutung | Definiert in | Beispiel |
+| --- | --- | --- | --- |
+| Z | Ziel | P1 | Z-02 |
+| EK | Erfolgskriterium | P1 | EK-03 |
+| LB | Leistungsbereich | P1 | LB-04 |
+| NZ | Nichtziel | P1 | NZ-02 |
+| RB | Rahmenbedingung | P1 | RB-05 |
+| AN | Annahme | P1 | AN-01 |
+| R | Risiko | P1 | R-02 |
+| AKT | Akteur | P2 | AKT-03 |
+| NS | Nachbarsystem | P2 (Überblick), S1 (Details) | NS-01 |
+| GP | Geschäftsprozess; Aktivitäten als `GP-<nn>.A<nn>` | F1 | GP-01, GP-01.A04 |
+| UC | Anwendungsfall; Akzeptanzkriterien als `UC-<nn>.AK<nn>` | F2 | UC-08, UC-08.AK02 |
+| AF | Anwendungsfunktion (fachliche Regel) | F3 | AF-02 |
+| INV | Invariante des Datenmodells | D1 | INV-04 |
+| DT | Fachlicher Datentyp | D2 | DT-01 |
+| DLG | Dialog | B1 | DLG-07 |
+| DA | Druckausgabe | B3 | DA-01 |
+| IB | Schritt der Inbetriebnahme | S3 | IB-03 |
+| NFR | Nichtfunktionale Anforderung | N1 | NFR-12 |
+| QR | Querschnittsregel | N2 | QR-05 |
 
-Die Spezifikation verwendet feste Bezeichner. Dadurch können Inhalte eindeutig referenziert werden.
+Entitäten in D1 und Begriffe in E2 haben keine ID; sie werden über ihren Namen referenziert.
 
-| Präfix | Bedeutung | Beispiel |
-|---|---|---|
-| P | Projektgrundlagen | P1 |
-| F | Funktionen | F2 |
-| D | Daten | D1 |
-| B | Benutzerschnittstelle | B1 |
-| S | Schnittstellen | S1 |
-| N | Nichtfunktionales und Querschnittliches | N2 |
-| E | Ergänzende Bausteine | E2 |
-| UC | Use Case | UC-08 |
-| AF | Anwendungsfunktion | AF-02 |
-| DLG | Dialog | DLG-07 |
-| NFR | Nichtfunktionale Anforderung | NFR-12a-01 |
-| INV | Invariante | INV-05 |
-| EXP | Exportregel | EXP-01 |
+## E1.6 Verweiskette
 
-Bezeichner sollen möglichst nicht nachträglich geändert werden, damit Links und Querverweise stabil bleiben.
+Die Bausteine sind in beide Richtungen verbunden. Damit lässt sich von jedem Ziel bis zur Regel und zum Dialog verfolgen, wie es umgesetzt wird, und umgekehrt.
 
----
+```mermaid
+flowchart LR
+    Z["Z (P1)"] -->|"wird gemessen durch"| EK["EK (P1)"]
+    Z -->|"wird erreicht durch"| LB["LB (P1)"]
+    LB -->|"wird spezifiziert durch"| UC["UC (F2)"]
+    GP["GP (F1)"] -->|"Aktivität wird unterstützt durch"| UC
+    UC -->|"wendet an"| AF["AF (F3)"]
+    UC -->|"wird bedient über"| DLG["DLG (B1)"]
+    UC -->|"unterliegt"| NFR["NFR (N1)"]
+    UC -->|"unterliegt"| QR["QR (N2)"]
+    AF -->|"stützt sich auf"| INV["INV, DT (D1, D2)"]
+    UC -->|"nutzt"| NS["NS (S1)"]
+```
 
-## E1.6 Sprach- und Schreibkonventionen
+**Legende:** Kästen sind ID-Arten mit dem Baustein, in dem sie definiert sind. Pfeile werden in Pfeilrichtung gelesen: „Z wird gemessen durch EK“.
 
-Die Spezifikation ist in deutscher Sprache verfasst. Fachliche Begriffe sollen einheitlich verwendet werden. Zentrale Begriffe werden im [Glossar](E2_Glossar.md) erklärt.
+Daraus ergeben sich diese Pflichtangaben:
 
-| Formulierung | Bedeutung |
-|---|---|
-| muss | verbindliche Anforderung |
-| soll | gewünschtes Verhalten |
-| kann | optionale Möglichkeit |
-| nicht Bestandteil | bewusst außerhalb des Projektumfangs |
-| nicht anwendbar | passt fachlich nicht zum Projekt |
+| Element | muss verweisen auf |
+| --- | --- |
+| Ziel (Z) | seine Erfolgskriterien (EK) und Leistungsbereiche (LB) |
+| Anwendungsfall (UC) | Leistungsbereich (LB), unterstützte Aktivität (GP), Akteure (AKT), angewandte Anwendungsfunktionen (AF), Dialoge (DLG), nichtfunktionale Anforderungen (NFR) und Querschnittsregeln (QR), genutzte Nachbarsysteme (NS) |
+| Anwendungsfunktion (AF) | Anwendungsfälle (UC), betroffene Entitäten und Invarianten (INV), Datentypen (DT) |
+| Dialog (DLG) | Anwendungsfälle (UC) |
+| Nichtfunktionale Anforderung (NFR) | Ziel (Z) oder Anwendungsfälle (UC), für die sie gilt |
+| Druckausgabe (DA) | Anwendungsfall (UC) und Ziel (Z) |
 
-Technische Begriffe werden nur verwendet, wenn sie für das Verständnis notwendig sind.
+## E1.7 Konsistenzregeln
 
----
-
-## E1.7 Umgang mit „nicht anwendbar“
-
-Einige Bausteine oder Themen passen nicht zur ersten Version von CampusSplit. Diese Inhalte werden nicht einfach weggelassen, sondern als **nicht anwendbar** oder **nicht Bestandteil** gekennzeichnet.
-
-| Thema | Status | Grund |
-|---|---|---|
-| B2 Batch-Prozesse | nicht anwendbar | keine zeitgesteuerten Batch-Prozesse geplant |
-| S2 Datenmigration | nicht anwendbar | neues Projekt ohne Altdaten |
-| Zahlungsabwicklung | nicht Bestandteil | Zahlungen erfolgen außerhalb der Anwendung |
-| Bankintegration | nicht Bestandteil | keine Verarbeitung von Bankdaten |
-| OCR oder KI-Erkennung | nicht Bestandteil | Belege werden nicht automatisch erkannt |
-| Mehrwährungen | nicht Bestandteil der ersten Version | erste Version verwendet Euro |
-
----
-
-## E1.8 Konsistenzregeln
-
-Die Bausteine hängen inhaltlich zusammen. Deshalb müssen Änderungen an einer Stelle auch in den betroffenen anderen Bausteinen geprüft werden.
-
-| Regel | Beschreibung |
-|---|---|
-| KR-01 | Ziele und Nichtziele aus [P1](P1_Ziele_und_Rahmenbedingungen.md) begrenzen den Umfang. |
-| KR-02 | Use Cases aus [F2](F2-anwendungsf%C3%A4lle.md) sollen durch passende Dialoge in [B1](B1_Dialogspezifikation.md) unterstützt werden. |
-| KR-03 | Daten aus Use Cases oder Dialogen sollen in [D1](D1_Datenmodell.md) oder [D2](D2_Datentypenverzeichnis.md) beschrieben sein. |
-| KR-04 | Berechnungen aus [F3](F3-anwendungsfunktionen.md) müssen zum Datenmodell passen. |
-| KR-05 | Exportinhalte aus [B3](B3_Druckausgaben.md) müssen aus gespeicherten Daten ableitbar sein. |
-| KR-06 | Begriffe sollen einheitlich verwendet und bei Bedarf in [E2](E2_Glossar.md) erklärt werden. |
-
----
-
-## E1.9 Abgrenzung zwischen Spezifikation, Architektur und Implementierung
-
-Die Spezifikation beschreibt hauptsächlich, **was** CampusSplit leisten soll. Die genaue technische Umsetzung wird nicht vollständig in der Spezifikation festgelegt.
-
-| Ebene | Inhalt |
-|---|---|
-| Spezifikation | Anforderungen, Use Cases, Daten, Dialoge und Qualitätsanforderungen |
-| Architektur | Struktur, Komponenten, Schnittstellen und Deployment |
-| Implementierung | Quellcode, Tests, Frameworks und konkrete Datenbankstruktur |
-
----
-
-## E1.10 Umgang mit Änderungen
-
-Änderungen an der Spezifikation sollen nur gemacht werden, wenn die betroffenen Bausteine mitgeprüft werden. Besonders wichtig ist, dass Nichtziele aus [P1](P1_Ziele_und_Rahmenbedingungen.md) nicht unbeabsichtigt aufgehoben werden.
-
-Bei Änderungen sollen vor allem diese Fragen geprüft werden:
-
-- Passt die Änderung noch zum Projektumfang?
-- Sind Use Cases, Datenmodell und Dialoge betroffen?
-- Müssen Begriffe im Glossar angepasst werden?
-- Entstehen neue Anforderungen an Sicherheit, Export oder Inbetriebnahme?
-
----
-
-## E1.11 Nicht Bestandteil von E1
-
-E1 ist nur eine Leseanleitung. Fachliche Details stehen in den jeweiligen Bausteinen.
-
-| Thema | Zuständiger Baustein |
-|---|---|
-| Ziele und Umfang | [P1](P1_Ziele_und_Rahmenbedingungen.md) |
-| Systemkontext | [P2](P2_Architekturueberblick.md) |
-| Geschäftsprozesse | [F1](F1-geschaeftsprozesse.md) |
-| Anwendungsfälle | [F2](F2-anwendungsf%C3%A4lle.md) |
-| Anwendungsfunktionen | [F3](F3-anwendungsfunktionen.md) |
-| Datenmodell | [D1](D1_Datenmodell.md) |
-| Datentypen | [D2](D2_Datentypenverzeichnis.md) |
-| Dialoge | [B1](B1_Dialogspezifikation.md) |
-| Exporte | [B3](B3_Druckausgaben.md) |
-| Nachbarsysteme | [S1](S1_Nachbarsysteme.md) |
-| Nichtfunktionale Anforderungen | [N1](N1_Nichtfunktionale%20Anforderungen.md) |
-| Querschnittskonzepte | [N2](N2_Querschnittskonzepte.md) |
-| Begriffe | [E2](E2_Glossar.md) |
-
----
-
-## E1.12 Querverweise
-
-| Baustein | Relevanz |
-|---|---|
-| [P1 — Ziele und Rahmenbedingungen](P1_Ziele_und_Rahmenbedingungen.md) | Einstieg in Ziele und Umfang |
-| [P2 — Architekturüberblick](P2_Architekturueberblick.md) | Systemkontext und grobe Struktur |
-| [F2 — Anwendungsfälle](F2-anwendungsf%C3%A4lle.md) | zentrale Nutzeraktionen |
-| [B1 — Dialogspezifikation](B1_Dialogspezifikation.md) | Bedienung der Anwendung |
-| [D1 — Datenmodell](D1_Datenmodell.md) | gespeicherte Datenobjekte |
-| [E2 — Glossar](E2_Glossar.md) | zentrale Begriffe |
+1. **Jede Fachregel steht genau einmal**, als Anwendungsfunktion in F3 oder als Invariante in D1. Alle anderen Bausteine verweisen per ID darauf, statt die Regel zu wiederholen.
+2. **Die Spezifikation gibt vor.** Ein Baustein beschreibt, wie sich CampusSplit verhalten muss, nicht, was „bereits implementiert“ ist. Nachträge der Art „Erweiterungen der Implementierung“ gibt es nicht; neue Funktionen werden in die betroffenen Bausteine eingearbeitet.
+3. **Keine Arbeitsnotizen im Text.** Hinweise wie „muss noch angepasst werden“, leere Überschriften oder Anweisungen an Teammitglieder gehören in die Aufgabenverwaltung des Projekts, nicht in die Spezifikation.
+4. **Ein Sachverhalt, eine Aussage.** Widersprechen sich zwei Bausteine, gilt der Baustein, in dem der Sachverhalt nach E1.2 definiert ist, und der andere wird korrigiert.
+5. **Begriffe nach E2.** Neue Fachbegriffe werden zuerst in E2 aufgenommen, dann verwendet.
 
 ---
 
